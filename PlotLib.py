@@ -27,7 +27,10 @@ class ParamPLT:
         Ajouter le système de liste si différents éléments, pas que pour les légendes,...
         """
         # Plot
-        self.Colour = colour
+        if isinstance(colour, list):
+            self.Colour = colour
+        else:
+            self.Colour = [colour]
         self.LineType = linetype
         self.LineSize = 2
         self.MarkerType = marker
@@ -65,11 +68,17 @@ class ParamPLT:
 
     @property
     def getColour(self):
-        return self.Colour
+        if not self.Colour:
+            return None
+        else:
+            return self.Colour.pop(0)
 
     @getColour.setter
     def getColour(self, colour):
-        self.Colour = colour
+        if isinstance(colour, list):
+            self.Colour += colour
+        else:
+            self.Colour.append(colour)
 
     @property
     def getLineType(self):
