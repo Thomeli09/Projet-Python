@@ -67,6 +67,13 @@ class ParamPLT:
         self.Zlimit = []
 
     @property
+    def getBoolColour(self):
+        if not self.Colour:
+            return False
+        else:
+            return True
+
+    @property
     def getColour(self):
         if not self.Colour:
             return None
