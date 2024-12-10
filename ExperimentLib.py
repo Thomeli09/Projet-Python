@@ -11,10 +11,18 @@ Created on Fri Nov  8 11:03:41 2024
 
 # Custom Lib
 
+"""
+Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisible par un humain)
+"""
 
 """
 Base element
 """
+from ast import List
+from pickle import TRUE
+import string
+
+
 class DataBasis:
     def __init__(self, Name, UpperLevel):
         self.Name = Name
@@ -110,7 +118,7 @@ class Composition(DataBasis):
 
         self.ProductionDate = ProductionDate
         self.Volume = None
-        self.Ingredients = None
+        self.Compo = None
 
     @property
     def getProdDate(self):
@@ -130,11 +138,31 @@ class Composition(DataBasis):
 
     @property
     def getCompo(self):
-        return self.Ingredients
+        return self.Compo
 
     @getCompo.setter
-    def getCompo(self, Ingredients):
-        self.Ingredients = Ingredients
+    def getCompo(self, Compo):
+        self.Compo = Compo
+
+    @property
+    def getMaterial(self):
+        # Listing des ingrédients utilisés pour le volume X
+        print('Listes des ingrédients de la composition {}, pour un volume de {} m3'.format(self.getName, self.getVolume))
+
+        for key, value in self.getCompo:
+            print(f"   -{key}: {value*self.getVolume} kg")
+        return True
+
+    def CmptCompo(self, Data):
+        # Calcul 
+        self.getCompo = Data
+        return True
+
+    def PLT2DCompo(self, Data):
+        # Plot de la composition
+        return True
+
+
 
 
 """
@@ -181,6 +209,7 @@ class Sample(DataBasis):
         super().__init__(Name=Name, UpperLevel=ParentSample)
 
         self.Type = Type
+        self.LCaract = []
         self.ExtractionDate = ExtractionDate
 
     @property
@@ -190,6 +219,14 @@ class Sample(DataBasis):
     @getType.setter
     def getType(self, Type):
         self.Type = Type
+
+    @property
+    def getLCaract(self):
+        return self.LCaract
+
+    @getLCaract.setter
+    def getLCaract(self, Caract):
+        self.LCaract.append(Caract)
 
     @property
     def getExtractDate(self):
@@ -258,17 +295,41 @@ class DeSorptionSorption(Experiment):
 
 
 """
-XX??
+Granulometry
 """
+class Granulometry(Experiment):
+    def __init__(self, Name, StartDate, LSample):
+        super().__init__(Name, StartDate)
+        self.LSample = []
+        self.LSizeResult = []
+        self.LProportResult = []
 
+    @property
+    def getSamples(self):
+        return self.LSample
 
-class XX:
-    def __init__(self, Type, Nom, ProductionDate):
-        self.Nom = Nom
+    @property
+    def getResults(self):
+        return (self.LSizeResult, self.LProportResult)
 
+    def getSampleResults(self, SampleID):
+        if SampleID == str: 
+            Index = self.getSampleName.index(SampleID) 
+            return (self.LSizeResult[Index], self.LProportResult[Index])
+        else:
+            return (self.LSizeResult[SampleID], self.LProportResult[SampleID])
 
-# Plot of results
+    def AddSample(self, Sample, LSize, LProportion):
+        self.LSample.append(Sample)
+        LSample.getExperiments = self
 
+        self.LSizeResult.append(LSize)
+        self.LProportResult.append(LProportion)
 
+    # Plot of results
+    def PLT2DGranulo(self, Select, paramPLT):
+        """
+        Select permet de définir comment afficher les résultats si c'est par échantillons, par type d'échantillon, échantillon parent, compo, Lcaract, Traitement
+        """
 
-
+        return False

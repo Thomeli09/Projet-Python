@@ -42,10 +42,16 @@ class SoilEasy(Surface2D):
     def PLT2DSoil(self, paramPLT):
         if self.getBDefaultColor:
             paramPLT.getColour = 'darkgoldenrod'
-
         self.PLT2DSurface(paramPLT)
 
 
+class Soil2D(SoilEasy):
+    def __init__(self, LNode, Axis, UnitWeight, BDefaultColor, Name=None):
+        super().__init__(LNode, Axis, UnitWeight, BDefaultColor, Name)
+
+    def ToContinue():
+        return False
+        
 
 """
 class Soil3DEasy(Volume)

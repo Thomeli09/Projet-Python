@@ -268,7 +268,7 @@ def PComputerColonne(Pline, freesurface, beton):
 
 
 # Function to compute pressure for Pline
-def ComputeConcretePressures(Plines, freesurface, beton, paramsolver):
+def CmptConcretePressures(Plines, freesurface, beton, paramsolver):
     for Pline in Plines:
         if paramsolver.getSolver == 0:  # Solveur hydrostatique
             PComputerHydrostat(Pline, freesurface, beton)
