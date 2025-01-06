@@ -51,6 +51,16 @@ class Soil2D(SoilEasy):
 
     def ToContinue():
         return False
+
+    "Définir des layers"
+
+
+class Geotech2D:
+    def __init__(self):
+        self.Val = True
+        self.Layer = []  # Liste de Soil2D ou SoilEasy
+
+    'Calcul'
         
 
 """

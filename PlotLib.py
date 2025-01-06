@@ -385,7 +385,6 @@ def PLTShow(paramPLT):
     plt.show(block=False)  # Show plot without blocking
 
 
-
 def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
     # Calculate the angles for the tick marks
     Angles = np.linspace(0, 2*np.pi, NPoints+1, endpoint=True)
@@ -419,5 +418,6 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
                  label=paramPLT.getLegends)
 
 
+'Fonction de plot de graphe en 2d'
 # 3D
 

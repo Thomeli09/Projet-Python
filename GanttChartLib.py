@@ -30,7 +30,7 @@ class Tasks:
         return self.LTask
 
     @getLTask.setter
-    def getLTask(self, Title, StartDate, EndDate):
+    def getLTask(self, Title, StartDate, EndDate, CompletionRatio=0, Color=None):
         """
         Add a task.
 
@@ -41,47 +41,74 @@ class Tasks:
         self.LTask.append({
             "task": Title,
             "start": StartDate,
-            "end": EndDate})
+            "end": EndDate,
+            "completion_ratio": CompletionRatio,
+            "color": Color})
 
-    def PLTTasks(self, paramPLT, start_date=None, end_date=None):
+    def PLTTasks(self, paramPLT, StartDate=None, EndDate=None, BCurrentDate=False):
         """Plot the Gantt chart of tasks."""
-        if not self.LTask:
+        if not self.getLTask:
             print("No tasks to plot.")
             return
 
         # Create DataFrame from the list of tasks
-        df = pd.DataFrame(self.LTask)
+        df = pd.DataFrame(self.getLTask)
         df["start"] = pd.to_datetime(df["start"])
         df["end"] = pd.to_datetime(df["end"])
         df["duration"] = (df["end"] - df["start"]).dt.days
+        df["completion_days"] = df["completion_ratio"]*df["duration"]
 
         # Determine the plot start and end dates
-        if start_date is None:
-            start_date = df["start"].min()
+        if StartDate is None:
+            StartDate = df["start"].min()
         else:
-            start_date = pd.to_datetime(start_date)
+            StartDate = pd.to_datetime(StartDate)
 
-        if end_date is None:
-            end_date = df["end"].max()
+        if EndDate is None:
+            EndDate = df["end"].max()
         else:
-            end_date = pd.to_datetime(end_date)
+            EndDate = pd.to_datetime(EndDate)
+
+        if BCurrentDate:
+            CurrentDate = datetime.now()
+            StartDate = min(StartDate, CurrentDate)
+            EndDate = max(EndDate, CurrentDate)
 
         # Plotting the Gantt chart
-        fig, ax = plt.subplots(figsize=(paramPLT.fig_width, paramPLT.fig_height))
-        y_positions = range(len(df))
+        fig, ax = plt.subplots()
+        # fig, ax = plt.subplots(figsize=(paramPLT.fig_width, paramPLT.fig_height))
+
+        YPositions = range(len(df))
 
         for i, task in enumerate(df.itertuples()):
-            ax.barh(i, task.duration, left=task.start, height=0.4, color=paramPLT.bar_color)
-            ax.text(task.start + pd.Timedelta(days=task.duration / 2), i,
-                    task.task, ha='center', va='center', color=paramPLT.text_color, fontsize=paramPLT.font_size)
+            # Adding a lower bar - for the overall task duration
+            plt.barh(i, width=task.duration, left=task.start, height=0.4, color=task.color, alpha=0.4)
+
+            # Adding an upper bar - for the status of completion
+            plt.barh(i, width=task.completion_days, left=task.start, height=0.4, color=task.color)
+
+            ax.text(task.start + pd.Timedelta(days=task.duration/2), i,
+                    task.task, ha='center', va='center', color='k', fontsize=paramPLT.getTicksSize)
+
+        if BCurrentDate:
+            CurrentDate = pd.to_datetime(datetime.now().strftime('%Y-%m-%d'))
+            ax.axvline(x=CurrentDate, color='r', linestyle='dashed')
+            ax.text(x=CurrentDate + pd.Timedelta(days=1), y=len(df) - 1, 
+                    s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize)
 
         # Formatting the plot
-        ax.set_yticks(y_positions)
+        ax.set_yticks(YPositions)
         ax.set_yticklabels(df["task"])
         ax.set_xlabel("Date")
-        ax.set_xlim(start_date, end_date)
-        ax.grid(paramPLT.grid)
-        plt.title(paramPLT.title)
+        ax.set_xlim(StartDate, EndDate)
+        plt.gca().invert_yaxis()
+        if paramPLT.getGridAxis:
+            plt.grid(axis=paramPLT.getGridAxis,
+                    color=paramPLT.getColour,
+                    linestyle=paramPLT.getGridLineType,
+                    linewidth=paramPLT.getGridLineSize,
+                    alpha=0.5)
+        plt.title(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
         plt.show()
 
 
