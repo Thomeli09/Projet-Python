@@ -10,9 +10,9 @@ Created on Fri Nov  8 10:16:55 2024
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
-from PlotLib import ParamPLT
 
 # Custom Lib
+from PlotLib import ParamPLT, PLTGrid, PLTLimit
 
 
 """
@@ -100,17 +100,25 @@ class Tasks:
         ax.set_yticks(YPositions)
         ax.set_yticklabels(df["task"])
         ax.set_xlabel("Date")
-        ax.set_xlim(StartDate, EndDate)
+
+        paramPLT.getXLimit = [StartDate, EndDate]
+        PLTLimit(paramPLT)
+
         plt.gca().invert_yaxis()
-        if paramPLT.getGridAxis:
-            plt.grid(axis=paramPLT.getGridAxis,
-                    color=paramPLT.getColour,
-                    linestyle=paramPLT.getGridLineType,
-                    linewidth=paramPLT.getGridLineSize,
-                    alpha=0.5)
+
+        paramPLT.getGridAlpha = 0.4
+        PLTGrid(paramPLT)
+
         plt.title(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
         plt.show()
 
+"""
+-------------
+Modifications
+-------------
+
+Faire des groupes de taches avec la même couleur et de pouvoir afficher une légende
+"""
 
 """
 -------

@@ -8,6 +8,7 @@ Created on Fri Nov  8 11:03:41 2024
 # Experiment library
 
 # Other Lib
+from re import S
 import string
 
 # Custom Lib
@@ -318,8 +319,9 @@ class Granulometry(Experiment):
             return (self.LSizeResult[SampleID], self.LProportResult[SampleID])
 
     def AddSample(self, Sample, LSize, LProportion):
-        self.LSample.append(Sample)
-        LSample.getExperiments = self
+        LSamples = self.getSamples
+        LSamples.append(Sample)
+        LSamples.getExperiments = self
 
         self.LSizeResult.append(LSize)
         self.LProportResult.append(LProportion)
