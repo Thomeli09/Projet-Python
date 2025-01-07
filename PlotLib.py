@@ -59,6 +59,7 @@ class ParamPLT:
         self.GridColour = None
         self.GridLineType = None
         self.GridLineSize = 0.4
+        self.GridAlpha = 1
 
         # Limits
         self.XLimit = []
@@ -297,6 +298,14 @@ class ParamPLT:
         self.GridAxis = GridAxis
 
     @property
+    def getGridAlpha(self):
+        return self.GridAlpha
+
+    @getGridAlpha.setter
+    def getGridAlpha(self, Val):
+        self.GridAlpha = Val
+
+    @property
     def getXLimit(self):
         if not self.XLimit:
             return None
@@ -305,7 +314,7 @@ class ParamPLT:
 
     @getXLimit.setter
     def getXLimit(self, Limit):
-        self.XLimit = Limit
+        self.XLimit.append(Limit)
     
     @property
     def getYLimit(self):
@@ -316,7 +325,7 @@ class ParamPLT:
 
     @getYLimit.setter
     def getYLimit(self, Limit):
-        self.YLimit = Limit
+        self.YLimit.append(Limit)
     
     @property
     def getZLimit(self):
@@ -327,7 +336,7 @@ class ParamPLT:
 
     @getZLimit.setter
     def getZLimit(self, Limit):
-        self.ZLimit = Limit
+        self.ZLimit.append(Limit)
 
     @property
     def getBoolXLimit(self):
@@ -346,44 +355,65 @@ class ParamPLT:
 """
 Fcts générales
 """
-def ClosePlots(PlotOBJ):
+def ClosePlot(PlotOBJ):
     plt.close(PlotOBJ)
 
 def CloseALLPlots():
     plt.close('all')
 
+def ClosePlotsOnDemand():
+    # To close all plots on demand
+    input("Press Enter to close all plots...") 
+    plt.close('all')
+
 def StartPlots():
     plt.figure()
-
 
 """
 Type de Plots
 """
 # 2D
-def PLTShow(paramPLT):
+def PLTTitleAxis(paramPLT):
     plt.xlabel(paramPLT.getXLabel, fontsize=paramPLT.getFontSize)
     plt.ylabel(paramPLT.getYLabel, fontsize=paramPLT.getFontSize)
     plt.title(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
 
+def PLTSizeAxis(paramPLT):
     plt.xticks(fontsize=paramPLT.getTicksSize)
     plt.yticks(fontsize=paramPLT.getTicksSize)
 
-    if paramPLT.getAspect:
-        plt.gca().set_aspect('equal', adjustable='box')
+def PLTLegend(paramPLT):
+    plt.legend(fontsize=paramPLT.getFontSize)
+
+def PLTGrid(paramPLT):
     if paramPLT.getGridAxis:
         plt.grid(axis=paramPLT.getGridAxis,
                  color=paramPLT.getColour,
                  linestyle=paramPLT.getGridLineType,
-                 linewidth=paramPLT.getGridLineSize)
-    plt.legend(fontsize=paramPLT.getFontSize)
+                 linewidth=paramPLT.getGridLineSize,
+                 alpha=paramPLT.getGridAlpha)
 
+def PLTLimit(paramPLT):
     if paramPLT.getBoolXLimit:
         plt.xlim(paramPLT.getXLimit)
     if paramPLT.getBoolYLimit:
         plt.ylim(paramPLT.getYLimit)
 
-    plt.show(block=False)  # Show plot without blocking
+def PLTShow(paramPLT):
+    PLTTitleAxis(paramPLT)
 
+    PLTSizeAxis(paramPLT)
+
+    if paramPLT.getAspect:
+        plt.gca().set_aspect('equal', adjustable='box')
+
+    PLTLegend(paramPLT)
+
+    PLTGrid(paramPLT)
+
+    PLTLimit(paramPLT)
+
+    plt.show(block=False)  # Show plot without blocking
 
 
 def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
@@ -419,5 +449,6 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
                  label=paramPLT.getLegends)
 
 
+'Fonction de plot de graphe en 2d'
 # 3D
 

@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>947121ef-2716-4f42-97cd-e82f75b8e1d2</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ProjetPython.py</StartupFile>
+    <StartupFile>GanttChartLib.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>ProjetPython</Name>
     <RootNamespace>ProjetPython</RootNamespace>
+    <InterpreterId>CondaEnv|CondaEnv|intelpython3</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,6 +35,11 @@
     <Compile Include="RheologyLib.py" />
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />
+    <InterpreterReference Include="Global|PythonCore|3.12" />
+    <InterpreterReference Include="Global|PythonCore|3.9" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -42,10 +42,26 @@ class SoilEasy(Surface2D):
     def PLT2DSoil(self, paramPLT):
         if self.getBDefaultColor:
             paramPLT.getColour = 'darkgoldenrod'
-
         self.PLT2DSurface(paramPLT)
 
 
+class Soil2D(SoilEasy):
+    def __init__(self, LNode, Axis, UnitWeight, BDefaultColor, Name=None):
+        super().__init__(LNode, Axis, UnitWeight, BDefaultColor, Name)
+
+    def ToContinue():
+        return False
+
+    "Définir des layers"
+
+
+class Geotech2D:
+    def __init__(self):
+        self.Val = True
+        self.Layer = []  # Liste de Soil2D ou SoilEasy
+
+    'Calcul'
+        
 
 """
 class Soil3DEasy(Volume)
