@@ -355,15 +355,19 @@ class ParamPLT:
 """
 Fcts générales
 """
-def ClosePlots(PlotOBJ):
+def ClosePlot(PlotOBJ):
     plt.close(PlotOBJ)
 
 def CloseALLPlots():
     plt.close('all')
 
+def ClosePlotsOnDemand():
+    # To close all plots on demand
+    input("Press Enter to close all plots...") 
+    plt.close('all')
+
 def StartPlots():
     plt.figure()
-
 
 """
 Type de Plots
