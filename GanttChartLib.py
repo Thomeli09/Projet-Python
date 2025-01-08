@@ -278,27 +278,3 @@ my_tasks.PLTTasks(paramPLT, BCurrentDate=True, BWeekEnds=False, GroupsColors=Gro
 # Close all plots on demand
 ClosePlotsOnDemand()
 """
-# Default use of the Tasks class
-
-# Define the Tasks instance
-my_tasks = Tasks()
-
-# Add tasks to the agenda
-my_tasks.AddTask(Title="Project Planning",
-                 StartDate="2024-01-10", EndDate="2024-01-10",
-                 CompletionRatio=1, Color=None)
-
-
-# Plot the tasks with default date range
-paramPLT = ParamPLT(colour=['k'], linetype=0, marker=0, linesize=16, fontsize=10, scale=1, scale3D=None)
-
-my_tasks.PLTTasks(paramPLT, StartDate=None, EndDate=None, BCurrentDate=False)
-
-# Plot the tasks with a user-defined date range
-paramPLT = ParamPLT(colour=['k'], linetype=0, marker=0, linesize=16, fontsize=10, scale=1, scale3D=None)
-paramPLT.getGridAxis = 'x'
-
-my_tasks.PLTTasks(paramPLT, StartDate="2024-01-01", EndDate="2024-02-01", BCurrentDate=False)
-
-# Close all plots on demand
-ClosePlotsOnDemand()
