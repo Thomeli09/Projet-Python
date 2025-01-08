@@ -116,7 +116,7 @@ class Tasks:
         df["start"] = pd.to_datetime(df["start"])
         df["end"] = pd.to_datetime(df["end"])
         df["duration"] = (df["end"] - df["start"]).dt.days
-        df["completion_days"] = df["completion_ratio"]*df["duration"]
+        df["completion_days"] = df["completion_ratio"] * df["duration"]
 
         # Determine the plot start and end dates
         Range = self.RangePLT(StartDate=StartDate, EndDate=EndDate, BCurrentDate=BCurrentDate)
@@ -144,13 +144,20 @@ class Tasks:
             else:
                 TaskColor = task.color
 
+            if task.duration<1:
+                Duration = 1
+                Completion_days = task.completion_ratio * 1
+            else:
+                Duration = task.duration
+                Completion_days = task.completion_days
+
             # Adding a lower bar - for the overall task duration
-            Bars = plt.barh(i, width=task.duration, left=task.start, height=0.4, color=TaskColor, alpha=0.4)
+            Bars = plt.barh(i, width=Duration, left=task.start, height=0.4, color=TaskColor, alpha=0.4)
             BarColors = [Bar.get_facecolor() for Bar in Bars]
             # Adding an upper bar - for the status of completion
-            plt.barh(i, width=task.completion_days, left=task.start, height=0.4, color=BarColors[0])
+            plt.barh(i, width=Completion_days, left=task.start, height=0.4, color=BarColors[0])
 
-            ax.text(task.start + pd.Timedelta(days=task.duration/2), i,
+            ax.text(task.start + pd.Timedelta(days=Duration/2), i,
                     task.task, ha='center', va='center', color='k', fontsize=paramPLT.getTicksSize)
 
         if BCurrentDate:
@@ -271,3 +278,27 @@ my_tasks.PLTTasks(paramPLT, BCurrentDate=True, BWeekEnds=False, GroupsColors=Gro
 # Close all plots on demand
 ClosePlotsOnDemand()
 """
+# Default use of the Tasks class
+
+# Define the Tasks instance
+my_tasks = Tasks()
+
+# Add tasks to the agenda
+my_tasks.AddTask(Title="Project Planning",
+                 StartDate="2024-01-10", EndDate="2024-01-10",
+                 CompletionRatio=1, Color=None)
+
+
+# Plot the tasks with default date range
+paramPLT = ParamPLT(colour=['k'], linetype=0, marker=0, linesize=16, fontsize=10, scale=1, scale3D=None)
+
+my_tasks.PLTTasks(paramPLT, StartDate=None, EndDate=None, BCurrentDate=False)
+
+# Plot the tasks with a user-defined date range
+paramPLT = ParamPLT(colour=['k'], linetype=0, marker=0, linesize=16, fontsize=10, scale=1, scale3D=None)
+paramPLT.getGridAxis = 'x'
+
+my_tasks.PLTTasks(paramPLT, StartDate="2024-01-01", EndDate="2024-02-01", BCurrentDate=False)
+
+# Close all plots on demand
+ClosePlotsOnDemand()
