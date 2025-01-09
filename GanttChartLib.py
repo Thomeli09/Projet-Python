@@ -148,8 +148,8 @@ class Tasks:
                 Duration = 1
                 Completion_days = task.completion_ratio * 1
             else:
-                Duration = task.duration
-                Completion_days = task.completion_days
+                Duration = task.duration+1
+                Completion_days = (task.duration+1) * task.completion_ratio
 
             # Adding a lower bar - for the overall task duration
             Bars = plt.barh(i, width=Duration, left=task.start, height=0.4, color=TaskColor, alpha=0.4)
@@ -164,14 +164,14 @@ class Tasks:
             CurrentDate = pd.to_datetime(datetime.now().strftime('%Y-%m-%d'))
             ax.axvline(x=CurrentDate, color='r', linestyle='dashed', label='Current day')
             ax.text(x=CurrentDate + pd.Timedelta(days=1), y=len(df) - 1,
-                    s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize)
+                    s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize*1)
 
         # Formatting the plot
         ax.set_yticks(YPositions)
         ax.set_yticklabels(df["task"])
         ax.set_xlabel("Date")
 
-        paramPLT.getXLimit = [StartDate, EndDate]
+        paramPLT.getXLimit = [StartDate, EndDate + pd.Timedelta(days=1)]
         PLTLimit(paramPLT)
 
         plt.gca().invert_yaxis()
@@ -193,7 +193,7 @@ class Tasks:
 def DatePlusNumDays(Date, NumDays):
     """Return the date after adding a number of days."""
     Temp = pd.to_datetime(Date) + pd.Timedelta(days=NumDays)
-    return f'"{Temp.strftime("%Y-%m-%d")}"'
+    return f'{Temp.strftime("%Y-%m-%d")}'
 
 
 """
