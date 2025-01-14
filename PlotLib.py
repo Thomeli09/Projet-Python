@@ -445,7 +445,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
         xEnd = xStart
         yEnd = yStart
     if BFill:
-        plt.fill(XPoint, YPoint, paramPLT.getColour, zorder=0,
+        plt.fill(XPoint, YPoint, color=paramPLT.getColour, zorder=0,
                  label=paramPLT.getLegends)
 
 
