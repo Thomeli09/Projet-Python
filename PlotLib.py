@@ -29,7 +29,7 @@ class ParamPLT:
         if isinstance(colour, list):
             self.Colour = colour
         else:
-            self.Colour = [colour]
+            self.Colour = colour
         self.LineType = linetype
         self.LineSize = 2
         self.MarkerType = marker
@@ -78,14 +78,17 @@ class ParamPLT:
         if not self.Colour:
             return None
         else:
-            return self.Colour.pop(0)
+            if isinstance(self.Colour, list):
+                return self.Colour.pop(0)
+            else:
+                return self.Colour
 
     @getColour.setter
     def getColour(self, colour):
         if isinstance(colour, list):
             self.Colour += colour
         else:
-            self.Colour.append(colour)
+            self.Colour = colour
 
     @property
     def getLineType(self):
@@ -445,7 +448,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
         xEnd = xStart
         yEnd = yStart
     if BFill:
-        plt.fill(XPoint, YPoint, paramPLT.getColour, zorder=0,
+        plt.fill(XPoint, YPoint, color=paramPLT.getColour, zorder=0,
                  label=paramPLT.getLegends)
 
 
