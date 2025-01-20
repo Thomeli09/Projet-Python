@@ -104,7 +104,7 @@ class Tasks:
         return [StartDate, EndDate]
 
     def PLTTasks(self, paramPLT, StartDate=None, EndDate=None, BCurrentDate=False,
-                 BWeekEnds=False, GroupsColors=None, BYTicks=True)):
+                 BWeekEnds=False, GroupsColors=None, BYTicks=True):
         """Plot the Gantt chart of tasks."""
         if not self.getLTask:
             print("Error: No tasks to plot.")
@@ -165,13 +165,14 @@ class Tasks:
             CurrentDate = pd.to_datetime(datetime.now().strftime('%Y-%m-%d'))
             ax.axvline(x=CurrentDate, color='r', linestyle='dashed', label='Current day')
             ax.text(x=CurrentDate + pd.Timedelta(days=1), y=len(df) - 1,
-                    s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize*1)
+                    s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize)
 
         # Formatting the plot
-        ax.set_xlabel("Date")
+        ax.set_xlabel("Date", fontsize=paramPLT.getFontSize)
+        ax.tick_params(axis='x', labelsize=paramPLT.getTicksSize)
         if BYTicks:
             # Show y-axis tick labels
-            ax.set_yticklabels(df["task"])
+            ax.set_yticklabels(df["task"], fontsize=paramPLT.getFontSize)
         else:
             # Remove y-axis tick labels
             ax.set_yticklabels([])
