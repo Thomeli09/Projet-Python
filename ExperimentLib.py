@@ -8,8 +8,8 @@ Created on Fri Nov  8 11:03:41 2024
 # Experiment library
 
 # Other Lib
-from re import S
-import string
+import pandas as pd
+import numpy as np
 
 # Custom Lib
 
@@ -18,15 +18,24 @@ Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisib
 """
 
 """
-Base element
+Databasis : Default class for all the data
 """
+
+
+from typing import Type
 
 
 class DataBasis:
     def __init__(self, Name, UpperLevel):
         self.Name = Name
 
-        self.UpperLevel = None
+        self.UpperLevel = UpperLevel
+        if UpperLevel:
+            UpperLevel.getLowerLevel = self
+            print("Info: Upper level connected")
+        else:
+            print("Info: No upper level")
+
         self.LLowerLevel = []
 
         self.LTest = []
@@ -52,7 +61,7 @@ class DataBasis:
             UpperLevel.getLowerLevel = self
             # Retirer la précédente et remettre la nouvelle
         else:
-            print("Info: Already highest level")
+            print("Info: No upper level")
 
     @property
     def getLowerLevel(self):
@@ -60,10 +69,7 @@ class DataBasis:
 
     @getLowerLevel.setter
     def getLowerLevel(self, LowerLevel):
-        if self.UpperLevel:
-            self.LLowerLevel.append(LowerLevel)
-        else:
-            print("Info: Already lowest level")
+        self.LLowerLevel.append(LowerLevel)
 
     @property
     def getExperiments(self):
@@ -81,13 +87,13 @@ class DataBasis:
     def getComment(self, Comment):
         self.LComment.append(Comment)
 
+
 """
-Experiments
+1) Experiments
 """
 class Experiments(DataBasis):
     def __init__(self, Name, StartDate):
         super().__init__(Name=Name, UpperLevel=None)
-
         self.StartDate = StartDate
         self.EndDate = 0
 
@@ -109,7 +115,7 @@ class Experiments(DataBasis):
 
 
 """
-Composition
+2) Composition : For cementious materials
 """
 class Composition(DataBasis):
     def __init__(self, Name, ProductionDate, Experiments):
@@ -165,7 +171,7 @@ class Composition(DataBasis):
 
 
 """
-ParentSample
+3) ParentSample
 """
 class ParentSample(DataBasis):
     def __init__(self, Name, Type, ProductionDate, Composition):
@@ -201,7 +207,7 @@ class ParentSample(DataBasis):
 
 
 """
-Sample
+4) Sample
 """
 class Sample(DataBasis):
     def __init__(self, Name, ExtractionDate, Type, ParentSample):
@@ -240,10 +246,10 @@ class Sample(DataBasis):
 Experiment base class
 """
 class Experiment:
-    def __init__(self, Name, StartDate):
+    def __init__(self, Name, StartDate, EndDate):
         self.Name = Name
         self.StartDate = StartDate
-        self.EndDate = 0
+        self.EndDate = EndDate
         self.LComment = []
 
     @property
@@ -333,3 +339,63 @@ class Granulometry(Experiment):
         """
 
         return False
+
+
+
+"""
+Ingredients : For cementious materials
+"""
+class Ingredients:
+    def __init__(self, MatType):
+        self.MatType = MatType
+        
+        self.Data = False
+
+    @property
+    def getMatType(self):
+        return self.MatType
+
+    @getMatType.setter
+    def getMatType(self, MatType):
+        self.MatType = MatType
+
+    def getDataCement(self, CementType, ClinckerContent):
+        if self.getMatType == 'Cement':
+            DictVariable = {"CementType": CementType,
+                            "ClinckerContent": ClinckerContent}
+            # Convert dictionary to a DataFrame
+            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
+        else:
+            print('Error: Wrong material type')
+            return False
+        return True
+
+    def getDataAggregates(self, LGranuloDiam, LGranuloRatio):
+        if self.getMatType == 'Aggregates':
+            # Create a NumPy matrix with 2 columns
+            Granulometry = np.column_stack((LGranuloDiam, LGranuloRatio))
+            self.Data = pd.DataFrame({"GranuloDiam": LGranuloDiam, "GranuloRatio": LGranuloRatio})
+        else:
+            print('Error: Wrong material type')
+            return False
+        return True
+
+    def getDataAdditives(self, AdditiveType):
+        if self.getMatType == 'Additives':
+            DictVariable = {"AdditiveType": AdditiveType}
+            # Convert dictionary to a DataFrame
+            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
+        else:
+            print('Error: Wrong material type')
+            return False
+        return True
+
+    def getDataWater(self, Data):
+        if self.getMatType == 'Water':
+            DictVariable = {"Temp": Data}
+            # Convert dictionary to a DataFrame
+            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
+        else:
+            print('Error: Wrong material type')
+            return False
+        return True

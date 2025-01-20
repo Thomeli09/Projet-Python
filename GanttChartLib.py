@@ -103,7 +103,8 @@ class Tasks:
 
         return [StartDate, EndDate]
 
-    def PLTTasks(self, paramPLT, StartDate=None, EndDate=None, BCurrentDate=False, BWeekEnds=False, GroupsColors=None):
+    def PLTTasks(self, paramPLT, StartDate=None, EndDate=None, BCurrentDate=False,
+                 BWeekEnds=False, GroupsColors=None, BYTicks=True)):
         """Plot the Gantt chart of tasks."""
         if not self.getLTask:
             print("Error: No tasks to plot.")
@@ -167,9 +168,14 @@ class Tasks:
                     s=CurrentDate.strftime('%d/%m/%Y'), color='r', fontsize=paramPLT.getTicksSize*1)
 
         # Formatting the plot
-        ax.set_yticks(YPositions)
-        ax.set_yticklabels(df["task"])
         ax.set_xlabel("Date")
+        if BYTicks:
+            # Show y-axis tick labels
+            ax.set_yticklabels(df["task"])
+        else:
+            # Remove y-axis tick labels
+            ax.set_yticklabels([])
+        ax.set_yticks(YPositions)
 
         paramPLT.getXLimit = [StartDate, EndDate + pd.Timedelta(days=1)]
         PLTLimit(paramPLT)
