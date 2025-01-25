@@ -21,7 +21,7 @@ Base de donnée
 
 # Paramètre d'affichage
 class ParamPLT:
-    def __init__(self, colour, linetype, marker, linesize, fontsize, scale, scale3D):
+    def __init__(self, colour, linetype, marker, linesize, fontsize):
         """
         Ajouter le système de liste si différents éléments, pas que pour les légendes,...
         """
@@ -31,7 +31,7 @@ class ParamPLT:
         else:
             self.Colour = colour
         self.LineType = linetype
-        self.LineSize = 2
+        self.LineSize = linesize
         self.MarkerType = marker
         self.MarkerSize = 50
         self.Alpha = 1  # Blending value, from 0 (transparent) to 1 (opaque)
@@ -48,8 +48,11 @@ class ParamPLT:
         self.Legends = []
 
         # Scale
-        self.Scale = scale
-        self.Scale3D = scale3D
+        self.Scale = 1
+        self.XScaleType = None
+        self.YScaleType = None
+        self.ZScaleType = None
+        self.Scale3D = 1
 
         # Plot Format
         self.PltAspect = None
@@ -237,6 +240,36 @@ class ParamPLT:
         self.Scale = scale
 
     @property
+    def getXScaleType(self):
+        return self.XScaleType
+
+    @getXScaleType.setter
+    def getXScaleType(self, Val):
+        ScaleTypeDict = {0: None, 1: 'log'}
+        ScaleType = ScaleTypeDict.get(Val, None)
+        self.XScaleType = ScaleType
+
+    @property
+    def getYScaleType(self):
+        return self.YScaleType
+
+    @getYScaleType.setter
+    def getYScaleType(self, Val):
+        ScaleTypeDict = {0: None, 1: 'log'}
+        ScaleType = ScaleTypeDict.get(Val, None)
+        self.YScaleType = ScaleType
+
+    @property
+    def getZScaleType(self):
+        return self.ZScaleType
+
+    @getZScaleType.setter
+    def getZScaleType(self, Val):
+        ScaleTypeDict = {0: None, 1: 'log'}
+        ScaleType = ScaleTypeDict.get(Val, None)
+        self.ZScaleType = ScaleType
+
+    @property
     def getScale3D(self):
         return self.Scale3D
 
@@ -402,6 +435,12 @@ def PLTLimit(paramPLT):
     if paramPLT.getBoolYLimit:
         plt.ylim(paramPLT.getYLimit)
 
+def PLTScaleType(paramPLT):
+    if paramPLT.getXScaleType:
+        plt.xscale(paramPLT.getXScaleType)
+    if paramPLT.getYScaleType:
+        plt.yscale(paramPLT.getYScaleType)
+
 def PLTShow(paramPLT):
     PLTTitleAxis(paramPLT)
 
@@ -415,6 +454,8 @@ def PLTShow(paramPLT):
     PLTGrid(paramPLT)
 
     PLTLimit(paramPLT)
+
+    PLTScaleType(paramPLT)
 
     plt.show(block=False)  # Show plot without blocking
 
