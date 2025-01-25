@@ -35,6 +35,7 @@
     <Compile Include="RheologyLib.py" />
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />
+    <Compile Include="TimeLib.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />
