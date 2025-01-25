@@ -405,10 +405,6 @@ def ClosePlotsOnDemand():
 def StartPlots():
     plt.figure()
 
-"""
-Type de Plots
-"""
-# 2D
 def PLTTitleAxis(paramPLT):
     plt.xlabel(paramPLT.getXLabel, fontsize=paramPLT.getFontSize)
     plt.ylabel(paramPLT.getYLabel, fontsize=paramPLT.getFontSize)
@@ -459,7 +455,53 @@ def PLTShow(paramPLT):
 
     plt.show(block=False)  # Show plot without blocking
 
+# Version Cas 3D avec PLT3DShow
 
+"""
+Type de Plots
+"""
+# 2D
+
+def PLTBar(Labels, Times, paramPLT, StdErrors=None, BOrientation=True):
+    """
+    Creates a bar plot with optional error bars, customizable colors, labels, and orientation.
+
+    Parameters:
+    - Labels: List of labels for the bars.
+    - Times: List of values corresponding to the height (or width) of each bar.
+    - paramPLT: An object containing plot parameters 
+    - StdErrors (optional): List or array of standard errors for each bar.
+        - Scalar: Symmetric +/- error for all bars.
+        - Shape (N,): Symmetric +/- error for each bar.
+        - Shape (2, N): Asymmetric error values where:
+            - First row specifies lower errors.
+            - Second row specifies upper errors.
+    - BOrientation: Boolean flag to specify the orientation of the bars.
+        - True: Vertical bar plot (default).
+        - False: Horizontal bar plot.
+
+    Improovements:
+    - Allows stacking bars: Use `bottom=` parameter with previous bar values.
+    - Allows grouping bars: Create offsets using arrays like:
+        br1 = np.arange(len(Labels))
+        br2 = [x + barWidth for x in br1]
+        br3 = [x + barWidth for x in br2]
+    """
+    if BOrientation:
+        plt.bar(Labels, Times, yerr=StdErrors,
+                facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
+                width=paramPLT.getLineSize, label=paramPLT.getLegends,
+                )
+    else:
+        plt.barh(Labels, Times, xerr=StdErrors,
+                 facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
+                 alpha=paramPLT.getAlpha,
+                 height=paramPLT.getLineSize, label=paramPLT.getLegends
+                 )
+
+
+
+# 2D Shapes
 def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
     # Calculate the angles for the tick marks
     Angles = np.linspace(0, 2*np.pi, NPoints+1, endpoint=True)
@@ -492,7 +534,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
         plt.fill(XPoint, YPoint, color=paramPLT.getColour, zorder=0,
                  label=paramPLT.getLegends)
 
-
 'Fonction de plot de graphe en 2d'
 # 3D
 
+# 3D Shapes
