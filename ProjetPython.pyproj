@@ -25,6 +25,7 @@
     <Compile Include="ChargementLib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
+    <Compile Include="ExtensionCementiousMaterialsLib.py" />
     <Compile Include="FormworkLib.py" />
     <Compile Include="GanttChartLib.py" />
     <Compile Include="GeometryLib.py" />

@@ -10,6 +10,7 @@ Created on Fri Nov  8 11:03:41 2024
 # Other Lib
 import pandas as pd
 import numpy as np
+# from typing import Type
 
 # Custom Lib
 
@@ -20,11 +21,6 @@ Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisib
 """
 Databasis : Default class for all the data
 """
-
-
-from typing import Type
-
-
 class DataBasis:
     def __init__(self, Name, UpperLevel):
         self.Name = Name
@@ -115,7 +111,7 @@ class Experiments(DataBasis):
 
 
 """
-2) Composition : For cementious materials
+2) Composition
 """
 class Composition(DataBasis):
     def __init__(self, Name, ProductionDate, Experiments):
@@ -123,7 +119,6 @@ class Composition(DataBasis):
 
         self.ProductionDate = ProductionDate
         self.Volume = None
-        self.Compo = None
 
     @property
     def getProdDate(self):
@@ -140,33 +135,6 @@ class Composition(DataBasis):
     @getVolume.setter
     def getVolume(self, Volume):
         self.Volume = Volume
-
-    @property
-    def getCompo(self):
-        return self.Compo
-
-    @getCompo.setter
-    def getCompo(self, Compo):
-        self.Compo = Compo
-
-    @property
-    def getMaterial(self):
-        # Listing des ingrédients utilisés pour le volume X
-        print('Listes des ingrédients de la composition {}, pour un volume de {} m3'.format(self.getName, self.getVolume))
-
-        for key, value in self.getCompo:
-            print(f"   -{key}: {value*self.getVolume} kg")
-        return True
-
-    def CmptCompo(self, Data):
-        # Calcul 
-        self.getCompo = Data
-        return True
-
-    def PLT2DCompo(self, Data):
-        # Plot de la composition
-        return True
-
 
 
 
@@ -288,7 +256,6 @@ class Experiment:
 """
 Sorption and Desorption
 """
-
 class DeSorptionSorption(Experiment):
     def __init__(self, Name, StartDate, Other):
         super().__init__(Name, StartDate)
@@ -339,63 +306,3 @@ class Granulometry(Experiment):
         """
 
         return False
-
-
-
-"""
-Ingredients : For cementious materials
-"""
-class Ingredients:
-    def __init__(self, MatType):
-        self.MatType = MatType
-        
-        self.Data = False
-
-    @property
-    def getMatType(self):
-        return self.MatType
-
-    @getMatType.setter
-    def getMatType(self, MatType):
-        self.MatType = MatType
-
-    def getDataCement(self, CementType, ClinckerContent):
-        if self.getMatType == 'Cement':
-            DictVariable = {"CementType": CementType,
-                            "ClinckerContent": ClinckerContent}
-            # Convert dictionary to a DataFrame
-            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
-        else:
-            print('Error: Wrong material type')
-            return False
-        return True
-
-    def getDataAggregates(self, LGranuloDiam, LGranuloRatio):
-        if self.getMatType == 'Aggregates':
-            # Create a NumPy matrix with 2 columns
-            Granulometry = np.column_stack((LGranuloDiam, LGranuloRatio))
-            self.Data = pd.DataFrame({"GranuloDiam": LGranuloDiam, "GranuloRatio": LGranuloRatio})
-        else:
-            print('Error: Wrong material type')
-            return False
-        return True
-
-    def getDataAdditives(self, AdditiveType):
-        if self.getMatType == 'Additives':
-            DictVariable = {"AdditiveType": AdditiveType}
-            # Convert dictionary to a DataFrame
-            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
-        else:
-            print('Error: Wrong material type')
-            return False
-        return True
-
-    def getDataWater(self, Data):
-        if self.getMatType == 'Water':
-            DictVariable = {"Temp": Data}
-            # Convert dictionary to a DataFrame
-            self.Data = pd.DataFrame(list(DictVariable.items()), columns=["Parameter", "Value"])
-        else:
-            print('Error: Wrong material type')
-            return False
-        return True
