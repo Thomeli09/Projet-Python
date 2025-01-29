@@ -27,6 +27,8 @@ class CemMaterials(Composition):
 
     def PLTComposition(self):
         # Plot a pie chart with the composition
+        PLTPie(Val, paramPLT, Radius=1, explode=None, TypeAutopct=0, LabelDist=1.25, PctDist=0.6, BShadow=False, StartAngle=0, 
+           BShowAbs=False, AbsUnit="", PrecisionPct=1, PrecisionAbs=0, AnnotateTextSize=10, EnableAnnotations=False)
         pass
 
 
@@ -34,36 +36,39 @@ class CemMaterials(Composition):
 Ingredients : Genrals ingredients for cementious materials
 """
 class Ingredients:
-    def __init__(self, MatType):
+    def __init__(self, Name, MatType):
+        self.Name = Name
         self.MatType = MatType
+
         
-        self.Data = False
+
 
 
 """
 Cement
 """
 class Cement(Ingredients):
-    def __init__(self, MatType):
-        super().__init__(MatType)
+    def __init__(self, Name):
+        super().__init__(Name=Name, MatType="Cement")
+
 
 """
 Eau
 """
 class Eau(Ingredients):
-    def __init__(self, MatType):
-        super().__init__(MatType)
+    def __init__(self, Name):
+        super().__init__(Name=Name, MatType="Cement")
 
 """
 Aggregat
 """
 class Aggregat(Ingredients):
-    def __init__(self, MatType):
-        super().__init__(MatType)
+    def __init__(self, Name):
+        super().__init__(Name=Name, MatType="Aggregat")
 
 """
 Adjuvant
 """
 class Adjuvant(Ingredients):
-    def __init__(self, MatType):
-        super().__init__(MatType)
+    def __init__(self, Name):
+        super().__init__(Name=Name, MatType="Adjuvant")

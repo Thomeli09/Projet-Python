@@ -7,6 +7,7 @@ Created on Wed Oct 30 14:15:29 2024
 
 # General Plotting library
 
+from queue import Empty
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -26,10 +27,7 @@ class ParamPLT:
         Ajouter le système de liste si différents éléments, pas que pour les légendes,...
         """
         # Plot
-        if isinstance(colour, list):
-            self.Colour = colour
-        else:
-            self.Colour = colour
+        self.Colour = colour
         self.LineType = linetype
         self.LineSize = linesize
         self.MarkerType = marker
@@ -93,10 +91,23 @@ class ParamPLT:
         else:
             self.Colour = colour
 
+    def getColourFillList(self, ColourTheme, LVals, FloatMin, FloatMax):
+        # To be continued
+        self.getColour = plt.get_cmap(ColourTheme)(np.linspace(FloatMin, FloatMax, len(LVals)))
+
+    def getColourFullList(self):
+        if isinstance(self.Colour, list):
+            Temp = self.Colour
+            self.Colour = None
+            return Temp
+        else:
+            print("Error: No list of colours found.")
+            return self.Colour
+
     @property
     def getLineType(self):
         # Determine line type based on linetype input
-        LineTypeDict = {0: '-', 1: '-', 2: '--', 3: '-.', 4: ':'}
+        LineTypeDict = {0: '-', 1: '--', 2: '-.', 3: ':'}
         LineType = LineTypeDict.get(self.LineType, '-')
         return LineType
 
@@ -144,19 +155,99 @@ class ParamPLT:
 
     @property
     def getHatch(self):
-        HatchTypeDict = {0: '', 1: '/', 2: '\\', 3: '|', 4: '-', 5: '+',
-                            6: 'x', 7: 'o', 8: 'O', 9: '.', 10: '*'}
-        Hatch = ''
-        if isinstance(self.HatchType, list):
-            for Val in self.HatchType:
-                Hatch += HatchTypeDict.get(Val, '')
+        """
+        Property that retrieves and modifies the `HatchType` attribute.
+        - If `HatchType` is empty (`None` or equivalent), it returns `None`.
+        - If `HatchType` is a list, it removes and returns the first element of the list (FIFO behavior).
+        - If `HatchType` is not a list, it simply returns the value of `HatchType`.
+
+        Returns:
+            Any: 
+                - If `HatchType` is empty, returns `None`.
+                - If `HatchType` is a list, returns the first element while modifying the list.
+                - If `HatchType` is a single value, returns that value.
+        """
+
+        # Check if `HatchType` is empty or `None`
+        if not self.HatchType:
+            return None  # Return None if no value is present
         else:
-            Hatch = HatchTypeDict.get(self.HatchType, '')
-        return Hatch
+            # If `HatchType` is a list, pop and return the first element
+            if isinstance(self.HatchType, list):
+                return self.HatchType.pop(0)  # Remove the first element and return it
+            else:
+                # If `HatchType` is not a list, return the value directly
+                return self.HatchType
 
     @getHatch.setter
     def getHatch(self, HatchType):
-        self.HatchType = HatchType
+        """
+        Sets the `HatchType` property of the object based on the specified hatch type (`HatchType`).
+        The hatch type is mapped to predefined patterns using a dictionary.
+        This method can handle simple integers or complex structures such as nested lists.
+
+        Args:
+            HatchType (int, list, or other): The hatch type to configure.
+                - If `HatchType` is an integer, it is directly mapped to a pattern using the dictionary (Result = 1 Hatch).
+                - If `HatchType` is a flat list, each element is individually mapped to create a combined pattern (Result = 1 Hatch).
+                - If `HatchType` is a nested list, each sub-list is individually mapped to create multiple patterns (Result = # of sub-lists Hatch).
+
+        Returns:
+            None: Directly assigns the resulting value to `self.HatchType`.
+        """
+
+        # Dictionary mapping numeric values to hatch patterns
+        HatchTypeDict = {
+            0: '', 1: '/', 2: '\\', 3: '|', 4: '-', 5: '+',
+            6: 'x', 7: 'o', 8: 'O', 9: '.', 10: '*'
+        }
+
+        # Variables to store the result
+        Hatch = ''   # Combined pattern if HatchType is a flat list
+        LHatch = []  # List of patterns if HatchType contains nested lists
+
+        # Check if `HatchType` is a list
+        if isinstance(HatchType, list):
+            for Item in HatchType:
+                if isinstance(Item, list):  # If an element is a nested list
+                    LItem = Item
+                    Hatch = ''  # Reset `Hatch` for each sub-list
+                    for Val in LItem:
+                        # Add the pattern corresponding to the value to `Hatch`
+                        Hatch += HatchTypeDict.get(Val, '')  
+                    LHatch.append(Hatch)  # Append the complete pattern of the sub-list to `LHatch`
+                else:  # If the element is an integer or a simple value
+                    Val = Item
+                    Hatch += HatchTypeDict.get(Val, '')  # Add the pattern directly
+        else:  # If `HatchType` is not a list
+            Hatch = HatchTypeDict.get(HatchType, '')  # Retrieve the corresponding pattern
+
+        # Assign the final value to `self.HatchType`
+        if LHatch:  # If `LHatch` contains complex patterns
+            self.HatchType = LHatch
+        else:  # Otherwise, use the simple pattern
+            self.HatchType = Hatch
+
+    @property
+    def getHatchFullList(self):
+        """
+        Property that retrieves the full list of hatch patterns if `HatchType` is a list.
+        If `HatchType` is not a list, it displays an error message and returns the current value of `HatchType`.
+
+        Returns:
+            list or other: If `HatchType` is a list, it returns the list of hatch patterns and resets `HatchType` to `None`.
+                           If `HatchType` is not a list, it prints an error message and returns the current value of `HatchType`.
+        """
+        # Check if `HatchType` is a list
+        if isinstance(self.HatchType, list):
+            Temp = self.HatchType  # Store the current list of hatch patterns in a temporary variable
+            self.HatchType = None  # Reset `HatchType` to `None`
+            return Temp  # Return the stored list
+        else:
+            # Print an error message if `HatchType` is not a list
+            print("Error: No list of hatch found.")
+            return self.HatchType  # Return the current value of `HatchType`
+
 
     @property
     def getTitleSize(self):
@@ -230,6 +321,18 @@ class ParamPLT:
     @getLegends.setter
     def getLegends(self, Legends):
         self.Legends = Legends
+
+    @property
+    def getLegendsFullList(self):
+        # Check if `Legends` is a list
+        if isinstance(self.Legends, list):
+            Temp = self.Legends  # Store the current list of legend in a temporary variable
+            self.Legends = None  # Reset `Legends` to `None`
+            return Temp  # Return the stored list
+        else:
+            # Print an error message if `Legends` is not a list
+            print("Error: No list of legend found.")
+            return self.Legends  # Return the current value of `Legends`
 
     @property
     def getScale(self):
@@ -462,13 +565,35 @@ Type de Plots
 """
 # 2D
 
-def PLTBar(Labels, Times, paramPLT, StdErrors=None, BOrientation=True):
+def PLTPlot(XValues, YValues, paramPLT):
+    """
+    Cette fonction trace un graphique en utilisant les données fournies et les paramètres personnalisés.
+
+    Args:
+        XValues (list ou array-like): Les valeurs de l'axe X.
+        YValues (list ou array-like): Les valeurs de l'axe Y.
+        paramPLT (objet): Un objet contenant les attributs suivants pour personnaliser l'apparence du graphique
+
+    Returns:
+        None: Cette fonction ne retourne rien. Elle affiche simplement le graphique.
+    """
+    plt.plot(XValues, YValues,
+            color=paramPLT.getColour,      # Couleur de la courbe
+            alpha=paramPLT.getAlpha,       # Transparence de la courbe
+            linestyle=paramPLT.getLineType,  # Style de la ligne (continu, pointillé, etc.)
+            linewidth=paramPLT.getLineSize,  # Épaisseur de la ligne
+            marker=paramPLT.getMarker,          # Style des marqueurs pour les points
+            markersize=paramPLT.getLineSize, # Taille des marqueurs
+            label=paramPLT.getLegends)       # Texte pour la légende
+
+
+def PLTBar(Labels, Vals, paramPLT, StdErrors=None, BOrientation=True):
     """
     Creates a bar plot with optional error bars, customizable colors, labels, and orientation.
 
-    Parameters:
+    Args:
     - Labels: List of labels for the bars.
-    - Times: List of values corresponding to the height (or width) of each bar.
+    - Vals: List of values corresponding to the height (or width) of each bar.
     - paramPLT: An object containing plot parameters 
     - StdErrors (optional): List or array of standard errors for each bar.
         - Scalar: Symmetric +/- error for all bars.
@@ -480,6 +605,9 @@ def PLTBar(Labels, Times, paramPLT, StdErrors=None, BOrientation=True):
         - True: Vertical bar plot (default).
         - False: Horizontal bar plot.
 
+    Returns:
+        None: Cette fonction ne retourne rien. Elle affiche simplement le graphique.
+
     Improovements:
     - Allows stacking bars: Use `bottom=` parameter with previous bar values.
     - Allows grouping bars: Create offsets using arrays like:
@@ -488,16 +616,74 @@ def PLTBar(Labels, Times, paramPLT, StdErrors=None, BOrientation=True):
         br3 = [x + barWidth for x in br2]
     """
     if BOrientation:
-        plt.bar(Labels, Times, yerr=StdErrors,
-                facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
-                width=paramPLT.getLineSize, label=paramPLT.getLegends,
-                )
+        plt.bar(Labels, Vals, yerr=StdErrors,
+                facecolor=paramPLT.getColourFullList, edgecolor=paramPLT.getColourFullList,
+                width=paramPLT.getLineSize, label=paramPLT.getLegends)
     else:
-        plt.barh(Labels, Times, xerr=StdErrors,
-                 facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
+        plt.barh(Labels, Vals, xerr=StdErrors,
+                 facecolor=paramPLT.getColourFullList, edgecolor=paramPLT.getColourFullList,
                  alpha=paramPLT.getAlpha,
-                 height=paramPLT.getLineSize, label=paramPLT.getLegends
-                 )
+                 height=paramPLT.getLineSize, label=paramPLT.getLegends)
+
+def PLTPie(Val, paramPLT, Radius=1, explode=None, TypeAutopct=0, LabelDist=1.25, PctDist=0.6, BShadow=False, StartAngle=0, 
+           AbsUnit="", PrecisionPct=1, PrecisionAbs=0, AnnotateTextSize=10, EnableAnnotations=False):
+    """
+    Creates a pie plot with customizable options, including optional annotations.
+
+    Parameters:
+    - Val (list): Values for the pie chart.
+    - paramPLT (object): Object containing plot parameters (colors, labels, hatches).
+    - Radius (float): Radius of the pie chart.
+    - explode (list): Fraction to offset a slice (e.g., [0, 0.1, 0, 0]).
+    - TypeAutopct (int): Type of percentage display (0: %, 1: absolute, 2: both).
+    - LabelDist (float): Distance of labels from the center.
+    - PctDist (float): Distance of percentage from the center.
+    - BShadow (bool): Whether to add shadow.
+    - StartAngle (float): Start angle for the pie chart.
+    - AbsUnit (str): Unit for absolute values (e.g., 'g', 'kg').
+    - PrecisionPct (int): Decimal precision for percentages.
+    - PrecisionAbs (int): Decimal precision for absolute values.
+    - AnnotateTextSize (int): Font size for annotation text.
+    - EnableAnnotations (bool): Whether to add annotations to the pie chart.
+
+    Returns:
+    - Displays a pie chart.
+    """
+    def GeneAutopct(pct, allvals):
+        absolute = np.round(pct / 100. * np.sum(allvals), PrecisionAbs)
+        if TypeAutopct <= 0:
+            return f"{pct:.{PrecisionPct}f}%"
+        elif TypeAutopct == 1:
+            return f"{absolute:.{PrecisionAbs}f} {AbsUnit}"
+        elif TypeAutopct >= 2:
+            return f"{pct:.{PrecisionPct}f}%\n({absolute:.{PrecisionAbs}f} {AbsUnit})"
+
+    # Generate the pie chart
+    wedges, texts, autotexts = plt.pie(Val, labels=paramPLT.getLegendsFullList(), labeldistance=LabelDist,
+        autopct=lambda pct: GeneAutopct(pct, Val), pctdistance=PctDist,
+        colors=paramPLT.getColourFullList(), hatch=paramPLT.getHatchFullList(),
+        radius=Radius, startangle=StartAngle,
+        explode=explode, shadow=BShadow,
+        textprops=dict(size=AnnotateTextSize, color="k"))  # Customize text properties
+
+    # Optional Annotation logic
+    if EnableAnnotations:
+        bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="w", lw=0.72)
+        kw = dict(arrowprops=dict(arrowstyle="-"), bbox=bbox_props, zorder=0, va="center")
+
+        for i, p in enumerate(wedges):
+            ang = (p.theta2 - p.theta1) / 2. + p.theta1
+            y = np.sin(np.deg2rad(ang))
+            x = np.cos(np.deg2rad(ang))
+            horizontalalignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+            connectionstyle = f"angle,angleA=0,angleB={ang}"
+            kw["arrowprops"].update({"connectionstyle": connectionstyle})
+            plt.annotate(paramPLT.getLegendsFullList()[i],  # Use legend text
+                         xy=(x, y), 
+                         xytext=(1.35 * Radius * np.sign(x), 1.4 * Radius * y),
+                         fontsize=AnnotateTextSize,
+                         horizontalalignment=horizontalalignment, 
+                         **kw)
 
 
 
