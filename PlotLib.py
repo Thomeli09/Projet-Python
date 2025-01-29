@@ -33,7 +33,7 @@ class ParamPLT:
         self.MarkerType = marker
         self.MarkerSize = 50
         self.Alpha = 1  # Blending value, from 0 (transparent) to 1 (opaque)
-        self.HatchType = 0
+        self.HatchType = ''
 
         # Text
         self.FontSize = fontsize
@@ -44,6 +44,7 @@ class ParamPLT:
         self.ZLabel = None
         self.Title = None
         self.Legends = []
+        self.BLegends = True
 
         # Scale
         self.Scale = 1
@@ -95,13 +96,14 @@ class ParamPLT:
         # To be continued
         self.getColour = plt.get_cmap(ColourTheme)(np.linspace(FloatMin, FloatMax, len(LVals)))
 
-    def getColourFullList(self):
+    def getColourFullList(self, BEmptying=True):
         if isinstance(self.Colour, list):
             Temp = self.Colour
-            self.Colour = None
+            if BEmptying:
+                self.Colour = None
             return Temp
         else:
-            print("Error: No list of colours found.")
+            print("Warning: No list of colours found.")
             return self.Colour
 
     @property
@@ -228,24 +230,24 @@ class ParamPLT:
         else:  # Otherwise, use the simple pattern
             self.HatchType = Hatch
 
-    @property
-    def getHatchFullList(self):
+    def getHatchFullList(self, BEmptying=True):
         """
         Property that retrieves the full list of hatch patterns if `HatchType` is a list.
-        If `HatchType` is not a list, it displays an error message and returns the current value of `HatchType`.
+        If `HatchType` is not a list, it displays a warning message and returns the current value of `HatchType`.
 
         Returns:
             list or other: If `HatchType` is a list, it returns the list of hatch patterns and resets `HatchType` to `None`.
-                           If `HatchType` is not a list, it prints an error message and returns the current value of `HatchType`.
+                           If `HatchType` is not a list, it prints a warning message and returns the current value of `HatchType`.
         """
         # Check if `HatchType` is a list
         if isinstance(self.HatchType, list):
             Temp = self.HatchType  # Store the current list of hatch patterns in a temporary variable
-            self.HatchType = None  # Reset `HatchType` to `None`
+            if BEmptying:
+                self.HatchType = None  # Reset `HatchType` to `None`
             return Temp  # Return the stored list
         else:
-            # Print an error message if `HatchType` is not a list
-            print("Error: No list of hatch found.")
+            # Print a warning message if `HatchType` is not a list
+            print("Warning: No list of hatch found.")
             return self.HatchType  # Return the current value of `HatchType`
 
 
@@ -322,17 +324,25 @@ class ParamPLT:
     def getLegends(self, Legends):
         self.Legends = Legends
 
-    @property
-    def getLegendsFullList(self):
+    def getLegendsFullList(self, BEmptying=True):
         # Check if `Legends` is a list
         if isinstance(self.Legends, list):
             Temp = self.Legends  # Store the current list of legend in a temporary variable
-            self.Legends = None  # Reset `Legends` to `None`
+            if BEmptying:
+                self.Legends = None  # Reset `Legends` to `None`
             return Temp  # Return the stored list
         else:
-            # Print an error message if `Legends` is not a list
-            print("Error: No list of legend found.")
+            # Print a warning message if `Legends` is not a list
+            print("Warning: No list of legend found.")
             return self.Legends  # Return the current value of `Legends`
+  
+    @property
+    def getBLegends(self):
+        return self.BLegends
+
+    @getBLegends.setter
+    def getBLegends(self, Bool):
+        self.BLegends = Bool
 
     @property
     def getScale(self):
@@ -518,7 +528,8 @@ def PLTSizeAxis(paramPLT):
     plt.yticks(fontsize=paramPLT.getTicksSize)
 
 def PLTLegend(paramPLT):
-    plt.legend(fontsize=paramPLT.getFontSize)
+    if paramPLT.getBLegends:
+        plt.legend(fontsize=paramPLT.getFontSize)
 
 def PLTGrid(paramPLT):
     if paramPLT.getGridAxis:
@@ -617,60 +628,74 @@ def PLTBar(Labels, Vals, paramPLT, StdErrors=None, BOrientation=True):
     """
     if BOrientation:
         plt.bar(Labels, Vals, yerr=StdErrors,
-                facecolor=paramPLT.getColourFullList, edgecolor=paramPLT.getColourFullList,
+                facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(),
                 width=paramPLT.getLineSize, label=paramPLT.getLegends)
     else:
         plt.barh(Labels, Vals, xerr=StdErrors,
-                 facecolor=paramPLT.getColourFullList, edgecolor=paramPLT.getColourFullList,
+                 facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(),
                  alpha=paramPLT.getAlpha,
                  height=paramPLT.getLineSize, label=paramPLT.getLegends)
 
-def PLTPie(Val, paramPLT, Radius=1, explode=None, TypeAutopct=0, LabelDist=1.25, PctDist=0.6, BShadow=False, StartAngle=0, 
-           AbsUnit="", PrecisionPct=1, PrecisionAbs=0, AnnotateTextSize=10, EnableAnnotations=False):
+def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAbs=0, 
+           Radius=1, StartAngle=0, LabelDist=1.25, PctDist=0.6, BShadow=False, explode=None, 
+           EnableAnnotations=False):
     """
     Creates a pie plot with customizable options, including optional annotations.
 
     Parameters:
     - Val (list): Values for the pie chart.
-    - paramPLT (object): Object containing plot parameters (colors, labels, hatches).
-    - Radius (float): Radius of the pie chart.
-    - explode (list): Fraction to offset a slice (e.g., [0, 0.1, 0, 0]).
-    - TypeAutopct (int): Type of percentage display (0: %, 1: absolute, 2: both).
-    - LabelDist (float): Distance of labels from the center.
-    - PctDist (float): Distance of percentage from the center.
-    - BShadow (bool): Whether to add shadow.
-    - StartAngle (float): Start angle for the pie chart.
+    - paramPLT (object): Object containing plot parameters (e.g., colors, labels, hatches).
+    - TypeAutopct (int): Type of percentage display:
+        0: Display only percentages (%).
+        1: Display absolute values.
+        2: Display both percentages and absolute values.
+    - PrecisionPct (int): Decimal precision for percentages (e.g., 1 for 1 decimal place).
     - AbsUnit (str): Unit for absolute values (e.g., 'g', 'kg').
-    - PrecisionPct (int): Decimal precision for percentages.
-    - PrecisionAbs (int): Decimal precision for absolute values.
-    - AnnotateTextSize (int): Font size for annotation text.
-    - EnableAnnotations (bool): Whether to add annotations to the pie chart.
+    - PrecisionAbs (int): Decimal precision for absolute values (e.g., 2 for 2 decimal places).
+    - Radius (float): Radius of the pie chart.
+    - StartAngle (float): Starting angle for the pie chart, in degrees.
+    - LabelDist (float): Distance of labels from the center of the pie chart, as a fraction of the radius.
+    - PctDist (float): Distance of percentage values from the center of the pie chart, as a fraction of the radius.
+    - BShadow (bool): Whether to add a shadow effect to the pie chart.
+    - explode (list): Fraction by which to offset a slice from the pie (e.g., [0, 0.1, 0, 0]).
+    - EnableAnnotations (bool): Whether to add annotations (e.g., arrows and labels) to the pie chart.
 
     Returns:
     - Displays a pie chart.
+
+    Improovements:
+    - Ajouter des vérifications entre les paramètres pour éviter les conflits.
+    - Extraire un nombre limité de paramètres pour éviter des clash si plus de valeurs.
     """
+
+    AnnotateTextSize=paramPLT.getFontSize
+    paramPLT.GridAxis = None
+    paramPLT.getBLegends = False
+
     def GeneAutopct(pct, allvals):
         absolute = np.round(pct / 100. * np.sum(allvals), PrecisionAbs)
         if TypeAutopct <= 0:
             return f"{pct:.{PrecisionPct}f}%"
         elif TypeAutopct == 1:
             return f"{absolute:.{PrecisionAbs}f} {AbsUnit}"
-        elif TypeAutopct >= 2:
+        elif TypeAutopct == 2:
+            return f""
+        elif TypeAutopct >= 3:
             return f"{pct:.{PrecisionPct}f}%\n({absolute:.{PrecisionAbs}f} {AbsUnit})"
 
     # Generate the pie chart
+    LLegends = paramPLT.getLegendsFullList(BEmptying=EnableAnnotations)
     wedges, texts, autotexts = plt.pie(Val, labels=paramPLT.getLegendsFullList(), labeldistance=LabelDist,
-        autopct=lambda pct: GeneAutopct(pct, Val), pctdistance=PctDist,
-        colors=paramPLT.getColourFullList(), hatch=paramPLT.getHatchFullList(),
-        radius=Radius, startangle=StartAngle,
-        explode=explode, shadow=BShadow,
-        textprops=dict(size=AnnotateTextSize, color="k"))  # Customize text properties
+                                       autopct=lambda pct: GeneAutopct(pct, Val), pctdistance=PctDist,
+                                       colors=paramPLT.getColourFullList(), hatch=paramPLT.getHatchFullList(),
+                                       radius=Radius, startangle=StartAngle,
+                                       explode=explode, shadow=BShadow,
+                                       textprops=dict(size=AnnotateTextSize, color="k"))  # Customize text properties
 
     # Optional Annotation logic
     if EnableAnnotations:
         bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="w", lw=0.72)
         kw = dict(arrowprops=dict(arrowstyle="-"), bbox=bbox_props, zorder=0, va="center")
-
         for i, p in enumerate(wedges):
             ang = (p.theta2 - p.theta1) / 2. + p.theta1
             y = np.sin(np.deg2rad(ang))
@@ -678,7 +703,7 @@ def PLTPie(Val, paramPLT, Radius=1, explode=None, TypeAutopct=0, LabelDist=1.25,
             horizontalalignment = {-1: "right", 1: "left"}[int(np.sign(x))]
             connectionstyle = f"angle,angleA=0,angleB={ang}"
             kw["arrowprops"].update({"connectionstyle": connectionstyle})
-            plt.annotate(paramPLT.getLegendsFullList()[i],  # Use legend text
+            plt.annotate(LLegends[i],  # Use legend text
                          xy=(x, y), 
                          xytext=(1.35 * Radius * np.sign(x), 1.4 * Radius * y),
                          fontsize=AnnotateTextSize,
