@@ -29,14 +29,17 @@
     <Compile Include="FormworkLib.py" />
     <Compile Include="GanttChartLib.py" />
     <Compile Include="GeometryLib.py" />
+    <Compile Include="GUITKLib.py" />
     <Compile Include="LagamineLib.py" />
     <Compile Include="LoadingLib.py" />
+    <Compile Include="MessageLib.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />
     <Compile Include="RheologyLib.py" />
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />
     <Compile Include="TimeLib.py" />
+    <Compile Include="VerifLib.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />
