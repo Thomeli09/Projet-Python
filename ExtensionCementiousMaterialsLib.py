@@ -24,10 +24,111 @@ class CemMaterials(Composition):
                          Experiments=Experiments)
         
         # Ingredients
-        self.Cement = []
-        self.Water = []
-        self.Aggregates = []
-        self.Adjuvants = []
+        self.Cement = False  # [Cement] Cement object (Limited to one object)
+        self.Water = False  # [Water] Water object (Limited to one object)
+        self.Aggregates = []  # [Aggregat] Aggregates objects (Unlimited)
+        self.Adjuvants = []  # [Adjuvant] Adjuvants objects (Unlimited)
+
+    @property
+    def getCement(self):
+        return self.Cement
+
+    @getCement.setter
+    def getCement(self, ItemCement):
+        if isinstance(ItemCement, Cement):
+            self.Cement = ItemCement
+        else:
+            print("Error : Invalid input for Cement")
+
+    @property
+    def getWater(self):
+        return self.Water
+
+    @getWater.setter
+    def getWater(self, ItemWater):
+        if isinstance(ItemWater, Water):
+            self.Water = ItemWater
+        else:
+            print("Error : Invalid input for Water")
+
+
+    @property
+    def getAggregates(self):
+        return self.Aggregates
+
+    @getAggregates.setter
+    def getAggregates(self, ItemAggregat):
+        if isinstance(ItemAggregat, list):
+            self.Aggregates = ItemAggregat
+        elif isinstance(ItemAggregat, Aggregat):
+            self.Aggregates.append(ItemAggregat)
+        else:
+            print("Error : Invalid input for Aggregates")
+
+    @property
+    def getAdjuvants(self):
+        return self.Adjuvants
+
+    @getAdjuvants.setter
+    def getAdjuvants(self, Adjuvants):
+        if isinstance(Adjuvants, list):
+            self.Adjuvants = Adjuvants
+        elif isinstance(Adjuvants, Adjuvant):
+            self.Adjuvants.append(Adjuvants)
+        else:
+            print("Error : Invalid input for Adjuvants")
+
+
+    def PLTGranulos(self, paramPLT, BPourcent=True):
+        if not paramPLT:
+            paramPLT = DefaultParamPLT()
+
+        StartPlots()
+        # Improvement : Add the the differents markers for each granulometry
+
+        # Plot of granulometries
+        for Aggregat in self.getAggregates:
+            Aggregat.PLTGranulometry(paramPLT, BStart=False, BEnd=False, BPourcent=BPourcent)
+
+        PLTShow(paramPLT)
+
+    def PLTIngredients(self, paramPLT):
+        if not paramPLT:
+            paramPLT = DefaultParamPLT()
+
+        StartPlots()
+
+        # Parameters of the plot
+        paramPLT.getTitle = "Composition of the " + self.getName
+        # Rajouter des paramètres en plus
+        # Résoudres le problème des arguments de PLTPie
+        # Résoudres le problème des couleurs
+
+        # Pie chart
+        Labels = ['Cement', 'Water']
+        Sizes = [self.getCement.getMass, self.getWater.getMass]
+        PLTPie(Labels, Sizes, paramPLT)
+
+        PLTShow(paramPLT)
+
+    def CmptComposition(self):
+        # Compute the composition of the cementious material
+
+        # Check if necessary ingredients are defined
+        if not self.getCement:
+            print("Error : Cement not defined")
+            return
+        if not self.getWater:
+            print("Error : Water not defined")
+            return
+        if not self.getAggregates:
+            print("Error : Aggregates not defined")
+            return
+
+        # Compute the composition by means of differents methods
+
+        pass
+    
 
 
 
@@ -42,9 +143,12 @@ class Ingredients:
         self.Color = Color
 
         # properties
-        self.Volume = 0
         self.BulkDensity = 0
         self.ParticleDensity = 0
+
+        # quantities
+        self.Volume = 0
+        self.Mass = 0
 
     @property
     def getName(self):
@@ -75,8 +179,12 @@ class Ingredients:
         return self.Volume
 
     @getVolume.setter
-    def getVolume(self, Volume):
+    def getVolume(self, Volume, BParticleDensity=False):
         self.Volume = Volume
+        if BParticleDensity:
+            self.Mass = self.Volume * self.getParticleDensity
+        else:
+            self.Mass = self.Volume * self.getBulkDensity
 
     @property
     def getBulkDensity(self):
@@ -96,14 +204,23 @@ class Ingredients:
 
     @property
     def getMass(self):
-        return self.getVolume * self.getBulkDensity
+        return self.Mass
 
     @getMass.setter
     def getMass(self, Mass, BParticleDensity=False):
+        self.Mass = Mass
         if BParticleDensity:
-            self.getVolume = Mass / self.ParticleDensity
+            if self.getParticleDensity != 0:
+                self.Volume = self.Mass / self.getParticleDensity
+            else:
+                print("Error : Particle Density not defined")
+                self.Volume = 0
         else:
-            self.getVolume = Mass / self.BulkDensity
+            if self.getBulkDensity != 0:
+                self.Volume = self.Mass / self.getBulkDensity
+            else:
+                print("Error : Bulk Density not defined")
+                self.Volume = 0
 
 
 """
@@ -113,8 +230,8 @@ Colors : Grey
 class Cement(Ingredients):
     def __init__(self, Name, CementClass, CementType):
         super().__init__(self, Name=Name, MatType="Cement")
-        Self.CementClass = False  # [int] Class of cement (CEM X, ...)
-        Self.CementType = False  # [str] Type of cement (Portland, Blast Furnace, ...)
+        self.CementClass = False  # [int] Class of cement (CEM X, ...)
+        self.CementType = False  # [str] Type of cement (Portland, Blast Furnace, ...)
 
         self.getCementClass = CementClass
         self.getCementType = CementType
@@ -221,16 +338,34 @@ class Aggregat(Ingredients):
         else:
             print("Error : Invalid input for Granulometry Ratio")
 
-    def PLTGranulometry(self, paramPLT=False, BStart=True):
+    def PLTGranulometry(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
         if not paramPLT:
             paramPLT = DefaultParamPLT()
 
         if BStart:
             StartPlots()
 
-        PLTPlot(self.getGranuloDiam, self.getGranuloRatio, paramPLT)
+        # Parameters of the plot
+        paramPLT.getTitle = "Particle size distribution of the " + self.getName
+        paramPLT.getXLabel = "Particle size [mm]"
+        paramPLT.getYLabel = "Ratio of passers-by [-]"
 
-        PLTShow(paramPLT)
+        GranuloRatio = self.getGranuloRatio
+        if BPourcent:
+            paramPLT.getYLabel = "Percentage of passers-by [%]"
+            GranuloRatio = [x*100 for x in GranuloRatio]
+
+        TempColor = paramPLT.getColor
+        paramPLT.getColor = self.getColor
+
+        paramPLT.getXScaleType = 1
+
+        PLTPlot(self.getGranuloDiam, GranuloRatio, paramPLT)
+
+        paramPLT.getColor = TempColor
+
+        if BEnd:
+            PLTShow(paramPLT)
 
 """
 Adjuvant

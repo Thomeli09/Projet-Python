@@ -48,9 +48,9 @@ class ParamPLT:
 
         # Scale
         self.Scale = 1
-        self.XScaleType = None
-        self.YScaleType = None
-        self.ZScaleType = None
+        self.XScaleType = 'linear'
+        self.YScaleType = 'linear'
+        self.ZScaleType = 'linear'
         self.Scale3D = 1
 
         # Plot Format
@@ -352,15 +352,21 @@ class ParamPLT:
     def getScale(self, scale):
         self.Scale = scale
 
+    def ScaleVal2Name(self, Val):
+        ScaleTypeDict = {0: 'linear', 1: 'log', 2: 'logit',
+                         3: 'symlog', 4: 'function',
+                         5: 'functionlog', 6: 'asinh',
+                         7: 'mercator'}
+        ScaleType = ScaleTypeDict.get(Val, 'linear')
+        return ScaleType
+
     @property
     def getXScaleType(self):
         return self.XScaleType
 
     @getXScaleType.setter
     def getXScaleType(self, Val):
-        ScaleTypeDict = {0: None, 1: 'log'}
-        ScaleType = ScaleTypeDict.get(Val, None)
-        self.XScaleType = ScaleType
+        self.XScaleType = self.ScaleVal2Name(Val)
 
     @property
     def getYScaleType(self):
@@ -368,9 +374,7 @@ class ParamPLT:
 
     @getYScaleType.setter
     def getYScaleType(self, Val):
-        ScaleTypeDict = {0: None, 1: 'log'}
-        ScaleType = ScaleTypeDict.get(Val, None)
-        self.YScaleType = ScaleType
+        self.YScaleType = self.ScaleVal2Name(Val)
 
     @property
     def getZScaleType(self):
@@ -378,9 +382,7 @@ class ParamPLT:
 
     @getZScaleType.setter
     def getZScaleType(self, Val):
-        ScaleTypeDict = {0: None, 1: 'log'}
-        ScaleType = ScaleTypeDict.get(Val, None)
-        self.ZScaleType = ScaleType
+        self.ZScaleType = self.ScaleVal2Name(Val)
 
     @property
     def getScale3D(self):
