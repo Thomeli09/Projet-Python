@@ -569,6 +569,9 @@ def PLTShow(paramPLT):
 
     plt.show(block=False)  # Show plot without blocking
 
+def DefaultParamPLT():
+    return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
+
 # Version Cas 3D avec PLT3DShow
 
 """
