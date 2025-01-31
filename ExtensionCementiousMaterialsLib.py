@@ -24,10 +24,27 @@ class CemMaterials(Composition):
                          Experiments=Experiments)
         
         # Ingredients
+        # Absolute volume of=> p:Gravel,s:Sand ,c:Cement, e:Water, v:Void
         self.Cement = False  # [Cement] Cement object (Limited to one object)
         self.Water = False  # [Water] Water object (Limited to one object)
         self.Aggregates = []  # [Aggregat] Aggregates objects (Unlimited)
         self.Adjuvants = []  # [Adjuvant] Adjuvants objects (Unlimited)
+
+        # Properties of the composition
+        self.VRock = 0  # [float] Volume of rock (p) [m^3/m^3 of concrete]
+        self.VSand = 0 # [float] Volume of sand (s) [m^3/m^3 of concrete]
+
+        self.VVoids = 0  # [float] Volume of voids in the concrete (v) [m^3/m^3 of concrete]
+
+        self.VConcrete = 0  # [float] Volume of concrete (p+s+c+e+v) [m^3/m^3 of concrete]
+        self.VMortar = 0  # [float] Volume of mortar (s+c+e+v) [m^3/m^3 of concrete]
+        self.VCementPaste = 0  # [float] Volume of cement paste (c+e+v) [m^3/m^3 of concrete]
+        self.VAggregats = 0  # [float] Volume of aggregates (p+s) [m^3/m^3 of concrete]
+
+        self.Obectif = 0  # [float] Objective of composition 
+        
+        # Parameters
+        self.DmaxSand = 2  # [float] Maximum diameter of sand [mm]
 
     @property
     def getCement(self):
@@ -127,7 +144,7 @@ class CemMaterials(Composition):
 
         # Compute the composition by means of differents methods
 
-        pass
+
     
 
 
@@ -141,14 +158,15 @@ class Ingredients:
         self.Name = Name
         self.MatType = MatType
         self.Color = Color
+        self.Hatch = None
 
         # properties
-        self.BulkDensity = 0
-        self.ParticleDensity = 0
+        self.BulkDensity = 0  # [float] Bulk density of the ingredient [kg/m^3]
+        self.ParticleDensity = 0  # [float] Particle density of the ingredient [kg/m^3]
 
         # quantities
-        self.Volume = 0
-        self.Mass = 0
+        self.Volume = 0  # [float] Volume of the ingredient [m^3/m^3 of concrete]
+        self.Mass = 0  # [float] Mass of the ingredient [kg/m^3 of concrete]
 
     @property
     def getName(self):
@@ -173,6 +191,14 @@ class Ingredients:
     @getColor.setter
     def getColor(self, Color):
         self.Color = Color
+
+    @property
+    def getHatch(self):
+        return self.Hatch
+
+    @getHatch.setter
+    def getHatch(self, Hatch):
+        self.Hatch = Hatch
 
     @property
     def getVolume(self):
@@ -319,11 +345,12 @@ class Aggregat(Ingredients):
     @getGranuloDiam.setter
     def getGranuloDiam(self, GranuloDiam):
         if isinstance(GranuloDiam, float):
-            self.GranuloDiam = GranuloDiam
+            self.GranuloDiam.append(GranuloDiam)
         elif isinstance(GranuloDiam, list):
             self.GranuloDiam = GranuloDiam
         else:
             print("Error : Invalid input for Granulometry Diameter")
+        self.GranuloDiam = sorted(self.GranuloDiam)
 
     @property
     def getGranuloRatio(self):
@@ -332,11 +359,24 @@ class Aggregat(Ingredients):
     @getGranuloRatio.setter
     def getGranuloRatio(self, GranuloRatio):
         if isinstance(GranuloRatio, float):
-            self.GranuloRatio = GranuloRatio
+            self.GranuloRatio.append(GranuloRatio)
         elif isinstance(GranuloRatio, list):
             self.GranuloRatio = GranuloRatio
         else:
             print("Error : Invalid input for Granulometry Ratio")
+        self.GranuloRatio = sorted(self.GranuloRatio)
+
+    @property
+    def getDmax(self):
+        # [float] Maximum diameter of the granulometry [mm]
+        if self.getGranuloDiam and self.getGranuloRatio:
+
+            return max(self.getGranuloDiam)
+        else:
+            print("Error: Granulometry not defined")
+            return 0
+
+
 
     def PLTGranulometry(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
         if not paramPLT:

@@ -39,7 +39,7 @@
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />
     <Compile Include="TimeLib.py" />
-    <Compile Include="VerifLib.py" />
+    <Compile Include="DataManagementLib.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />
