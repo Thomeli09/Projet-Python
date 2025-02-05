@@ -89,7 +89,11 @@ class ParamPLT:
     @getColour.setter
     def getColour(self, colour):
         if isinstance(colour, list):
-            self.Colour += colour
+            if isinstance(self.Colour, list):
+                self.Colour = self.Colour + colour
+            else:
+                self.Colour = None
+                self.Colour = colour
         else:
             self.Colour = colour
 
@@ -577,7 +581,9 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1):
     if Index == 1:
         StartPlots()
         plt.subplot(Rows, Cols, Index)
+        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
     elif Index == Rows*Cols+1:
+        plt.tight_layout()
         PLTShow(paramPLT)
     elif 1 < Index <= Rows*Cols:
         PLTShow(paramPLT, BMultiplot=True)
