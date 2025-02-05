@@ -7,6 +7,7 @@ Created on Wed Oct 30 14:15:29 2024
 
 # General Plotting library
 
+from operator import index
 from queue import Empty
 import matplotlib.pyplot as plt
 import numpy as np
@@ -553,7 +554,7 @@ def PLTScaleType(paramPLT):
     if paramPLT.getYScaleType:
         plt.yscale(paramPLT.getYScaleType)
 
-def PLTShow(paramPLT):
+def PLTShow(paramPLT, BMultiplot=False):
     PLTTitleAxis(paramPLT)
 
     PLTSizeAxis(paramPLT)
@@ -569,7 +570,22 @@ def PLTShow(paramPLT):
 
     PLTScaleType(paramPLT)
 
-    plt.show(block=False)  # Show plot without blocking
+    if not BMultiplot:
+        plt.show(block=False)  # Show plot without blocking
+
+def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1):
+    if Index == 1:
+        StartPlots()
+        plt.subplot(Rows, Cols, Index)
+    elif Index == Rows*Cols:
+        PLTShow(paramPLT)
+    elif 1 < Index < Rows*Cols:
+        PLTShow(paramPLT, BMultiplot=True)
+        plt.subplot(Rows, Cols, Index)
+    else:
+        print("Warning: Invalid index for subplot.")
+    return Index + 1
+
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
