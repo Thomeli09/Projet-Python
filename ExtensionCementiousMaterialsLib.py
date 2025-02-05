@@ -14,6 +14,7 @@ from ExperimentLib import Composition
 
 # Custom Lib
 from PlotLib import ParamPLT, StartPlots, CloseALLPlots, PLTShow, DefaultParamPLT, PLTPie, PLTPlot
+from DataManagementLib import ListSort
 
 """
 CemMaterials : Cementious materials objects
@@ -37,11 +38,15 @@ class CemMaterials(Composition):
         self.VVoids = 0  # [float] Volume of voids in the concrete (v) [m^3/m^3 of concrete]
 
         self.VConcrete = 0  # [float] Volume of concrete (p+s+c+e+v) [m^3/m^3 of concrete]
+        self.VSOlids = 0  # [float] Volume of solids (p+s+c) [m^3/m^3 of concrete]
+        self.VAggregats = 0  # [float] Volume of aggregates (p+s) [m^3/m^3 of concrete]
         self.VMortar = 0  # [float] Volume of mortar (s+c+e+v) [m^3/m^3 of concrete]
         self.VCementPaste = 0  # [float] Volume of cement paste (c+e+v) [m^3/m^3 of concrete]
-        self.VAggregats = 0  # [float] Volume of aggregates (p+s) [m^3/m^3 of concrete]
 
+
+        self.DMax = 0  # [float] Maximum diameter of the composition [mm]
         self.Obectif = 0  # [float] Objective of composition 
+
         
         # Parameters
         self.DmaxSand = 2  # [float] Maximum diameter of sand [mm]
@@ -145,6 +150,104 @@ class CemMaterials(Composition):
         # Compute the composition by means of differents methods
 
 
+    # Water to cement ratio
+    def FeretFormula(self, BSimpli=False):
+        """
+        Compute the Feret formula for the composition
+        
+        Values of the formula:
+        - K : Granular coefficient
+        - Rc : Compression strength of the normalised mortar [MPa]
+        - K0 : ???
+        - Lambda : Cement matrix quality factor
+        - FcCube : Compression strength of the concrete [MPa]
+
+        c, e, v : Cement, Water, Void are in volume
+        """
+        K = 4.9 # [float] Experimental value
+        K0 = K * Rc
+        if BSimpli:  # Simplified formula
+            Lambda = 1/(1+e/c) 
+        else:  # Normal formula
+            Lambda = c/(c+e+v)
+        FcCube = K0 * Lambda**2
+
+        return FcCube
+
+    def BolomeyFormula(self, K, h1):
+        """
+        Compute the Bolomey formula for the composition
+
+        Values of the formula:
+        - K : Coefficient [26-36]
+        - h1 : Coefficient [0.45-0.87]
+
+        C, E : Cement, Water are by mass
+        """
+        if K<26 or K>36:
+            print("Error : Coefficient K not in the range [26-36]")
+            return 0
+        if h1<0.45 or h1>0.87:
+            print("Error : Coefficient h1 not in the range [0.45-0.87]")
+            return 0
+
+        FcCube = K*(C/E-h1)
+        return FcCube
+
+    # Granular squeletton
+    def FullerCurve(self, dList):
+        """
+        Compute the Fuller curve for the composition
+
+        Args:
+        dList: List of diameters of the granulometry [mm]
+
+        return:
+        x: List of the percentage of passers-by [-]
+        """
+        DMax = self.DMax # [float] Maximum diameter of the composition [mm]
+        x = [100*(d/DMax)**0.5 for d in dList]
+
+        return x
+
+    def BolomeyCurve(self, dList, A):
+        """
+        Compute the Bolomey curve for the composition
+
+        Args:
+        dList: List of diameters of the granulometry [mm]
+        A: Coefficient depending on the type of aggregates [8-16]
+
+        return:
+        x: List of the percentage of passers-by [-]
+        """
+        DMax = self.DMax
+
+        if A<8 or A>16:
+            print("Error : Coefficient A not in the range [8-16]")
+            return 0
+
+        x = [A*(100-A)*(d/DMax)**0.5 for d in dList]
+        return x
+
+    def FauryCurve(self, dList, A):
+        """
+        Compute the Faury curve for the composition
+        Args:
+        dList: List of diameters of the granulometry [mm]
+        A: Coefficient depending on the type of aggregates [8-16]
+        return:
+        x: List of the percentage of passers-by [-]
+        """
+        DMax = self.DMax
+        if A<8 or A>16:
+            print("Error : Coefficient A not in the range [8-16]")
+            return 0
+        x = [A+17*(DMax**1/5)+(B/(R/D-0.75)) for d in dList]
+        return x
+    # Eeff volume of water
+
+        
     
 
 
@@ -326,6 +429,8 @@ class Water(Ingredients):
     def __init__(self, Name):
         super().__init__(Name=Name, MatType="Water")
 
+        self.VolumeEeff = 0
+
 """
 Aggregat
 Colors : Brown
@@ -350,7 +455,7 @@ class Aggregat(Ingredients):
             self.GranuloDiam = GranuloDiam
         else:
             print("Error : Invalid input for Granulometry Diameter")
-        self.GranuloDiam = sorted(self.GranuloDiam)
+        self.GranuloDiam = ListSort(self.GranuloDiam)
 
     @property
     def getGranuloRatio(self):
@@ -364,14 +469,14 @@ class Aggregat(Ingredients):
             self.GranuloRatio = GranuloRatio
         else:
             print("Error : Invalid input for Granulometry Ratio")
-        self.GranuloRatio = sorted(self.GranuloRatio)
+        self.GranuloRatio = ListSort(self.GranuloRatio)
 
     @property
     def getDmax(self):
         # [float] Maximum diameter of the granulometry [mm]
         if self.getGranuloDiam and self.getGranuloRatio:
-
-            return max(self.getGranuloDiam)
+            MaxRatio, MaxDiam = ListFindFirstMaxPair(self.getGranuloRatio, self.getGranuloDiam)
+            return MaxDiam
         else:
             print("Error: Granulometry not defined")
             return 0

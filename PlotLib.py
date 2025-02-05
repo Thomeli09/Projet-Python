@@ -31,7 +31,7 @@ class ParamPLT:
         self.LineType = linetype
         self.LineSize = linesize
         self.MarkerType = marker
-        self.MarkerSize = 50
+        self.MarkerSize = linesize
         self.Alpha = 1  # Blending value, from 0 (transparent) to 1 (opaque)
         self.HatchType = ''
 
@@ -599,7 +599,7 @@ def PLTPlot(XValues, YValues, paramPLT):
             linestyle=paramPLT.getLineType,  # Style de la ligne (continu, pointillé, etc.)
             linewidth=paramPLT.getLineSize,  # Épaisseur de la ligne
             marker=paramPLT.getMarker,          # Style des marqueurs pour les points
-            markersize=paramPLT.getLineSize, # Taille des marqueurs
+            markersize=paramPLT.getMarkerSize, # Taille des marqueurs
             label=paramPLT.getLegends)       # Texte pour la légende
 
 
