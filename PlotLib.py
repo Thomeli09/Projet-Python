@@ -577,9 +577,9 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1):
     if Index == 1:
         StartPlots()
         plt.subplot(Rows, Cols, Index)
-    elif Index == Rows*Cols:
+    elif Index == Rows*Cols+1:
         PLTShow(paramPLT)
-    elif 1 < Index < Rows*Cols:
+    elif 1 < Index <= Rows*Cols:
         PLTShow(paramPLT, BMultiplot=True)
         plt.subplot(Rows, Cols, Index)
     else:
