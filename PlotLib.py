@@ -552,6 +552,14 @@ def PLTLimit(paramPLT):
     if paramPLT.getBoolYLimit:
         plt.ylim(paramPLT.getYLimit)
 
+def PLTCmptLimit(Variable, Ratio=0.1):
+    MaxVal = max(Variable)
+    MinVal = min(Variable)
+    Delta = MaxVal-MinVal
+    LowerLimit = MinVal-Delta*Ratio
+    UpperLimit = MaxVal+Delta*Ratio
+    return [LowerLimit, UpperLimit]
+
 def PLTScaleType(paramPLT):
     if paramPLT.getXScaleType:
         plt.xscale(paramPLT.getXScaleType)
@@ -602,8 +610,8 @@ def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
         plt.get_current_fig_manager().full_screen_toggle()
 
     if BUpdateLayout:
+        plt.pause(0.001) # Pause to allow the window to maximize and UpdateLayout to work
         PLTUpdateLayout()
-
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
