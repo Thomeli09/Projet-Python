@@ -592,6 +592,18 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1):
         print("Warning: Invalid index for subplot.")
     return Index + 1
 
+def PLTUpdateLayout():
+    plt.tight_layout()
+
+def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
+    if BTaskbar:
+        plt.get_current_fig_manager().window.state('zoomed')
+    else:
+        plt.get_current_fig_manager().full_screen_toggle()
+
+    if BUpdateLayout:
+        PLTUpdateLayout()
+
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
