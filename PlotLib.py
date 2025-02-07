@@ -553,6 +553,12 @@ def PLTLimit(paramPLT):
         plt.ylim(paramPLT.getYLimit)
 
 def PLTCmptLimit(Variable, Ratio=0.1):
+    """
+    Compute the limits of the plot based on the variable and a ratio.
+
+    Improvements:
+    - Based the computation on the current registered limits (self.XLimit, self.YLimit, self.ZLimit).
+    """
     MaxVal = max(Variable)
     MinVal = min(Variable)
     Delta = MaxVal-MinVal
@@ -610,7 +616,8 @@ def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
         plt.get_current_fig_manager().full_screen_toggle()
 
     if BUpdateLayout:
-        plt.pause(0.001) # Pause to allow the window to maximize and UpdateLayout to work
+        plt.pause(0.1) # Pause to allow the window to maximize and UpdateLayout to work
+        # in case of unreliable behavior, increase the pause duration
         PLTUpdateLayout()
 
 def DefaultParamPLT():
@@ -643,6 +650,22 @@ def PLTPlot(XValues, YValues, paramPLT):
             marker=paramPLT.getMarker,          # Style des marqueurs pour les points
             markersize=paramPLT.getMarkerSize, # Taille des marqueurs
             label=paramPLT.getLegends)       # Texte pour la légende
+
+def PLTFill(XValues, YValues, paramPLT, YValuesSec=False):
+    """
+    Cette fonction remplit l'espace constitué par les points fournis en utilisant les paramètres personnalisés.
+    Si deux ensembles de valeurs sont fournis, l'espace entre les deux courbes est rempli.
+    """
+    if YValuesSec:
+        plt.fill_between(XValues, YValues, YValuesSec,
+                         facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
+                         hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=0,
+                         label=paramPLT.getLegends)
+    else:
+        plt.fill(XValues, YValues,
+                 facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
+                 hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=0,
+                 label=paramPLT.getLegends)
 
 
 def PLTBar(Labels, Vals, paramPLT, StdErrors=None, BOrientation=True):
