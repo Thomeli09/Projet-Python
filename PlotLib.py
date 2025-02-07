@@ -651,20 +651,27 @@ def PLTPlot(XValues, YValues, paramPLT):
             markersize=paramPLT.getMarkerSize, # Taille des marqueurs
             label=paramPLT.getLegends)       # Texte pour la légende
 
-def PLTFill(XValues, YValues, paramPLT, YValuesSec=False):
+def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """
     Cette fonction remplit l'espace constitué par les points fournis en utilisant les paramètres personnalisés.
     Si deux ensembles de valeurs sont fournis, l'espace entre les deux courbes est rempli.
+
+    Inputs:
+    - XValues (list or array-like): X-axis values.
+    - YValues (list or array-like): Y-axis values for the primary curve.
+    - paramPLT (object): Object containing plot parameters.
+    - ValZOrder (int): Z-order value to determine which layer is on top.
+    - YValuesSec (list or array-like): Y-axis values for the secondary curve (optional).
     """
     if YValuesSec:
         plt.fill_between(XValues, YValues, YValuesSec,
                          facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
-                         hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=0,
+                         hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=ValZOrder,
                          label=paramPLT.getLegends)
     else:
         plt.fill(XValues, YValues,
                  facecolor=paramPLT.getColour, edgecolor=paramPLT.getColour,
-                 hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=0,
+                 hatch=paramPLT.getHatch, alpha=paramPLT.getAlpha, zorder=ValZOrder,
                  label=paramPLT.getLegends)
 
 
