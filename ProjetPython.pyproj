@@ -33,6 +33,7 @@
     <Compile Include="LagamineLib.py" />
     <Compile Include="LoadingLib.py" />
     <Compile Include="MessageLib.py" />
+    <Compile Include="ObjectManagement.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />
     <Compile Include="RheologyLib.py" />

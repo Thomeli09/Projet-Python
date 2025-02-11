@@ -268,14 +268,16 @@ class Ingredients:
     def __init__(self, Name, MatType, Color=None):
         self.Name = Name
         self.MatType = MatType
+
+        # Graphics
         self.Color = Color
         self.Hatch = None
 
-        # properties
+        # Properties
         self.BulkDensity = 0  # [float] Bulk density of the ingredient [kg/m^3]
         self.ParticleDensity = 0  # [float] Particle density of the ingredient [kg/m^3]
 
-        # quantities
+        # Quantities
         self.Volume = 0  # [float] Volume of the ingredient [m^3/m^3 of concrete]
         self.Mass = 0  # [float] Mass of the ingredient [kg/m^3 of concrete]
 
@@ -365,13 +367,13 @@ Cement
 Colors : Grey
 """
 class Cement(Ingredients):
-    def __init__(self, Name, CementClass, CementType):
+    def __init__(self, Name, CementClass, CementType, CementStrength):
         super().__init__(Name=Name, MatType="Cement")
         self.CementClass = None  # [int] Class of cement (CEM X, ...)
-        self.CementType = None  # [str] Type of cement (Portland, Blast Furnace, ...)
-
         self.getCementClass = CementClass
+        self.CementType = None  # [str] Type of cement (Portland, Blast Furnace, ...)
         self.getCementType = CementType
+        self.CementStrength = CementStrength  # [float] Strength of the cement [MPa]
 
     @property
     def getCementClass(self):
@@ -427,6 +429,18 @@ class Cement(Ingredients):
         else:
             print("Error : Invalid input for Cement Type")
 
+    @property
+    def getCementStrength(self):
+        return self.CementStrength
+
+    @getCementStrength.setter
+    def getCementStrength(self, CementStrength):
+        if isinstance(CementStrength, float):
+            self.CementStrength = CementStrength
+        else:
+            print("Error : Invalid input for Cement Strength")
+            self.CementStrength = 0
+
 
 
 """
@@ -444,13 +458,17 @@ Aggregat
 Colors : Brown
 """
 class Aggregat(Ingredients):
-    def __init__(self, Name):
+    def __init__(self, Name, StrRockType, StrAggregatType, StrDiamExtend=None):
         super().__init__(Name=Name, MatType="Aggregat")
         """
         Improovements :
         - Add caracteristics of the aggregates 
         (Rock type, Size (min/max), Type of aggregates (rolled, crushed, ...))
         """
+        # Nomenclature
+        self.RockType = StrRockType  # [str] Type of rock (Granite, Basalt, Limestone, ...)
+        self.AggregatType = StrAggregatType  # [str] Type of aggregates (Rolled, Crushed, ...)
+        self.DiamExtend = StrDiamExtend  # [str] Maximum and minimum diameter of the aggregates [mm]
 
         # Granulometry
         self.GranuloDiam = [] # [float] Diameter of granulometry [mm]
@@ -532,3 +550,9 @@ Colors : Green
 class Adjuvant(Ingredients):
     def __init__(self, Name):
         super().__init__(Name=Name, MatType="Adjuvant")
+
+
+"""
+Experiments : Experiments specific to cementious materials
+"""
+# Adsorption par immersion, ...

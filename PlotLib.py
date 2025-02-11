@@ -703,6 +703,7 @@ def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
 
 def PLTColorBar(paramPLT):
     """
+    Add a color bar to the plot based on the specified parameters.
     """
     if paramPLT.getColourBarTitle:
         plt.colorbar(label=paramPLT.getColourBarTitle)
@@ -719,7 +720,7 @@ Type de Plots
 
 def PLTPlot(XValues, YValues, paramPLT):
     """
-    Cette fonction trace un graphique en utilisant les données fournies et les paramètres personnalisés.
+    Creates a 2D plot using customizable parameters.
 
     Args:
         XValues (list ou array-like): Les valeurs de l'axe X.
@@ -740,6 +741,7 @@ def PLTPlot(XValues, YValues, paramPLT):
 
 def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """
+    Creates a filled plot between two curves (primary and secondary) using customizable parameters.
 
     Inputs:
     - XValues (list or array-like): X-axis values.
