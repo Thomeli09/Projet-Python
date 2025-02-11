@@ -14,7 +14,7 @@ from ExperimentLib import Composition
 
 # Custom Lib
 from PlotLib import ParamPLT, StartPlots, CloseALLPlots, PLTShow, DefaultParamPLT, PLTPie, PLTPlot
-from DataManagementLib import ListSort
+from DataManagementLib import ListSort, ListFindFirstMaxPair
 
 """
 CemMaterials : Cementious materials objects
@@ -165,6 +165,10 @@ class CemMaterials(Composition):
         c, e, v : Cement, Water, Void are in volume
         """
         K = 4.9 # [float] Experimental value
+        Rc = 1
+        e=1
+        c=1
+        v=1
         K0 = K * Rc
         if BSimpli:  # Simplified formula
             Lambda = 1/(1+e/c) 
@@ -190,7 +194,9 @@ class CemMaterials(Composition):
         if h1<0.45 or h1>0.87:
             print("Error : Coefficient h1 not in the range [0.45-0.87]")
             return 0
-
+        E = 1
+        h1 = 1
+        C = 1
         FcCube = K*(C/E-h1)
         return FcCube
 
@@ -239,6 +245,9 @@ class CemMaterials(Composition):
         return:
         x: List of the percentage of passers-by [-]
         """
+        B = 1
+        R = 1
+        D = 1
         DMax = self.DMax
         if A<8 or A>16:
             print("Error : Coefficient A not in the range [8-16]")
