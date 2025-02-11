@@ -73,7 +73,6 @@ class CemMaterials(Composition):
         else:
             print("Error : Invalid input for Water")
 
-
     @property
     def getAggregates(self):
         return self.Aggregates
@@ -367,7 +366,7 @@ Colors : Grey
 """
 class Cement(Ingredients):
     def __init__(self, Name, CementClass, CementType):
-        super().__init__(self, Name=Name, MatType="Cement")
+        super().__init__(Name=Name, MatType="Cement")
         self.CementClass = False  # [int] Class of cement (CEM X, ...)
         self.CementType = False  # [str] Type of cement (Portland, Blast Furnace, ...)
 
