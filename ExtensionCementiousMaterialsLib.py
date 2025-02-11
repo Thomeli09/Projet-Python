@@ -455,7 +455,6 @@ class Aggregat(Ingredients):
         # Granulometry
         self.GranuloDiam = [] # [float] Diameter of granulometry [mm]
         self.GranuloRatio = [] # [float] Ratio of granulometry [0; 1]
-        •
 
     @property
     def getGranuloDiam(self):

@@ -701,6 +701,12 @@ def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
         # in case of unreliable behavior, increase the pause duration
         PLTUpdateLayout()
 
+def PLTColorBar(paramPLT):
+    """
+    """
+    if paramPLT.getColourBarTitle:
+        plt.colorbar(label=paramPLT.getColourBarTitle)
+
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
 
@@ -734,8 +740,6 @@ def PLTPlot(XValues, YValues, paramPLT):
 
 def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """
-    Cette fonction remplit l'espace constitué par les points fournis en utilisant les paramètres personnalisés.
-    Si deux ensembles de valeurs sont fournis, l'espace entre les deux courbes est rempli.
 
     Inputs:
     - XValues (list or array-like): X-axis values.
@@ -885,12 +889,9 @@ def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True):
                norm=paramPLT.GenericScaleType, interpolation=InterpolType,
                origin=TypeOrigin)
 
-    if paramPLT.getColourBarTitle:
-        plt.colorbar(label=paramPLT.getColourBarTitle)
+    PLTColorBar(paramPLT)
 
-
-
-
+    
 
 # 2D Shapes
 def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
