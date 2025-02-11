@@ -20,7 +20,7 @@ from DataManagementLib import ListSort, ListFindFirstMaxPair
 CemMaterials : Cementious materials objects
 """
 class CemMaterials(Composition):
-    def __init__(self, Val, Name, ProductionDate, Experiments):
+    def __init__(self, Name, ProductionDate, Experiments):
         super().__init__(Name=Name, ProductionDate=ProductionDate,
                          Experiments=Experiments)
         

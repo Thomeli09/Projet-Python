@@ -53,38 +53,38 @@ def LenData(Data):
     return 0
 
 
-    def ListSort(L1, L2=False):
-        """
-        Sort a list of numbers or pairs of values based on the first list.
-        """
-        if L2:  # Sorting a list of numbers
-            L1 = sorted(L1)
-            return L1
-        else:  # Sorting pairs of values based on the first list
-            if LenData(L1)==LenData(L2):
-                L1, L2 = zip(*sorted(zip(L1, L2)))
-                return L1, L2
-            else:
-                print("Error: The two lists should have the same length.")
+def ListSort(L1, L2=False):
+    """
+    Sort a list of numbers or pairs of values based on the first list.
+    """
+    if L2:  # Sorting a list of numbers
+        L1 = sorted(L1)
+        return L1
+    else:  # Sorting pairs of values based on the first list
+        if LenData(L1)==LenData(L2):
+            L1, L2 = zip(*sorted(zip(L1, L2)))
+            return L1, L2
+        else:
+            print("Error: The two lists should have the same length.")
 
-    def ListFindFirstMaxPair(L1, L2):
-        """
-        Finds the first occurrence of the maximum value in list1 
-        and returns the paired value from list2.
+def ListFindFirstMaxPair(L1, L2):
+    """
+    Finds the first occurrence of the maximum value in list1 
+    and returns the paired value from list2.
     
-        Parameters:
-            L1 (list): The list to find the max value in.
-            L2 (list): The paired list to retrieve the corresponding value.
+    Parameters:
+        L1 (list): The list to find the max value in.
+        L2 (list): The paired list to retrieve the corresponding value.
 
-        Returns:
-            tuple: (max_value, paired_value) or None if lists are empty or mismatched.
-        """
-        if not L1 or not L2 or not isinstance(L1,list) or not isinstance(L1,list) or len(L1) != len(L2):
-            print("Error: There is not 2 lists ot the two lists should have the same length.")
-            return None
+    Returns:
+        tuple: (max_value, paired_value) or None if lists are empty or mismatched.
+    """
+    if not L1 or not L2 or not isinstance(L1,list) or not isinstance(L1,list) or len(L1) != len(L2):
+        print("Error: There is not 2 lists ot the two lists should have the same length.")
+        return None
 
-        MaxIndex = L1.index(max(L1))  # Find the index of the first max value
-        return L1[MaxIndex], L2[MaxIndex]  # Return (max_value, paired_value)
+    MaxIndex = L1.index(max(L1))  # Find the index of the first max value
+    return L1[MaxIndex], L2[MaxIndex]  # Return (max_value, paired_value)
 
 
 
