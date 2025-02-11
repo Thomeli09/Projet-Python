@@ -29,6 +29,7 @@ class ParamPLT:
         """
         # Plot
         self.Colour = colour
+        self.ColourMap = None
         self.LineType = linetype
         self.LineSize = linesize
         self.MarkerType = marker
@@ -46,12 +47,14 @@ class ParamPLT:
         self.Title = None
         self.Legends = []
         self.BLegends = True
+        self.ColourBarTitle = None
 
         # Scale
         self.Scale = 1
         self.XScaleType = 'linear'
         self.YScaleType = 'linear'
         self.ZScaleType = 'linear'
+        self.GenericScaleType = 'linear'
         self.Scale3D = 1
 
         # Plot Format
@@ -110,6 +113,68 @@ class ParamPLT:
         else:
             print("Warning: No list of colours found.")
             return self.Colour
+
+    @property
+    def getColourMap(self):
+        return self.ColourMap
+
+    @getColourMap.setter
+    def getColourMap(self, VColourMap):
+        ColourMapDict = {"Perceptually Uniform Sequential": (0, 4),  # Indices: 0-4
+                         0: "viridis", 1: "plasma", 2: "inferno", 3: "magma", 4: "cividis",
+
+                         "Sequential": (5, 22),  # Indices: 5-22
+                         5: "Greys", 6: "Purples", 7: "Blues", 8: "Greens", 9: "Oranges", 10: "Reds",
+                         11: "YlOrBr", 12: "YlOrRd", 13: "OrRd", 14: "PuRd", 15: "RdPu", 16: "BuPu",
+                         17: "GnBu", 18: "PuBu", 19: "YlGnBu", 20: "PuBuGn", 21: "BuGn", 22: "YlGn",
+
+                         "Diverging": (23, 34),  # Indices: 23-34
+                         23: "PiYG", 24: "PRGn", 25: "BrBG", 26: "PuOr", 27: "RdGy", 28: "RdBu",
+                         29: "RdYlBu", 30: "RdYlGn", 31: "Spectral", 32: "coolwarm", 33: "bwr", 34: "seismic",
+
+                         "Cyclic": (35, 37),  # Indices: 35-37
+                         35: "twilight", 36: "twilight_shifted", 37: "hsv",
+
+                         "Qualitative": (38, 49),  # Indices: 38-49
+                         38: "Pastel1", 39: "Pastel2", 40: "Paired", 41: "Accent", 42: "Dark2",
+                         43: "Set1", 44: "Set2", 45: "Set3", 46: "tab10", 47: "tab20", 48: "tab20b", 49: "tab20c",
+
+                         "Miscellaneous": (50, 66),  # Indices: 50-66
+                         50: "flag", 51: "prism", 52: "ocean", 53: "gist_earth", 54: "terrain", 55: "gist_stern",
+                         56: "gnuplot", 57: "gnuplot2", 58: "CMRmap", 59: "cubehelix", 60: "brg",
+                         61: "gist_rainbow", 62: "rainbow", 63: "jet", 64: "turbo", 65: "nipy_spectral", 66: "gist_ncar",
+
+                         "Sequential (Miscellaneous)": (67, 82),  # Indices: 67-82
+                         67: "binary", 68: "gist_yarg", 69: "gist_gray", 70: "gray", 71: "bone", 72: "pink",
+                         73: "spring", 74: "summer", 75: "autumn", 76: "winter", 77: "cool", 78: "Wistia",
+                         79: "hot", 80: "afmhot", 81: "gist_heat", 82: "copper",
+
+                         "Perceptually Uniform Sequential (Reversed)": (83, 87),  # Indices: 83-87
+                         83: "viridis_r", 84: "plasma_r", 85: "inferno_r", 86: "magma_r", 87: "cividis_r",
+
+                         "Sequential (Reversed)": (88, 105),  # Indices: 88-105
+                         88: "Greys_r", 89: "Purples_r", 90: "Blues_r", 91: "Greens_r", 92: "Oranges_r", 93: "Reds_r",
+                         94: "YlOrBr_r", 95: "YlOrRd_r", 96: "OrRd_r", 97: "PuRd_r", 98: "RdPu_r", 99: "BuPu_r",
+                         100: "GnBu_r", 101: "PuBu_r", 102: "YlGnBu_r", 103: "PuBuGn_r", 104: "BuGn_r", 105: "YlGn_r",
+                         
+                         "Diverging (Reversed)": (106, 117),  # Indices: 106-117
+                         106: "PiYG_r", 107: "PRGn_r", 108: "BrBG_r", 109: "PuOr_r", 110: "RdGy_r", 111: "RdBu_r",
+                         112: "RdYlBu_r", 113: "RdYlGn_r", 114: "Spectral_r", 115: "coolwarm_r", 116: "bwr_r", 117: "seismic_r",
+
+                         "Cyclic (Reversed)": (118, 120),  # Indices: 118-120
+                         118: "twilight_r", 119: "twilight_shifted_r", 120: "hsv_r",
+
+                         "Miscellaneous (Reversed)": (121, 137),  # Indices: 121-137
+                         121: "flag_r", 122: "prism_r", 123: "ocean_r", 124: "gist_earth_r", 125: "terrain_r", 126: "gist_stern_r",
+                         127: "gnuplot_r", 128: "gnuplot2_r", 129: "CMRmap_r", 130: "cubehelix_r", 131: "brg_r",
+                         132: "gist_rainbow_r", 133: "rainbow_r", 134: "jet_r", 135: "turbo_r", 136: "nipy_spectral_r", 137: "gist_ncar_r",
+
+                         "Sequential (Miscellaneous) (Reversed)": (138, 153),  # Indices: 138-153
+                         138: "binary_r", 139: "gist_yarg_r", 140: "gist_gray_r", 141: "gray_r", 142: "bone_r", 143: "pink_r",
+                         144: "spring_r", 145: "summer_r", 146: "autumn_r", 147: "winter_r", 148: "cool_r", 149: "Wistia_r",
+                         150: "hot_r", 151: "afmhot_r", 152: "gist_heat_r", 153: "copper_r"}
+
+        self.ColourMap = ColourMapDict.get(VColourMap, 'viridis')
 
     @property
     def getLineType(self):
@@ -350,6 +415,14 @@ class ParamPLT:
         self.BLegends = Bool
 
     @property
+    def getColourBarTitle(self):
+        return self.ColourBarTitle
+
+    @getColourBarTitle.setter
+    def getColourBarTitle(self, Title):
+        self.ColourBarTitle = Title
+
+    @property
     def getScale(self):
         return self.Scale
 
@@ -388,6 +461,14 @@ class ParamPLT:
     @getZScaleType.setter
     def getZScaleType(self, Val):
         self.ZScaleType = self.ScaleVal2Name(Val)
+
+    @property
+    def getGenericScaleType(self):
+        return self.GenericScaleType
+
+    @getGenericScaleType.setter
+    def getGenericScaleType(self, Val):
+        self.GenericScaleType = self.ScaleVal2Name(Val)
 
     @property
     def getScale3D(self):
@@ -786,6 +867,28 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
                          fontsize=AnnotateTextSize,
                          horizontalalignment=horizontalalignment, 
                          **kw)
+
+def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True):
+    """
+    Displays an image plot of the provided matrix using custom parameters.
+    """
+    InterpolDict = {0: 'none', 1: 'auto', 2: 'nearest', 3: 'bilinear', 4: 'bicubic',
+                    5: 'spline16', 6: 'spline36', 7: 'hanning', 8: 'hamming',
+                    9: 'hermite', 10: 'kaiser', 11: 'quadric', 12: 'catrom',
+                    13: 'gaussian', 14: 'bessel', 15: 'mitchell', 16: 'sinc', 17: 'lanczos',
+                    18: 'blackman'}
+    InterpolType = InterpolDict.get(FInterpolType, 'none')
+    
+    TypeOrigin =  'upper' if BOrigin else 'lower'
+
+    plt.imshow(ValMatrix, cmap='viridis', alpha=paramPLT.getAlpha,
+               norm=paramPLT.GenericScaleType, interpolation=InterpolType,
+               origin=TypeOrigin)
+
+    if paramPLT.getColourBarTitle:
+        plt.colorbar(label=paramPLT.getColourBarTitle)
+
+
 
 
 

@@ -367,8 +367,8 @@ Colors : Grey
 class Cement(Ingredients):
     def __init__(self, Name, CementClass, CementType):
         super().__init__(Name=Name, MatType="Cement")
-        self.CementClass = False  # [int] Class of cement (CEM X, ...)
-        self.CementType = False  # [str] Type of cement (Portland, Blast Furnace, ...)
+        self.CementClass = None  # [int] Class of cement (CEM X, ...)
+        self.CementType = None  # [str] Type of cement (Portland, Blast Furnace, ...)
 
         self.getCementClass = CementClass
         self.getCementType = CementType
@@ -446,10 +446,16 @@ Colors : Brown
 class Aggregat(Ingredients):
     def __init__(self, Name):
         super().__init__(Name=Name, MatType="Aggregat")
-        
+        """
+        Improovements :
+        - Add caracteristics of the aggregates 
+        (Rock type, Size (min/max), Type of aggregates (rolled, crushed, ...))
+        """
+
         # Granulometry
         self.GranuloDiam = [] # [float] Diameter of granulometry [mm]
         self.GranuloRatio = [] # [float] Ratio of granulometry [0; 1]
+        •
 
     @property
     def getGranuloDiam(self):
