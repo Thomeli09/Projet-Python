@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>ProjetPython</Name>
     <RootNamespace>ProjetPython</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|intelpython3</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,16 +25,22 @@
     <Compile Include="ChargementLib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
+    <Compile Include="ExtensionCementiousMaterialsLib.py" />
     <Compile Include="FormworkLib.py" />
     <Compile Include="GanttChartLib.py" />
     <Compile Include="GeometryLib.py" />
+    <Compile Include="GUITKLib.py" />
     <Compile Include="LagamineLib.py" />
     <Compile Include="LoadingLib.py" />
+    <Compile Include="MessageLib.py" />
+    <Compile Include="ObjectManagement.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />
     <Compile Include="RheologyLib.py" />
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />
+    <Compile Include="TimeLib.py" />
+    <Compile Include="DataManagementLib.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />

@@ -8,8 +8,9 @@ Created on Fri Nov  8 11:03:41 2024
 # Experiment library
 
 # Other Lib
-from re import S
-import string
+import pandas as pd
+import numpy as np
+# from typing import Type
 
 # Custom Lib
 
@@ -18,15 +19,19 @@ Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisib
 """
 
 """
-Base element
+Databasis : Default class for all the data
 """
-
-
 class DataBasis:
     def __init__(self, Name, UpperLevel):
         self.Name = Name
 
-        self.UpperLevel = None
+        self.UpperLevel = UpperLevel
+        if UpperLevel:
+            UpperLevel.getLowerLevel = self
+            print("Info: Upper level connected")
+        else:
+            print("Info: No upper level")
+
         self.LLowerLevel = []
 
         self.LTest = []
@@ -52,7 +57,7 @@ class DataBasis:
             UpperLevel.getLowerLevel = self
             # Retirer la précédente et remettre la nouvelle
         else:
-            print("Info: Already highest level")
+            print("Info: No upper level")
 
     @property
     def getLowerLevel(self):
@@ -60,10 +65,7 @@ class DataBasis:
 
     @getLowerLevel.setter
     def getLowerLevel(self, LowerLevel):
-        if self.UpperLevel:
-            self.LLowerLevel.append(LowerLevel)
-        else:
-            print("Info: Already lowest level")
+        self.LLowerLevel.append(LowerLevel)
 
     @property
     def getExperiments(self):
@@ -81,13 +83,13 @@ class DataBasis:
     def getComment(self, Comment):
         self.LComment.append(Comment)
 
+
 """
-Experiments
+1) Experiments
 """
 class Experiments(DataBasis):
     def __init__(self, Name, StartDate):
         super().__init__(Name=Name, UpperLevel=None)
-
         self.StartDate = StartDate
         self.EndDate = 0
 
@@ -109,7 +111,7 @@ class Experiments(DataBasis):
 
 
 """
-Composition
+2) Composition
 """
 class Composition(DataBasis):
     def __init__(self, Name, ProductionDate, Experiments):
@@ -117,7 +119,6 @@ class Composition(DataBasis):
 
         self.ProductionDate = ProductionDate
         self.Volume = None
-        self.Compo = None
 
     @property
     def getProdDate(self):
@@ -135,37 +136,10 @@ class Composition(DataBasis):
     def getVolume(self, Volume):
         self.Volume = Volume
 
-    @property
-    def getCompo(self):
-        return self.Compo
-
-    @getCompo.setter
-    def getCompo(self, Compo):
-        self.Compo = Compo
-
-    @property
-    def getMaterial(self):
-        # Listing des ingrédients utilisés pour le volume X
-        print('Listes des ingrédients de la composition {}, pour un volume de {} m3'.format(self.getName, self.getVolume))
-
-        for key, value in self.getCompo:
-            print(f"   -{key}: {value*self.getVolume} kg")
-        return True
-
-    def CmptCompo(self, Data):
-        # Calcul 
-        self.getCompo = Data
-        return True
-
-    def PLT2DCompo(self, Data):
-        # Plot de la composition
-        return True
-
-
 
 
 """
-ParentSample
+3) ParentSample
 """
 class ParentSample(DataBasis):
     def __init__(self, Name, Type, ProductionDate, Composition):
@@ -201,7 +175,7 @@ class ParentSample(DataBasis):
 
 
 """
-Sample
+4) Sample
 """
 class Sample(DataBasis):
     def __init__(self, Name, ExtractionDate, Type, ParentSample):
@@ -240,10 +214,10 @@ class Sample(DataBasis):
 Experiment base class
 """
 class Experiment:
-    def __init__(self, Name, StartDate):
+    def __init__(self, Name, StartDate, EndDate):
         self.Name = Name
         self.StartDate = StartDate
-        self.EndDate = 0
+        self.EndDate = EndDate
         self.LComment = []
 
     @property
@@ -282,7 +256,6 @@ class Experiment:
 """
 Sorption and Desorption
 """
-
 class DeSorptionSorption(Experiment):
     def __init__(self, Name, StartDate, Other):
         super().__init__(Name, StartDate)
