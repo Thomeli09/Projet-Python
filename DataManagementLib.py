@@ -57,7 +57,7 @@ def ListSort(L1, L2=False):
     """
     Sort a list of numbers or pairs of values based on the first list.
     """
-    if L2:  # Sorting a list of numbers
+    if not L2:  # Sorting a list of numbers
         L1 = sorted(L1)
         return L1
     else:  # Sorting pairs of values based on the first list
