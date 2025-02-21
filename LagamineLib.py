@@ -8,7 +8,6 @@ Created on Fri Nov  8 11:20:09 2024
 # Lagamine library for data management  
 
 # Other Lib
-from webbrowser import get
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -39,8 +38,10 @@ class DataLag:
         self.OrdVal = None
         self.TimeVal = None
 
-        self.PLTDataMatrix = None
         self.PLTIndex = None
+        self.PLTDataMatrix = None
+
+        self.TimeStepArray = None
 
     # File
     @property
@@ -81,11 +82,43 @@ class DataLag:
 
     @property
     def getNRow(self):
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+        print("Number of rows: [ 0 ;", self.getDataMatrix.shape[0], "]")
         return self.getDataMatrix.shape[0]
 
     @property
     def getNCol(self):
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+
+        print("Number of columns: [ 0 ;", self.getDataMatrix.shape[1], "]")
         return self.getDataMatrix.shape[1]
+
+    @property
+    def getNStep(self):
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+
+        if self.getTimeCol is None:
+            print("Error: No time column selected.")
+            return None
+
+        # Extract the time steps
+        if self.getTimeStepArray is None:
+            TimeStepArray = self.SetTimeStepArray
+        else:
+            TimeStepArray = self.getTimeStepArray
+
+        # Count the number of time steps
+        NStep = len(TimeStepArray)
+
+        print("Number of time steps: [ 0 ;", NStep, "]")
+        return NStep
+
 
     # Data Analysis and Visualization
     @property
@@ -145,14 +178,6 @@ class DataLag:
         self.TimeVal = Array
 
     @property
-    def getPLTDataMatrix(self):
-        return self.PLTDataMatrix
-
-    @getPLTDataMatrix.setter
-    def getPLTDataMatrix(self, Matrix):
-        self.PLTDataMatrix = Matrix
-
-    @property
     def getPLTIndex(self):
         return self.PLTIndex
 
@@ -161,15 +186,51 @@ class DataLag:
         self.PLTIndex = Array
 
     @property
+    def getPLTDataMatrix(self):
+        return self.PLTDataMatrix
+
+    @getPLTDataMatrix.setter
+    def getPLTDataMatrix(self, Matrix):
+        self.PLTDataMatrix = Matrix
+
+    @property
     def ResetPLTIndex(self):
         """ Resets the index selection array."""
         self.PLTIndex = np.arange(self.getNRow)
+        self.getPLTDataMatrix = self.getDataMatrix
+
+    @property
+    def getTimeStepArray(self):
+        return self.TimeStepArray
+
+    @getTimeStepArray.setter
+    def getTimeStepArray(self, Array):
+        self.TimeStepArray = Array
+
+    @property
+    def SetTimeStepArray(self):
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return False
+
+        if self.getTimeCol is None:
+            print("Error: No time column selected.")
+            return False
+
+        # Extract the time values
+        TimeVal = self.getDataMatrix[:, self.getTimeCol]
+
+        # Extract the unique time steps
+        self.getTimeStepArray = np.unique(TimeVal)
+        return self.getTimeStepArray
+
+
 
     # to be done
 
     # Methods
     # File loading
-    def LoadFile(self):
+    def LoadFile(self, BLoadMatrix=False):
         """Reads the file and extracts numerical data, keeping row structure intact."""
         if not self.BoolApprovedFiles:
             print("Error: File format not approved.")
@@ -179,7 +240,11 @@ class DataLag:
         if self.FileName.endswith(('.csv', '.txt')):
             try:
                 self.getData = pd.read_csv(self.FileName, delim_whitespace=True, header=None).values
+
+                if BLoadMatrix:
+                    self.LoadDataMatrix()
                 return self.getData
+
             except Exception as e:
                 print(f"Error reading file {self.FileName}: {e}")
                 return None
@@ -199,7 +264,11 @@ class DataLag:
                         continue  # Skip non-numeric lines
 
                 self.getData = DataRows
+
+                if BLoadMatrix:
+                    self.LoadDataMatrix()
                 return self.getData
+
             except Exception as e:
                 print(f"Error reading file {self.FileName}: {e}")
                 return None
@@ -215,9 +284,20 @@ class DataLag:
 
     # Data Analysis and Visualization
 
-    def SelectIndex(self, Col=None, Val=None, ValTol=0, ValMin=None, ValMax=None):
-        """Selects rows based on the values in a column and updates the index selection array."""
-        # Verify that the index selection array is not empty
+    def SelectIndex(self, Col=None, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
+        """
+        Selects rows based on the values in a column and updates the index selection array.
+        
+        Improvement to be done:
+        - Add the possibility to extract the values directly from the pltDataMatrix
+        """
+
+        # Verify that the data matrix is not empty
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return False
+
+        # Select the column to select by
         if Col is None:
             if self.getSelectCol is None:
                 print("Error: No column selected.")
@@ -229,10 +309,18 @@ class DataLag:
 
         # Select rows based on the values in the column
         if Val is not None:
-            NewPLTIndex = np.where(np.abs(ArrayExtractedVal - Val) <= ValTol)[0]
+            # Defining the tolerance
+            if AbsTol is None:
+                AbsTol = np.abs(Tol*Val)
+
+            NewPLTIndex = np.where(np.abs(ArrayExtractedVal - Val) <= AbsTol)[0]
 
         elif ValMin is not None and ValMax is not None:
             NewPLTIndex = np.where((ArrayExtractedVal >= ValMin) & (ArrayExtractedVal <= ValMax))[0]
+
+        else:
+            print("Error: No value or range selected.")
+            return False
 
         # Update the index selection array
         if self.getPLTIndex is not None and NewPLTIndex is not None:
@@ -240,27 +328,70 @@ class DataLag:
         else:
             self.getPLTIndex = NewPLTIndex
 
-    def SelectTime(self, TimeVal=None, Tol=0, TimeMin=None, TimeMax=None):
+        # Verifies that the selection is not empty
+        if len(self.getPLTIndex) == 0:
+            print("Warning: No data selected.")
+
+        # Update the PLTDataMatrix
+        if self.getPLTDataMatrix is not None:
+            self.getPLTDataMatrix = self.getDataMatrix[self.getPLTIndex, :]
+        else:
+            self.getPLTDataMatrix = self.getDataMatrix[self.getPLTIndex, :]
+
+    def SelectTime(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
         self.SelectIndex(Col=self.getTimeCol,
-                         Val=TimeVal, ValTol=Tol,
-                         ValMin=TimeMin, ValMax=TimeMax)
+                         Val=Val, Tol=Tol, AbsTol=AbsTol,
+                         ValMin=ValMin, ValMax=ValMax)
 
-    def SelectAbs(self, AbsVal=None, Tol=0, AbsMin=None, AbsMax=None):
+    def SelectAbs(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
         self.SelectIndex(Col=self.getAbsCol,
-                         Val=AbsVal, ValTol=Tol,
-                         ValMin=AbsMin, ValMax=AbsMax)
+                         Val=Val, Tol=Tol, AbsTol=AbsTol,
+                         ValMin=ValMin, ValMax=ValMax)
 
-    def SelectOrd(self, OrdVal=None, Tol=0, OrdMin=None, OrdMax=None):
+    def SelectOrd(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
         self.SelectIndex(Col=self.getOrdCol,
-                         Val=OrdVal, ValTol=Tol,
-                         ValMin=OrdMin, ValMax=OrdMax)
+                         Val=Val, Tol=Tol, AbsTol=AbsTol,
+                         ValMin=ValMin, ValMax=ValMax)
+
+    def SortResults(self, Col=None):
+        """
+        Sorts the differents values by a given column.
+
+        Improvement to be done:
+        - Add the possibility to extract the values directly from the pltDataMatrix
+        """
+        # Verify that the index selection array is not empty
+        if self.getPLTIndex is None:
+            print("Error: No index selected.")
+            return False
+
+        # Select the column to sort by
+        if Col is None:
+            if self.getSelectCol is None:
+                print("Error: No column selected.")
+                return False
+            Col = self.getSelectCol
+
+        # Sort the data
+        # Extract the values to sort by
+        ArrayExtratedVal = self.getDataMatrix[self.getPLTIndex, Col]
+
+        # Sort the PLTIndex array by the values in the selected column
+        IndexOrder = np.argsort(ArrayExtratedVal)
+        self.getPLTIndex = self.getPLTIndex[IndexOrder]
+
+        # Sort the PLTDataMatrix
+        if self.getPLTDataMatrix is not None:
+            self.getPLTDataMatrix = self.getDataMatrix[IndexOrder, :]
+        else:
+            self.getPLTDataMatrix = self.getDataMatrix[IndexOrder, :]
 
     def PLTPreprocessing(self):
         """Preprocesses data for plotting by putting them into the right variables."""
         # Verify that the index selection array is not empty
         if self.getPLTIndex is None:
-            print("Error: No index selected.")
-            return False
+            print("Warning: No index selected. Resetting the index.")
+            self.ResetPLTIndex
 
         if self.getAbsCol is None:
             print("Error: No abscissa column selected.")
@@ -284,32 +415,28 @@ class DataLag:
             self.getTimeVal = None
             print("Warning: No time column selected.")
 
-    def SortResults(self):
-        """Sorts the differents values by a given column."""
-        # Verify that the index selection array is not empty
-        if self.getPLTIndex is None:
-            print("Error: No index selected.")
-            return False
+def TimeStep2Time(self):
+    pass
+    # permet de faire la traduction de time step à un temps
 
-        # Sort the data
-        # Select the column to sort by
-        if self.getSelectCol is None:
-            print("Error: No column selected.")
-            return False
-        # Extract the values to sort by
-        ArrayExtratedVal = self.getDataMatrix[self.getPLTIndex, self.getSelectCol]
+    # S'aider de la colonne de unique time step
 
-        # Sort the PLTIndex array by the values in the selected column
-        self.getPLTIndex = self.getPLTIndex[np.argsort(ArrayExtratedVal)]
 
+
+def Time2TimeStep(self):
+    pass
+    # permet de faire la traduction de temps à un time step
+
+    # S'aider de la colonne de unique time step
+
+"""
+-Improvement to be done:
+- Add the possibility to extract the values directly from the pltDataMatrix
+- Add the capability to use the data of different files at the same time
+    - Add the ability to merge the data of different files
+"""
 # Fonction import de donné
-#'Savoir donné des fichiers IPE, IPN, LAG'
-#'Détecter le type de fichiers'
-#'Comprendre le contenu'
-
 # Fonction de traitement des données
-
 # Fonction d'affichage
-
 # Fonction d'export de donnée
 
