@@ -87,4 +87,21 @@ def ListFindFirstMaxPair(L1, L2):
     return L1[MaxIndex], L2[MaxIndex]  # Return (max_value, paired_value)
 
 
+def ListMult(Val, ListVal, BPrint=True):
+    """
+    Multiply a list of values by a constant value.
+    """
+    MultListVal = [Val*i for i in ListVal]
+    if BPrint:
+        print("Multiplication of list by value:", MultListVal)
+    return MultListVal
 
+
+def ListSum(ListOfSumList, BPrint=True):
+    """
+    Sum a list of lists of values.
+    """
+    SumListVal = [sum(x) for x in zip(*ListOfSumList)]
+    if BPrint:
+        print("Sum of lists:", SumListVal)
+    return SumListVal
