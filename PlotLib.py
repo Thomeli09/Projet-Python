@@ -21,7 +21,7 @@ Base de donnée
 """
 
 
-# Paramètre d'affichage
+# Display parameters
 class ParamPLT:
     def __init__(self, colour, linetype, marker, linesize, fontsize):
         """
@@ -711,7 +711,7 @@ def PLTColorBar(paramPLT):
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
 
-# Version Cas 3D avec PLT3DShow
+# Version in 3D case with PLT3DShow
 
 """
 Type de Plots
@@ -827,7 +827,7 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
     Returns:
     - Displays a pie chart.
 
-    Improovements:
+    Improvements:
     - Ajouter des vérifications entre les paramètres pour éviter les conflits.
     - Extraire un nombre limité de paramètres pour éviter des clash si plus de valeurs.
     """
@@ -887,7 +887,7 @@ def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True):
     
     TypeOrigin =  'upper' if BOrigin else 'lower'
 
-    plt.imshow(ValMatrix, cmap='viridis', alpha=paramPLT.getAlpha,
+    plt.imshow(ValMatrix, cmap=paramPLT.getColourMap, alpha=paramPLT.getAlpha,
                norm=paramPLT.GenericScaleType, interpolation=InterpolType,
                origin=TypeOrigin)
 
@@ -928,7 +928,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
         plt.fill(XPoint, YPoint, color=paramPLT.getColour, zorder=0,
                  label=paramPLT.getLegends)
 
-'Fonction de plot de graphe en 2d'
+# Plotting functions in 3D
 # 3D
 
 # 3D Shapes

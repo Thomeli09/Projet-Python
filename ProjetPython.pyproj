@@ -22,6 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ConcreteCarbonationLib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
     <Compile Include="ExtensionCementiousMaterialsLib.py" />
@@ -40,6 +41,7 @@
     <Compile Include="StructuralLib.py" />
     <Compile Include="TimeLib.py" />
     <Compile Include="DataManagementLib.py" />
+    <Compile Include="VoltorbeGameLib.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|intelpython3" />

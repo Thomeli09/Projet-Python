@@ -19,8 +19,6 @@ from PlotLib import ParamPLT, PLTGrid, PLTLimit, CloseALLPlots, StartPlots, Clos
 """
 Tasks class
 """
-
-
 class Tasks:
     def __init__(self):
         self.LTask = []
@@ -201,14 +199,6 @@ def DatePlusNumDays(Date, NumDays):
     """Return the date after adding a number of days."""
     Temp = pd.to_datetime(Date) + pd.Timedelta(days=NumDays)
     return f'{Temp.strftime("%Y-%m-%d")}'
-
-
-"""
--------------
-Modifications
--------------
-
-"""
 
 """
 -------
