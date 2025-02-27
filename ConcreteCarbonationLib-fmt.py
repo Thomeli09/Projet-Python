@@ -16,10 +16,6 @@ import numpy as np
 
 # Saetta's Model
 def CarboSaettaFD(Cco2Ini, Ccaoh2Ini, tMax, Dt, RH, T):
-    """
-    Saetta's model for the carbonation of concrete without considering diffusion.
-    The partial differential equation is solved using a finite difference method.
-    """
     # Constants
     MCaOH2 = 74.093  # g/mol
     MCO2 = 44.01  # g/mol
@@ -68,10 +64,6 @@ def CarboSaettaRate(CCaOH2, CCo2, Cco2Ini, Ccaoh2Ini, RH, T):
     return ReactionRate
 
 def CarboSaettaAnal(Cco2Ini, Ccaoh2Ini, tMax, Dt, RH, T):
-    """
-    Saetta's model for the carbonation of concrete without considering diffusion.
-    The partial differential equation is solved analytically with the help of Wolfram Alpha.
-    """
     # Chemicals Constants
     MCaOH2 = 74.093 # g/mol 
     MCO2 = 44.01 # g/mol
@@ -128,110 +120,73 @@ def CarboSaettaAnal(Cco2Ini, Ccaoh2Ini, tMax, Dt, RH, T):
     return TVals, Ccaoh2Vals, Cco2Vals, Ccaco3Vals
 
 # Simplified Carbonation Model
-def CarboSilva(SigmaCO2, RH, RhoClincker, fc, ExpositionClass=1, tMax=5, Dt=0.1):
-    """
-    Silva's model for the carbonation of concrete.
-    Model class : 1
-    
-    Inputs:
-        SigmaCO2: float
-            Volumic concentration of CO2 in the air (m^3/m^3).
-        RH: float
-            Relative humidity of the air (%).
-        RhoClincker: float
-            Massic concentration of clinker in the concrete (kg/m^3).
-        fc: float
-            Compressive strength of the concrete (MPa).
-        ExpositionClass: int [1; 3]
-            Exposure class of the concrete. XC1=1, XC2=2, or XC4=3.
-        tMax: float
-            Maximum time for the simulation (years).
-        Dt: float
-            Time step for the simulation (years).
-    """
+def Carbo(Cco2, tMax, Dt):
     TVals = np.linspace(0, tMax, int(tMax/Dt))
-
-    if 0 <= RH <= 70:  # Dry environment
-        kd = 0.556*SigmaCO2 - 3.602*ExpositionClass - 0.148*fc + 18.734
-        xc = kd*TVals**0.5  # [mm]
-    elif 70 <= RH <= 10:  # Wet environment
-        kw = 3.355*SigmaCO2 - 0.019*RhoClincker - 0.042*fc + 10.830  # Wet environment
-        xc = kw*TVals**0.5  # [mm]
-
-    return TVals, xc
-
-def CarboPetreLazar(Gamma, RH, fc, tMax=5, Dt=0.1):
-    """
-    Petre Lazar's model for the carbonation of concrete.
-    Model class : 1
-
-    Inputs:
-        Gamma: float
-            Carbonation exposition coefficient.
-            Gamma = 1.5 in structures exposed to high concentrations of CO2.
-            Gamma = 0.9 in structures particularly exposed to rain.
-            Gamma = 1.2 in structures sheltered from rain.
-        RH: float
-            Relative humidity of the air (%).
-        fc: float
-            Compressive strength of the concrete (MPa).
-        tMax: float
-            Maximum time for the simulation (years).
-        Dt: float
-            Time step for the simulation (years).
-
-    """
-    TVals = np.linspace(0, tMax, int(tMax/Dt))
-    
-    fRH = -3.5833*(RH/100)**2 + 3.4833*(RH/100) + 0.2
-    k = 365**0.5 * (1/(2.1*fc**0.5)-0.06)
-    xc = 10 * Gamma * fRH * k * TVals**0.5  # [mm]
-
-    return TVals, xc
-
-def CarboCEB():
-    """
-    CEB model for the carbonation of concrete.
-    Model class : 2
-
-    Inputs:
-
-    """
     pass
 
-def CarboPapadakis():
-    """
-    Papadakis model for the carbonation of concrete.
-    Model class : 2
-    Inputs:
-        
-    """
-    pass
 
-def CarboHyvert():
-    """
-    Hyvert model for the carbonation of concrete.
-    Model class : 3
-    Inputs:
 
-    """
-    pass
-    
 
 # Hydration Degree
-def  HydrationDegree(ECRatio, BPrint=True):
-    """
-    Mills' model for the hydration degree of concrete.
-    The ultimate hydration degree is a function of the water/cement ratio.
-    """
-    if isinstance(ECRatio, list):
-        HydrationDegreeList = [HydrationDegree(ECRatio=EC, BPrint=False) for EC in ECRatio]
-        if BPrint:
-            for i, HD in enumerate(HydrationDegreeList):
-                print(f"E/C: {ECRatio[i]} -> Hydration Degree: {HD}")
-        return HydrationDegreeList 
-    else:
-        HydrationDegreeVal = (1.031*ECRatio)/(0.194+ECRatio)
-        if BPrint:
-            print(f"E/C: {ECRatio} -> Hydration Degree: {HydrationDegreeVal}")
-        return HydrationDegreeVal
+def  HydrationDegree(CementType, Time, Temp):
+    if CementType == "Type1":
+        # Constants
+        A = 0.5
+        B = 0.5
+        C = 0.5
+        D = 0.5
+        E = 0.5
+        F = 0.5
+        G = 0.5
+        H = 0.5
+        I = 0.5
+        J = 0.5
+        K = 0.5
+        L = 0.5
+        M = 0.5
+        N = 0.5
+        O = 0.5
+        P = 0.5
+        Q = 0.5
+        R = 0.5
+        S = 0.5
+        T = 0.5
+        U = 0.5
+        V = 0.5
+        W = 0.5
+        X = 0.5
+        Y = 0.5
+        Z = 0.5
+        AA = 0.5
+        AB = 0.5
+        AC = 0.5
+        AD = 0.5
+        AE = 0.5
+        AF = 0.5
+        AG = 0.5
+        AH = 0.5
+        AI = 0.5
+        AJ = 0.5
+        AK = 0.5
+        AL = 0.5
+        AM = 0.5
+        AN = 0.5
+        AO = 0.5
+        AP = 0.5
+        AQ = 0.5
+        AR = 0.5
+        AS = 0.5
+        AT = 0.5
+        AU = 0.5
+        AV = 0.5
+        AW = 0.5
+        AX = 0.5
+        AY = 0.5
+        AZ = 0.5
+        BA = 0.5
+        BB = 0.5
+        BC = 0.5
+        BD = 0.5
+        BE = 0.5
+        BF = 0.5
+        BG = 0.5
