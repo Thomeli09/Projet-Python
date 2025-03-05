@@ -7,26 +7,20 @@ Created on Tue Jan 21 12:35:04 2025
 
 # Voltorb Game Solver Library
 
-from operator import index
-from queue import Empty
 import matplotlib.pyplot as plt
-import numpy as np
-
-
-# Custom Lib
 import numpy as np
 import itertools
 
 # Custom Lib
 from TimeLib import Chrono
 from PlotLib import ParamPLT, StartPlots, CloseALLPlots, PLTShow, DefaultParamPLT
-from PlotLib import PLTUpdateLayout, PLTScreenMaximize, PLTImShow
+from PlotLib import PLTUpdateLayout, PLTScreenMaximize, PLTImShow, PLTMultiPlot
 
 class VoltorbGameGrid:
-    def __init__(self):
+    def __init__(self, NCols=None, NRows=None):
         # Game parameters
-        self.NRows = None
-        self.NCols = None
+        self.NRows = NRows
+        self.NCols = NCols
         self.MaxVal = 3 # All values are between 0 and MaxVal included
 
         # Game initial data
@@ -78,6 +72,13 @@ class VoltorbGameGrid:
 
     @getXPoints.setter
     def getXPoints(self, ArrayVal):
+        # Convert the list to a NumPy array if needed
+        if isinstance(ArrayVal, list):
+            ArrayVal = np.array(ArrayVal)
+        # Check if the size of the array is correct
+        if ArrayVal.size != self.getNCols:
+            print("Error: ArrayXPoints must have the same size as the number of columns.")
+            return False
         self.ArrayXPoints = ArrayVal
 
     @property
@@ -86,6 +87,13 @@ class VoltorbGameGrid:
 
     @getXVoltorbes.setter
     def getXVoltorbes(self, ArrayVal):
+        # Convert the list to a NumPy array if needed
+        if isinstance(ArrayVal, list):
+            ArrayVal = np.array(ArrayVal)
+        # Check if the size of the array is correct
+        if ArrayVal.size != self.getNCols:
+            print("Error: ArrayXVoltorbes must have the same size as the number of columns.")
+            return False
         self.ArrayXVoltorbes = ArrayVal
 
     @property
@@ -94,6 +102,13 @@ class VoltorbGameGrid:
 
     @getYPoints.setter
     def getYPoints(self, ArrayVal):
+        # Convert the list to a NumPy array if needed
+        if isinstance(ArrayVal, list):
+            ArrayVal = np.array(ArrayVal)
+        # Check if the size of the array is correct
+        if ArrayVal.size != self.getNRows:
+            print("Error: ArrayYPoints must have the same size as the number of rows.")
+            return
         self.ArrayYPoints = ArrayVal
 
     @property
@@ -102,6 +117,12 @@ class VoltorbGameGrid:
 
     @getYVoltorbes.setter
     def getYVoltorbes(self, ArrayVal):
+        # Convert the list to a NumPy array if needed
+        if isinstance(ArrayVal, list):
+            ArrayVal = np.array(ArrayVal)
+        # Check if the size of the array is correct
+        if ArrayVal.size != self.getNRows:
+            print("Error: ArrayYVoltorbes must have the same size as the number of rows.")
         self.ArrayYVoltorbes = ArrayVal
     
     # Game optional data
@@ -155,9 +176,117 @@ class VoltorbGameGrid:
     # Methods
 
     # Data aquisition methods
+    def VolorbeInputGene(self):
+        """
+        Ask for the row and column of the tiles # modifier
+        """
+        pass
+
+    def VolorbeInputSpec(self):
+        """
+        Ask for the value of tiles in row row and column col # modifier
+        """
+        pass
+
 
     # Computations methods
-    def CmptGridsGeneration(self):
+    def CmptScores(self):
+        """
+        Compute the scores for each position based on the point and voltorbe vectors and the current knowledge.
+        """
+        Rows, Cols = self.getNRows, self.getNCols
+        MaxValue = self.getMaxVal
+        MatrixDataTiles = self.getMatrixDataTiles
+        XPoints = self.getXPoints[:Cols].flatten()  # Take the first `Cols` elements
+        YPoints = self.getYPoints[:Rows].flatten()  # Take the first `Rows` elements
+        XVoltorbes = self.getXVoltorbes[:Cols].flatten()  # Take the first `Cols` elements
+        YVoltorbes = self.getYVoltorbes[:Rows].flatten()  # Take the first `Rows` elements
+
+        # Verify that the sum of the points and voltorbes in X and Y vectors match
+        if np.sum(YPoints) != np.sum(XPoints) or np.sum(YVoltorbes) != np.sum(XVoltorbes):
+            print("Error: Different total number of points or voltorbes on the whole matrix.")
+            return
+
+        # Compute the number of unknown tiles for each row and column and put it inside a np array
+        RowUnknownTiles = np.array([np.sum(MatrixDataTiles[i] < 0) for i in range(Rows)])
+        ColUnknownTiles = np.array([np.sum(MatrixDataTiles[:, j] < 0) for j in range(Cols)])
+
+        # Compute the scores for each position
+        # Formula is:  The number of points in the row decreased by the number of already known points in the row all divided by the number of unknown tiles in the row minus the number unknown voltorbes in the row (Number of voltorbes in the row minus the number of already known voltorbes in the row)
+        # the same formula for the column to get the column score and take the minimum of the two scores to get the score of the position
+        ScoresMatrix = np.zeros((Rows, Cols))
+        for i in range(Rows):
+            RowScoreDenom = RowUnknownTiles[i] - (YVoltorbes[i] - np.sum(MatrixDataTiles[i] == 0))
+            if RowScoreDenom == 0:
+                RowScore = 0
+            elif (YVoltorbes[i] - np.sum(MatrixDataTiles[i] == 0)) <= 0:
+                    RowScore = np.inf
+            else:
+                RowScore = (YPoints[i] - np.sum((MatrixDataTiles[i] > 0)*MatrixDataTiles[i])) / (RowUnknownTiles[i] - (YVoltorbes[i] - np.sum(MatrixDataTiles[i] == 0)))
+
+            for j in range(Cols):
+                ColScoreDenom = ColUnknownTiles[j] - (XVoltorbes[j] - np.sum(MatrixDataTiles[:, j] == 0))
+                if ColScoreDenom == 0:
+                    ColScore = 0
+                elif (XVoltorbes[j] - np.sum(MatrixDataTiles[:, j] == 0)) <= 0:
+                    ColScore = np.inf
+                else:
+                    ColScore = (XPoints[j] - np.sum((MatrixDataTiles[:, j] > 0)*MatrixDataTiles[:, j])) / (ColUnknownTiles[j] - (XVoltorbes[j] - np.sum(MatrixDataTiles[:, j] == 0)))
+
+                if MatrixDataTiles[i, j] < 0:
+                    ScoresMatrix[i, j] = min(RowScore, ColScore)
+                    if RowScore == np.inf or ColScore == np.inf:
+                        ScoresMatrix[i, j] = np.inf
+                    if RowScore <= 1 or ColScore <= 1:
+                        ScoresMatrix[i, j] = 0  # If the score is less or equal to 1, the tile is a voltorbe or is a one point tile, which is not interesting
+                else:
+                    ScoresMatrix[i, j] = MatrixDataTiles[i, j]*0  # Known values are kept as to not be selected
+
+        # Update the computed scores matrix
+        self.getMatrixCmptScores = ScoresMatrix
+        
+    def CmptRowCombinations(self):
+        """
+        Compute all valid row combinations based on the point and voltorbe vectors and the current knowledge.
+        """
+        Rows, Cols = self.getNRows, self.getNCols
+        MaxValue = self.getMaxVal
+        MatrixDataTiles = self.getMatrixDataTiles  # Known tiles are used to filter valid rows (-1 are unknown tiles))
+
+        # Dynamically slice the Points and Voltorbes vectors to match the current grid size
+        XPointsSubset = self.getXPoints[:Cols].flatten()  # Take the first `Cols` elements
+        YPointsSubset = self.getYPoints[:Rows].flatten()  # Take the first `Rows` elements
+        XVoltorbesSubset = self.getXVoltorbes[:Cols].flatten()  # Take the first `Cols` elements
+        YVoltorbesSubset = self.getYVoltorbes[:Rows].flatten()  # Take the first `Rows` elements
+
+        # Verify that the sum of the points and voltorbes in X and Y vectors match
+        if np.sum(YPointsSubset) != np.sum(XPointsSubset) or np.sum(YVoltorbesSubset) != np.sum(XVoltorbesSubset):
+            print("Error: Different total number of points or voltorbes on the whole matrix.")
+            self.getLPossibleGrid = []  # Update the possible grid list
+            return []
+
+        # Precompute valid row combinations, considering known values
+        def ValidRowCombinations(RowSum, Zeros, Length, MaxVal, KnownValues):
+            """
+            Generate all valid row combinations that match constraints and respect known values.
+            """
+            ValidCombinations = []
+            for Comb in itertools.product(range(MaxVal + 1), repeat=Length):
+                if sum(Comb) == RowSum and Comb.count(0) == Zeros:
+                    # Check known values** before adding
+                    if all((KnownValues[i] == -1 or KnownValues[i] == Comb[i]) for i in range(Length)):
+                        ValidCombinations.append(Comb)
+            return ValidCombinations
+
+        # Generate valid rows and columns based on constraints
+        ValidRows = [ValidRowCombinations(YPointsSubset[i], YVoltorbesSubset[i], Cols, MaxValue, MatrixDataTiles[i]) for i in range(Rows)]
+
+        # Compute the number of combinations # modifier
+        NCombinations = np.prod([len(ValidRows[i]) for i in range(Rows)])
+
+        return ValidRows, NCombinations
+
+    def CmptGridsGenerationOLD(self):
         """
         Generate all plausible matrices based on the given constraints and the current knowledge.
         Returns:
@@ -166,12 +295,13 @@ class VoltorbGameGrid:
         Rows, Cols = self.getNRows, self.getNCols
         MaxValue = self.getMaxVal
         PlausibleMatrices = []
+        MatrixDataTiles = self.getMatrixDataTiles  # Known tiles are used to filter valid rows (-1 are unknown tiles))
 
         # Dynamically slice the Points and Voltorbes vectors to match the current grid size
-        XPointsSubset = self.getXPoints[0, :Cols].flatten()  # Take the first `Cols` elements
-        YPointsSubset = self.getYPoints[0, :Rows].flatten()  # Take the first `Rows` elements
-        XVoltorbesSubset = self.getXVoltorbes[0, :Cols].flatten()  # Take the first `Cols` elements
-        YVoltorbesSubset = self.getYVoltorbes[0, :Rows].flatten()  # Take the first `Rows` elements
+        XPointsSubset = self.getXPoints[:Cols].flatten()  # Take the first `Cols` elements
+        YPointsSubset = self.getYPoints[:Rows].flatten()  # Take the first `Rows` elements
+        XVoltorbesSubset = self.getXVoltorbes[:Cols].flatten()  # Take the first `Cols` elements
+        YVoltorbesSubset = self.getYVoltorbes[:Rows].flatten()  # Take the first `Rows` elements
 
         # Verify that the sum of the points and voltorbes in X and Y vectors match
         if np.sum(YPointsSubset) != np.sum(XPointsSubset) or np.sum(YVoltorbesSubset) != np.sum(XVoltorbesSubset):
@@ -204,8 +334,8 @@ class VoltorbGameGrid:
                     PlausibleMatrices.append(Matrix.copy())
                 return
 
-            for row in ValidRows[RowIdx]:
-                Matrix[RowIdx, :] = row
+            for Row in ValidRows[RowIdx]:
+                Matrix[RowIdx, :] = Row
                 ConstructMatrix(Matrix, RowIdx + 1)
 
         # Initialize an empty matrix and start backtracking
@@ -213,6 +343,123 @@ class VoltorbGameGrid:
         ConstructMatrix(matrix, 0)
 
         self.getLPossibleGrid = PlausibleMatrices  # Update the possible grid list
+        return PlausibleMatrices
+
+    def CmptGridsGeneration(self):
+        """
+        Generate all plausible matrices based on the given constraints and the current knowledge.
+        Returns:
+            List of plausible matrices satisfying the constraints.
+
+        
+        """
+        Rows, Cols = self.getNRows, self.getNCols
+        MaxValue = self.getMaxVal
+        PlausibleMatrices = []
+        MatrixDataTiles = self.getMatrixDataTiles  # Known tiles are used to filter valid rows (-1 are unknown tiles))
+
+        # Dynamically slice the Points and Voltorbes vectors to match the current grid size
+        XPointsSubset = self.getXPoints[:Cols].flatten()  # Take the first `Cols` elements
+        YPointsSubset = self.getYPoints[:Rows].flatten()  # Take the first `Rows` elements
+        XVoltorbesSubset = self.getXVoltorbes[:Cols].flatten()  # Take the first `Cols` elements
+        YVoltorbesSubset = self.getYVoltorbes[:Rows].flatten()  # Take the first `Rows` elements
+
+        # Verify that the sum of the points and voltorbes in X and Y vectors match
+        if np.sum(YPointsSubset) != np.sum(XPointsSubset) or np.sum(YVoltorbesSubset) != np.sum(XVoltorbesSubset):
+            print("Error: Different total number of points or voltorbes on the whole matrix.")
+            self.getLPossibleGrid = []  # Update the possible grid list
+            return []
+
+        # Generate valid rows and columns based on constraints
+        ValidRows, NCombinations = self.CmptRowCombinations()
+
+        # Recursive function to construct matrices row by row
+        def ConstructMatrix(Matrix, RowIdx):
+            if RowIdx == Rows:
+                # Validate column constraints
+                if (
+                    np.all(np.sum(Matrix, axis=0) == XPointsSubset) and
+                    np.all(np.sum(Matrix == 0, axis=0) == XVoltorbesSubset)
+                ):
+                    PlausibleMatrices.append(Matrix.copy())
+                return
+
+            for Row in ValidRows[RowIdx]:
+                Matrix[RowIdx, :] = Row
+                ConstructMatrix(Matrix, RowIdx + 1)
+
+        # Initialize an empty matrix and start backtracking
+        matrix = np.zeros((Rows, Cols), dtype=int)
+        ConstructMatrix(matrix, 0)
+
+        self.getLPossibleGrid = PlausibleMatrices  # Update the possible grid list
+        return PlausibleMatrices
+
+    def CmptGridsGenerationTemp(self):
+        """
+        Generate all plausible matrices based on the given constraints and the current knowledge.
+        Returns:
+            List of plausible matrices satisfying the constraints.
+
+        Based on computation of both valid rows and columns.
+        """
+        Rows, Cols = self.getNRows, self.getNCols
+        MaxValue = self.getMaxVal
+        MatrixDataTiles = self.getMatrixDataTiles  # Known values (-1 means unknown)
+
+        # Extract constraints
+        XPointsSubset = self.getXPoints[:Cols].flatten()  # Take the first `Cols` elements
+        YPointsSubset = self.getYPoints[:Rows].flatten()  # Take the first `Rows` elements
+        XVoltorbesSubset = self.getXVoltorbes[:Cols].flatten()  # Take the first `Cols` elements
+        YVoltorbesSubset = self.getYVoltorbes[:Rows].flatten()  # Take the first `Rows` elements
+
+        # Ensure point and voltorbe constraints match
+        if np.sum(YPointsSubset) != np.sum(XPointsSubset) or np.sum(YVoltorbesSubset) != np.sum(XVoltorbesSubset):
+            print("Error: Mismatch in total points or voltorbes across rows and columns.")
+            self.getLPossibleGrid = []
+            return []
+
+        # Generate valid row combinations while respecting known values
+        def ValidCombinations(TargetSum, ZeroCount, Length, MaxVal, KnownValues):
+            """
+            Generate all valid row/column combinations that match constraints and respect known values.
+            """
+            ValidCombinations = []
+            for Comb in itertools.product(range(MaxVal + 1), repeat=Length):
+                if sum(Comb) == TargetSum and Comb.count(0) == ZeroCount:
+                    # Ensure known values are correctly placed
+                    if all((KnownValues[i] == -1 or KnownValues[i] == Comb[i]) for i in range(Length)):
+                        ValidCombinations.append(Comb)
+            return ValidCombinations
+
+        # Precompute valid row and column candidates using constraints
+        ValidRows = [
+            ValidCombinations(YPointsSubset[i], YVoltorbesSubset[i], Cols, MaxValue, MatrixDataTiles[i])
+            for i in range(Rows)
+        ]
+        ValidCols = [
+            ValidCombinations(XPointsSubset[j], XVoltorbesSubset[j], Rows, MaxValue, MatrixDataTiles[:, j])
+            for j in range(Cols)
+        ]
+
+        # Recursive function to construct matrices row by row
+        def ConstructMatrix(Matrix, RowIdx):
+            if RowIdx == Rows:
+                # Verify column constraints before accepting the matrix
+                if all(tuple(Matrix[:, j]) in ValidCols[j] for j in range(Cols)):
+                    PlausibleMatrices.append(Matrix.copy())  # Save fully constructed matrices
+                return
+
+            for row in ValidRows[RowIdx]:
+                Matrix[RowIdx, :] = row  # Assign valid row
+                ConstructMatrix(Matrix, RowIdx + 1)
+
+        # Initialize an empty matrix without `-1`
+        PlausibleMatrices = []
+        matrix = np.zeros((Rows, Cols), dtype=int)  # Start with 0s
+        ConstructMatrix(matrix, 0)
+
+        self.getLPossibleGrid = PlausibleMatrices  # Update possible grid list
         return PlausibleMatrices
 
     def CmptElem2MatricesSelection(self, Row, Col, Val):
@@ -270,41 +517,74 @@ class VoltorbGameGrid:
     def PLTDataTiles(self, paramPLT=None):
         if paramPLT is None:
             paramPLT = DefaultParamPLT()
+
         if self.getMatrixDataTiles is None:
             print("Error: MatrixDataTiles is empty.")
             return
-        PLTImShow(ValMatrix=self.getMatrixDataTiles, paramPLT=paramPLT, FInterpolType=2)
+
+        PLTImShow(ValMatrix=self.getMatrixDataTiles, paramPLT=paramPLT, FInterpolType=2, BShowVal=True, Fmt=".0f")
+        paramPLT.getTitle = "Values of known tiles"
+        paramPLT.getXLabel = "Columns"
+        paramPLT.getYLabel = "Rows"
+        PLTShow(paramPLT=paramPLT)
         return paramPLT
 
     def PLTProba(self, paramPLT=None):
         if paramPLT is None:
             paramPLT = DefaultParamPLT()
+
+        if self.getMatrixProb is None:
+            print("Error: MatrixProb is empty.")
+            return
+
+        paramPLT.getTitle = "Probability of 0 at each position"
+        paramPLT.getXLabel = "Columns"
+        paramPLT.getYLabel = "Rows"
         PLTImShow(ValMatrix=self.getMatrixProb, paramPLT=paramPLT, FInterpolType=2)
+        PLTShow(paramPLT=paramPLT)
         return paramPLT
 
     def PLTCmptScores(self, paramPLT=None):
         if paramPLT is None:
             paramPLT = DefaultParamPLT()
+
         if self.getMatrixCmptScores is None:
             print("Error: MatrixCmptScores is empty.")
+
+        paramPLT.getTitle = "Computed scores for each position"
+        paramPLT.getXLabel = "Columns"
+        paramPLT.getYLabel = "Rows"
         PLTImShow(ValMatrix=self.getMatrixCmptScores, paramPLT=paramPLT, FInterpolType=2)
+        PLTShow(paramPLT=paramPLT)
         return paramPLT
 
-    def PLTProbaAndTiles(self, paramPLT=None):
+    def PLTProbaAndTiles(self, paramPLT=None, BStartPLT=True):
         if paramPLT is None:
             paramPLT = DefaultParamPLT()
-        PLTUpdateLayout(1, 2)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=2, BStartPLT=BStartPLT)
         self.PLTProba(paramPLT=paramPLT)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=2, Index=Index)
         self.PLTDataTiles(paramPLT=paramPLT)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=2, Index=Index)
         return paramPLT
 
-    def PLTProbaScoresTiles(self, paramPLT=None):
+    def PLTProbaScoresTiles(self, paramPLT=None, BStartPLT=True):
         if paramPLT is None:
             paramPLT = DefaultParamPLT()
-        PLTUpdateLayout(1, 3)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=3, BStartPLT=BStartPLT)
         self.PLTProba(paramPLT=paramPLT)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=3, Index=Index)
         self.PLTCmptScores(paramPLT=paramPLT)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=3, Index=Index)
         self.PLTDataTiles(paramPLT=paramPLT)
+
+        Index = PLTMultiPlot(paramPLT, Rows=1, Cols=3, Index=Index)
         return paramPLT
 
     # Solver methods
@@ -318,32 +598,119 @@ class VoltorbGameGrid:
         probability matrix.
         """
 
-        self.CmptGridsGeneration()
-
         Status = True
         i = 1
+        while Status:
+            # Compute the number of grids that satisfies only row constraints
+            print(f"Step {i}:")
+            ValidRows, NCombinations = self.CmptRowCombinations()
+            print(f"Number of combination {NCombinations}")
+
+            # Verify if the number of combinations is not too high
+            if NCombinations > 10**6:
+                print("Info: Too many combinations to compute. Solver will not work. Use the score method instead.")
+
+                # Compute scores
+                self.CmptScores()
+
+                # Retrieve the computed scores matrix
+                ScoreMatrix = self.getMatrixCmptScores
+
+                # Retrieve the data matrix
+                DataMatrix = self.getMatrixDataTiles
+
+                # If no position has a score higher than 1, the game is finished
+                if np.all(ScoreMatrix <= 1):
+                    Status = False
+                    print("Info: Solver completed successfully.")
+                    break
+
+                # If there are infinite values in the score matrix, the player has to select those tiles
+                if np.any(ScoreMatrix == np.inf):
+                    # Select the tile with the infinite score
+                    Row, Col = np.unravel_index(np.argmax(ScoreMatrix), ScoreMatrix.shape)
+
+                    # Ask for the value at the selected position
+                    print(f"Querying value at position ({Row}, {Col})")
+                    Value = int(input())
+                else:
+                    # If tiles are known, the solver will not select them
+                    # Ask for the row and column of the tiles
+                    TempStatus = True
+                    while TempStatus:
+                        print("Querying the row of the tile")
+                        Row = int(input())
+                        print("Querying the column of the tile")
+                        Col = int(input())
+                        # As long as the position is invalid, the player has to give a valid position
+                        if Row < 0 or Row >= self.getNRows or Col < 0 or Col >= self.getNCols:
+                            print("Error: Invalid position.")
+                        else:
+                            TempStatus = True
+                    # Ask for the value at the selected position
+                    print(f"Querying value at position ({Row}, {Col})")
+                    Value = int(input())
+
+                if Value == 0 or Value is False:
+                    Status = False
+                    print("Info: Terminating solver as value is 0 or False.")
+                else:
+                    # Update the plausible matrices with the new knowledge
+                    self.AddTile2MatrixDataTiles(Val=Value, Row=Row, Column=Col)
+
+            else:
+                # End of the score method and goes to the score
+                Status = False
+                print("Info: Solver use now the score and probability method.")
+
+            # Increment the step counter
+            i += 1
+
+        # Generate plausible matrices
+        self.CmptGridsGeneration()
+
+        # Launch the solver
+        Status = True
+
         while Status:
             # Compute probabilities
             self.CmptProba()
 
+            # Compute scores
+            self.CmptScores()
+
+            # Retrieve the computed scores matrix
+            ScoreMatrix = self.getMatrixCmptScores
+
+            # Retrieve the data matrix
+            DataMatrix = self.getMatrixDataTiles
+
             # Retrieve the probability matrix
             ProbMatrix = self.getMatrixProb
 
-            # Find the position with the least probability
-            DataMatrix = self.getMatrixDataTiles
+            # If no position has a score higher than 1, the game is finished
+            if np.all(ScoreMatrix <= 1):
+                Status = False
+                print("Info: Solver completed successfully.")
+                break
+
+            # If tiles are known, the solver will not select them
             TempProbMatrix = np.where(DataMatrix != 0, np.inf, ProbMatrix)
-            row, col = np.unravel_index(np.argmin(TempProbMatrix), TempProbMatrix.shape)
+            # If the score is less than 1, the tile is a voltorbe or a 1 point tile, the solver will not select them
+            TempProbMatrix = np.where(ScoreMatrix < 1, np.inf, TempProbMatrix)
+            # From the previous selection, the solver will select the tile with the lowest probability
+            Row, Col = np.unravel_index(np.argmin(TempProbMatrix), TempProbMatrix.shape)
 
             # Display the current state
             print(f"Step {i}:")
             print(f"Number of plausible matrices: {len(self.getLPossibleGrid)}")
             print("Probability matrix (likelihood of 0 in each position):")
             print(TempProbMatrix)
-            print(f"Querying value at position ({row+1}, {col+1})")
+            print(f"Querying value at position ({Row}, {Col})")
             # Ask for the value at the selected position
-            value = int(input())
+            Value = int(input())
 
-            if value == 0 or value is False:
+            if Value == 0 or Value is False:
                 Status = False
                 print("Info: Terminating solver as value is 0 or False.")
             elif len(self.getLPossibleGrid) == 1:  # Assuming checkCompletion verifies if the task is finished
@@ -351,7 +718,7 @@ class VoltorbGameGrid:
                 print("Info: Solver completed successfully (only one possibility).")
             else:
                 # Update the plausible matrices with the new knowledge
-                Success = self.CmptElem2MatricesSelection(row, col, value)
+                Success = self.CmptElem2MatricesSelection(Row, Col, Value)
                 if not Success:
                     Status = True
                     print("Error: Wrong value")
