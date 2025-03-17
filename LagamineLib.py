@@ -17,6 +17,12 @@ from pathlib import Path
 
 """
 DataLag
+
+# Improvement to be done:
+- Ability to load multiple files at the same time
+- Ability to merge the data of different files
+- Ability to read DAE files from Yokogawa software
+- Ability to read Excel files
 """
 class DataLag:
     def __init__(self):

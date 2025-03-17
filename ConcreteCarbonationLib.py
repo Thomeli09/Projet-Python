@@ -7,12 +7,90 @@ Created on Fri Feb 21 11:24:54 2025
 
 # Carbonation of concrete Library
 import numpy as np
+import scipy.special
 
 # Custom Lib
 
 
 
 # Methods
+
+# Transport model
+def CarboDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef):
+    """
+    Diffusion model
+
+    Parameters:
+        Xini (float): Initial position.
+        Xmax (float): Maximum position.
+        Dx (float): Spatial step.
+        tMax (float): Maximum time.
+        Dt (float): Time step.
+        Cco20 (float): Initial CO2 concentration.
+        DiffCoef (float): Diffusion coefficient.
+
+    Returns:
+        TimeArray (numpy.ndarray): Array of time steps.
+        XArray (numpy.ndarray): Array of spatial positions.
+        CArray (numpy.ndarray): Computed concentration values over time and space.
+    """
+    
+    # Generate spatial and temporal grid
+    NStepst = int(tMax/Dt)
+    TimeArray = np.linspace(0, tMax, NStepst)
+    NStepsX = int((Xmax-Xini)/Dx)
+    XArray = np.linspace(Xini, Xmax, NStepsX)
+
+    # Create time and space matrices using broadcasting
+    TMatrix = TimeArray[:, np.newaxis]  # Shape: (NSteps, 1)
+    XMatrix = XArray[np.newaxis, :]     # Shape: (1, NStepX)
+
+    # Compute diffusion profile efficiently using NumPy broadcasting
+    DenomTerm = np.sqrt(4 * DiffCoef * TMatrix)  # Precompute sqrt(4Dt) for all time steps
+    CMatrix = Cco20 * (1 - scipy.special.erf(np.abs(XMatrix) / DenomTerm))
+    return TimeArray, XArray, CMatrix
+
+def CarboAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u):
+    """
+    Advection-Diffusion model
+ 
+    Parameters:
+        Xini (float): Initial position.
+        Xmax (float): Maximum position.
+        Dx (float): Spatial step.
+        tMax (float): Maximum time.
+        Dt (float): Time step.
+        Cco20 (float): Initial CO2 concentration.
+        DiffCoef (float): Diffusion coefficient.
+        u (float): Advection velocity.
+
+    Returns:
+        TimeArray (numpy.ndarray): Array of time steps.
+        XArray (numpy.ndarray): Array of spatial positions.
+        CMatrix (numpy.ndarray): Computed CO2 concentration over time and space.
+    """
+    # Generate spatial and temporal grid
+    NStepst = int(tMax/Dt)
+    TimeArray = np.linspace(0, tMax, NStepst)
+    NStepsX = int((Xmax-Xini)/Dx)
+    XArray = np.linspace(Xini, Xmax, NStepsX)
+
+    # Create time and space matrices using broadcasting
+    TMatrix = TimeArray[:, np.newaxis]  # Shape: (NSteps, 1)
+    XMatrix = XArray[np.newaxis, :]     # Shape: (1, NStepX)
+
+    # Compute diffusion profile efficiently using NumPy broadcasting
+    term1 = np.exp(u * XMatrix / (2 * DiffCoef))
+    
+    term2 = np.exp(-XMatrix * u / (2 * DiffCoef)) * \
+            scipy.special.erfc((XMatrix / (2 * np.sqrt(DiffCoef * TMatrix))) - np.sqrt((u**2 * TMatrix) / (4 * DiffCoef)))
+    
+    term3 = np.exp(XMatrix * u / (2 * DiffCoef)) * \
+            scipy.special.erfc((XMatrix / (2 * np.sqrt(DiffCoef * TMatrix))) + np.sqrt((u**2 * TMatrix) / (4 * DiffCoef)))
+
+    CMatrix = (Cco20 / 2) * term1 * (term2 + term3)
+    return TimeArray, XArray, CMatrix
+
 
 # Saetta's Model
 def CarboSaettaFD(Cco2Ini, Ccaoh2Ini, tMax, Dt, RH, T):

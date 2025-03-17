@@ -7,6 +7,7 @@ Created on Tue Jan 21 12:35:04 2025
 
 # Voltorb Game Solver Library
 
+from pickle import TRUE
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools
@@ -178,15 +179,48 @@ class VoltorbGameGrid:
     # Data aquisition methods
     def VolorbeInputGene(self):
         """
-        Ask for the row and column of the tiles # modifier
+        Ask for the row and column of the tiles and the value of the tiles
         """
-        pass
+        # Ask for the row and column of the tiles
+        TempStatus = True
+        while TempStatus:
+            print("Querying the row of the tile")
+            try:
+                Row = int(input())
+            except ValueError:
+                print("Error: Please enter a Int value.")
 
-    def VolorbeInputSpec(self):
+            print("Querying the column of the tile")
+            try:
+                Col = int(input())
+            except ValueError:
+                print("Error: Please enter a Int value.")
+
+            # As long as the position is invalid, the player has to give a valid position
+            if Row < 0 or Row >= self.getNRows or Col < 0 or Col >= self.getNCols:
+                print("Error: Invalid position.")
+            else:
+                TempStatus = True
+
+        # Ask for the value at the selected position
+        Value = self.VolorbeInputSpec(Row, Col)
+        return Row, Col, Value
+
+    def VolorbeInputSpec(self, Row, Col):
         """
-        Ask for the value of tiles in row row and column col # modifier
+        Ask for the value of tiles in row row and column col
         """
-        pass
+        # Ask for the value at the selected position
+        print(f"Querying value at position ({Row}, {Col})")
+        TempStatus = True
+        while TempStatus:
+            try:
+                Value = int(input())
+                TempStatus = False
+            except ValueError:
+                print("Error: Please enter a Int value.")
+    
+        return Value
 
 
     # Computations methods
@@ -235,10 +269,10 @@ class VoltorbGameGrid:
 
                 if MatrixDataTiles[i, j] < 0:
                     ScoresMatrix[i, j] = min(RowScore, ColScore)
-                    if RowScore == np.inf or ColScore == np.inf:
-                        ScoresMatrix[i, j] = np.inf
                     if RowScore <= 1 or ColScore <= 1:
                         ScoresMatrix[i, j] = 0  # If the score is less or equal to 1, the tile is a voltorbe or is a one point tile, which is not interesting
+                    if RowScore == np.inf or ColScore == np.inf:
+                        ScoresMatrix[i, j] = np.inf
                 else:
                     ScoresMatrix[i, j] = MatrixDataTiles[i, j]*0  # Known values are kept as to not be selected
 
@@ -248,6 +282,9 @@ class VoltorbGameGrid:
     def CmptRowCombinations(self):
         """
         Compute all valid row combinations based on the point and voltorbe vectors and the current knowledge.
+
+        # Improvements:
+        - Use the list of possible grids to compute the valid row combinations if existing
         """
         Rows, Cols = self.getNRows, self.getNCols
         MaxValue = self.getMaxVal
@@ -281,7 +318,7 @@ class VoltorbGameGrid:
         # Generate valid rows and columns based on constraints
         ValidRows = [ValidRowCombinations(YPointsSubset[i], YVoltorbesSubset[i], Cols, MaxValue, MatrixDataTiles[i]) for i in range(Rows)]
 
-        # Compute the number of combinations # modifier
+        # Compute the number of combinations
         NCombinations = np.prod([len(ValidRows[i]) for i in range(Rows)])
 
         return ValidRows, NCombinations
@@ -596,8 +633,12 @@ class VoltorbGameGrid:
         Request the value of the reward at a given place (least probability),
         recompute the probability matrix from this knowledge, and show the new 
         probability matrix.
-        """
 
+        Improvements:
+        - Add the simplification of management of asking tiles values
+        - Add the possibility to compute the number of combinations with row or with column constraints and choose the one with the least number of combinations
+        """
+        Value = True
         Status = True
         i = 1
         while Status:
@@ -618,6 +659,10 @@ class VoltorbGameGrid:
 
                 # Retrieve the data matrix
                 DataMatrix = self.getMatrixDataTiles
+
+                # Plottings of the probability, scores and data matrices
+                paramPLT = self.PLTProbaScoresTiles(paramPLT=None, BStartPLT=True)
+                PLTScreenMaximize()
 
                 # If no position has a score higher than 1, the game is finished
                 if np.all(ScoreMatrix <= 1):
@@ -646,12 +691,12 @@ class VoltorbGameGrid:
                         if Row < 0 or Row >= self.getNRows or Col < 0 or Col >= self.getNCols:
                             print("Error: Invalid position.")
                         else:
-                            TempStatus = True
+                            TempStatus = False
                     # Ask for the value at the selected position
                     print(f"Querying value at position ({Row}, {Col})")
                     Value = int(input())
 
-                if Value == 0 or Value is False:
+                if Value == 0:
                     Status = False
                     print("Info: Terminating solver as value is 0 or False.")
                 else:
@@ -666,65 +711,70 @@ class VoltorbGameGrid:
             # Increment the step counter
             i += 1
 
-        # Generate plausible matrices
-        self.CmptGridsGeneration()
+        if Value != 0:  # Launch the solver
+            # Generate plausible matrices
+            self.CmptGridsGeneration()
 
-        # Launch the solver
-        Status = True
+            Status = True
+            while Status:
+                # Compute probabilities
+                self.CmptProba()
 
-        while Status:
-            # Compute probabilities
-            self.CmptProba()
+                # Compute scores
+                self.CmptScores()
 
-            # Compute scores
-            self.CmptScores()
+                # Retrieve the computed scores matrix
+                ScoreMatrix = self.getMatrixCmptScores
 
-            # Retrieve the computed scores matrix
-            ScoreMatrix = self.getMatrixCmptScores
+                # Retrieve the data matrix
+                DataMatrix = self.getMatrixDataTiles
 
-            # Retrieve the data matrix
-            DataMatrix = self.getMatrixDataTiles
+                # Retrieve the probability matrix
+                ProbMatrix = self.getMatrixProb
 
-            # Retrieve the probability matrix
-            ProbMatrix = self.getMatrixProb
+                # If no position has a score higher than 1, the game is finished
+                if np.all(ScoreMatrix <= 1):
+                    Status = False
+                    print("Info: Solver completed successfully.")
+                    break
 
-            # If no position has a score higher than 1, the game is finished
-            if np.all(ScoreMatrix <= 1):
-                Status = False
-                print("Info: Solver completed successfully.")
-                break
+                # If tiles are known, the solver will not select them
+                TempProbMatrix = np.where(DataMatrix <= 0, ProbMatrix, np.inf)
+                # If the score is less than 1, the tile is a voltorbe or a 1 point tile, the solver will not select them
+                TempProbMatrix = np.where(ScoreMatrix < 1,  np.inf, TempProbMatrix)
+                # From the previous selection, the solver will select the tile with the lowest probability
+                Row, Col = np.unravel_index(np.argmin(TempProbMatrix), TempProbMatrix.shape)
 
-            # If tiles are known, the solver will not select them
-            TempProbMatrix = np.where(DataMatrix != 0, np.inf, ProbMatrix)
-            # If the score is less than 1, the tile is a voltorbe or a 1 point tile, the solver will not select them
-            TempProbMatrix = np.where(ScoreMatrix < 1, np.inf, TempProbMatrix)
-            # From the previous selection, the solver will select the tile with the lowest probability
-            Row, Col = np.unravel_index(np.argmin(TempProbMatrix), TempProbMatrix.shape)
+                # Display the current state
+                print(f"Step {i}:")
+                print(f"Number of plausible matrices: {len(self.getLPossibleGrid)}")
+                print(f"Querying value at position ({Row}, {Col})")
 
-            # Display the current state
-            print(f"Step {i}:")
-            print(f"Number of plausible matrices: {len(self.getLPossibleGrid)}")
-            print("Probability matrix (likelihood of 0 in each position):")
-            print(TempProbMatrix)
-            print(f"Querying value at position ({Row}, {Col})")
-            # Ask for the value at the selected position
-            Value = int(input())
+                # Plottings of the probability, scores and data matrices
+                paramPLT = self.PLTProbaScoresTiles(paramPLT=None, BStartPLT=True)
+                PLTScreenMaximize()
 
-            if Value == 0 or Value is False:
-                Status = False
-                print("Info: Terminating solver as value is 0 or False.")
-            elif len(self.getLPossibleGrid) == 1:  # Assuming checkCompletion verifies if the task is finished
-                Status = False
-                print("Info: Solver completed successfully (only one possibility).")
-            else:
-                # Update the plausible matrices with the new knowledge
-                Success = self.CmptElem2MatricesSelection(Row, Col, Value)
-                if not Success:
-                    Status = True
-                    print("Error: Wrong value")
+                # Ask for the value at the selected position
+                Value = int(input())
 
-            # Increment the step counter
-            i += 1
+                if Value == 0:
+                    Status = False
+                    print("Info: Terminating solver as value is 0 or False.")
+                elif len(self.getLPossibleGrid) == 1:  # Assuming checkCompletion verifies if the task is finished
+                    Status = False
+                    print("Info: Solver completed successfully (only one possibility).")
+                else:
+                    # Update the plausible matrices with the new knowledge
+                    Success = self.CmptElem2MatricesSelection(Row, Col, Value)
+                    if not Success:
+                        Status = True
+                        print("Error: Wrong value")
+
+                # Increment the step counter
+                i += 1
+
+        # Close all plots
+        CloseALLPlots()
 
 
 
