@@ -19,8 +19,6 @@ from PlotLib import ParamPLT, PLTGrid, PLTLimit, CloseALLPlots, StartPlots, Clos
 """
 Tasks class
 """
-
-
 class Tasks:
     def __init__(self):
         self.LTask = []
@@ -153,7 +151,7 @@ class Tasks:
                 Completion_days = (task.duration+1) * task.completion_ratio
 
             # Adding a lower bar - for the overall task duration
-            Bars = plt.barh(i, width=Duration, left=task.start, height=0.4, color=TaskColor, alpha=0.4)
+            Bars = plt.barh(i, width=Duration, left=task.start, height=0.4, color=TaskColor, alpha=paramPLT.getAlpha)
             BarColors = [Bar.get_facecolor() for Bar in Bars]
             # Adding an upper bar - for the status of completion
             plt.barh(i, width=Completion_days, left=task.start, height=0.4, color=BarColors[0])
@@ -191,7 +189,7 @@ class Tasks:
         if self.getBColorGroups:
             patches = []
             for Item in GroupsColors:
-                patches.append(matplotlib.patches.Patch(color=GroupsColors[Item]))
+                patches.append(matplotlib.patches.Patch(color=GroupsColors[Item], alpha=paramPLT.getAlpha))
             plt.legend(handles=patches, labels=GroupsColors.keys(), fontsize=paramPLT.getFontSize)
 
         plt.show(block=False)
@@ -201,14 +199,6 @@ def DatePlusNumDays(Date, NumDays):
     """Return the date after adding a number of days."""
     Temp = pd.to_datetime(Date) + pd.Timedelta(days=NumDays)
     return f'{Temp.strftime("%Y-%m-%d")}'
-
-
-"""
--------------
-Modifications
--------------
-
-"""
 
 """
 -------

@@ -6,11 +6,10 @@ Created on Wed Oct 30 14:15:29 2024
 """
 
 # General Plotting library
-
-from operator import index
-from queue import Empty
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import numpy as np
+
 
 
 # Custom Lib
@@ -21,7 +20,7 @@ Base de donnée
 """
 
 
-# Paramètre d'affichage
+# Display parameters
 class ParamPLT:
     def __init__(self, colour, linetype, marker, linesize, fontsize):
         """
@@ -29,7 +28,7 @@ class ParamPLT:
         """
         # Plot
         self.Colour = colour
-        self.ColourMap = None
+        self.ColourMap = 'viridis'
         self.LineType = linetype
         self.LineSize = linesize
         self.MarkerType = marker
@@ -100,11 +99,22 @@ class ParamPLT:
         else:
             self.Colour = colour
 
-    def getColourFillList(self, ColourTheme, LVals, FloatMin, FloatMax):
-        # To be continued
-        self.getColour = plt.get_cmap(ColourTheme)(np.linspace(FloatMin, FloatMax, len(LVals)))
+    def getColourFillList(self, ShadesNumber, FloatMin=0.0, FloatMax=1.0):
+        """
+        Create a list of colours based on a colour map and a range of values.
 
-    def getColourFullList(self, BEmptying=True):
+        Args:
+            ShadesNumber (int): Number of shades to generate.
+            FloatMin (float): Minimum value of the range.
+            FloatMax (float): Maximum value of the range.
+        """
+        CMap = cm.get_cmap(self.getColourMap)
+        ColorRange = np.linspace(FloatMin, FloatMax, ShadesNumber)
+        ListColours = [CMap(Value) for Value in ColorRange]
+
+        return ListColours
+
+    def getColourFullList(self, BEmptying=False):
         if isinstance(self.Colour, list):
             Temp = self.Colour
             if BEmptying:
@@ -119,7 +129,7 @@ class ParamPLT:
         return self.ColourMap
 
     @getColourMap.setter
-    def getColourMap(self, VColourMap):
+    def getColourMap(self, ValColourMap):
         ColourMapDict = {"Perceptually Uniform Sequential": (0, 4),  # Indices: 0-4
                          0: "viridis", 1: "plasma", 2: "inferno", 3: "magma", 4: "cividis",
 
@@ -174,7 +184,7 @@ class ParamPLT:
                          144: "spring_r", 145: "summer_r", 146: "autumn_r", 147: "winter_r", 148: "cool_r", 149: "Wistia_r",
                          150: "hot_r", 151: "afmhot_r", 152: "gist_heat_r", 153: "copper_r"}
 
-        self.ColourMap = ColourMapDict.get(VColourMap, 'viridis')
+        self.ColourMap = ColourMapDict.get(ValColourMap, 'viridis')
 
     @property
     def getLineType(self):
@@ -232,12 +242,6 @@ class ParamPLT:
         - If `HatchType` is empty (`None` or equivalent), it returns `None`.
         - If `HatchType` is a list, it removes and returns the first element of the list (FIFO behavior).
         - If `HatchType` is not a list, it simply returns the value of `HatchType`.
-
-        Returns:
-            Any: 
-                - If `HatchType` is empty, returns `None`.
-                - If `HatchType` is a list, returns the first element while modifying the list.
-                - If `HatchType` is a single value, returns that value.
         """
 
         # Check if `HatchType` is empty or `None`
@@ -263,9 +267,6 @@ class ParamPLT:
                 - If `HatchType` is an integer, it is directly mapped to a pattern using the dictionary (Result = 1 Hatch).
                 - If `HatchType` is a flat list, each element is individually mapped to create a combined pattern (Result = 1 Hatch).
                 - If `HatchType` is a nested list, each sub-list is individually mapped to create multiple patterns (Result = # of sub-lists Hatch).
-
-        Returns:
-            None: Directly assigns the resulting value to `self.HatchType`.
         """
 
         # Dictionary mapping numeric values to hatch patterns
@@ -592,8 +593,11 @@ class ParamPLT:
 """
 Fcts générales
 """
-def ClosePlot(PlotOBJ):
-    plt.close(PlotOBJ)
+def ClosePlot(PlotOBJ=None):
+    if PlotOBJ is None:
+        plt.close()
+    else:
+        plt.close(PlotOBJ)
 
 def CloseALLPlots():
     plt.close('all')
@@ -672,9 +676,10 @@ def PLTShow(paramPLT, BMultiplot=False):
     if not BMultiplot:
         plt.show(block=False)  # Show plot without blocking
 
-def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1):
+def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True):
     if Index == 1:
-        StartPlots()
+        if BStartPLT:  # To start a new plot or not
+            StartPlots()
         plt.subplot(Rows, Cols, Index)
         plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
     elif Index == Rows*Cols+1:
@@ -711,7 +716,7 @@ def PLTColorBar(paramPLT):
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
 
-# Version Cas 3D avec PLT3DShow
+# Version in 3D case with PLT3DShow
 
 """
 Type de Plots
@@ -827,7 +832,7 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
     Returns:
     - Displays a pie chart.
 
-    Improovements:
+    Improvements:
     - Ajouter des vérifications entre les paramètres pour éviter les conflits.
     - Extraire un nombre limité de paramètres pour éviter des clash si plus de valeurs.
     """
@@ -874,7 +879,7 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
                          horizontalalignment=horizontalalignment, 
                          **kw)
 
-def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True):
+def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True, BShowVal=True, Fmt=".2f"):
     """
     Displays an image plot of the provided matrix using custom parameters.
     """
@@ -887,9 +892,17 @@ def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True):
     
     TypeOrigin =  'upper' if BOrigin else 'lower'
 
-    plt.imshow(ValMatrix, cmap='viridis', alpha=paramPLT.getAlpha,
+    plt.imshow(ValMatrix, cmap=paramPLT.getColourMap, alpha=paramPLT.getAlpha,
                norm=paramPLT.GenericScaleType, interpolation=InterpolType,
                origin=TypeOrigin)
+
+    if BShowVal:
+        Rows, Cols = ValMatrix.shape
+        for i in range(Rows):
+            for j in range(Cols):
+                plt.text(j, i, format(ValMatrix[i, j], Fmt),
+                         color="black",fontsize=paramPLT.getFontSize, fontweight="bold",
+                         ha='center', va='center')
 
     PLTColorBar(paramPLT)
 
@@ -928,7 +941,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
         plt.fill(XPoint, YPoint, color=paramPLT.getColour, zorder=0,
                  label=paramPLT.getLegends)
 
-'Fonction de plot de graphe en 2d'
+# Plotting functions in 3D
 # 3D
 
 # 3D Shapes
