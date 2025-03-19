@@ -53,6 +53,7 @@ def LenData(Data):
     return 0
 
 
+# List management functions
 def ListSort(L1, L2=False):
     """
     Sort a list of numbers or pairs of values based on the first list.
@@ -105,3 +106,5 @@ def ListSum(ListOfSumList, BPrint=True):
     if BPrint:
         print("Sum of lists:", SumListVal)
     return SumListVal
+
+# Text management functions
