@@ -423,7 +423,7 @@ class DataLag:
 
 def TimeStep2Time(self):
     pass
-    # permet de faire la traduction de time step à un temps
+    # permet de faire la traduction de time step ? un temps
 
     # S'aider de la colonne de unique time step
 
@@ -431,7 +431,7 @@ def TimeStep2Time(self):
 
 def Time2TimeStep(self):
     pass
-    # permet de faire la traduction de temps à un time step
+    # permet de faire la traduction de temps ? un time step
 
     # S'aider de la colonne de unique time step
 
@@ -441,8 +441,8 @@ def Time2TimeStep(self):
 - Add the capability to use the data of different files at the same time
     - Add the ability to merge the data of different files
 """
-# Fonction import de donné
-# Fonction de traitement des données
+# Fonction import de donn?
+# Fonction de traitement des donn?es
 # Fonction d'affichage
-# Fonction d'export de donnée
+# Fonction d'export de donn?e
 

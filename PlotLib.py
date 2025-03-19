@@ -9,7 +9,7 @@ Created on Wed Oct 30 14:15:29 2024
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
-
+from highlight_text import fig_text
 
 
 # Custom Lib
@@ -46,6 +46,7 @@ class ParamPLT:
         self.Title = None
         self.Legends = []
         self.BLegends = True
+        self.BLegendsInsideBox = True  # To put the legend inside the plot or not
         self.ColourBarTitle = None
 
         # Scale
@@ -65,6 +66,7 @@ class ParamPLT:
         self.GridLineType = None
         self.GridLineSize = 0.4
         self.GridAlpha = 1
+        self.BBox = True # To add a box around the plot or not
 
         # Limits
         self.XLimit = []
@@ -416,6 +418,14 @@ class ParamPLT:
         self.BLegends = Bool
 
     @property
+    def getBLegendsInsideBox(self):
+        return self.BLegendsInsideBox
+
+    @getBLegendsInsideBox.setter
+    def getBLegendsInsideBox(self, Bool):
+        self.BLegendsInsideBox = Bool
+
+    @property
     def getColourBarTitle(self):
         return self.ColourBarTitle
 
@@ -544,6 +554,14 @@ class ParamPLT:
         self.GridAlpha = Val
 
     @property
+    def getBBox(self):
+        return self.BBox
+
+    @getBBox.setter
+    def getBBox(self, Bool):
+        self.BBox = Bool
+
+    @property
     def getXLimit(self):
         if not self.XLimit:
             return None
@@ -610,18 +628,114 @@ def ClosePlotsOnDemand():
 def StartPlots():
     plt.figure()
 
+def PLTLatexStyle():
+    """
+    Set the style of the plot to use LaTeX for text rendering. But is slower.
+    """
+    plt.rcParams['text.usetex'] = True
+
 def PLTTitleAxis(paramPLT):
+    """
+    Add a title to the plot and label the axes based on the specified parameters.
+    """
     plt.xlabel(paramPLT.getXLabel, fontsize=paramPLT.getFontSize)
     plt.ylabel(paramPLT.getYLabel, fontsize=paramPLT.getFontSize)
     plt.title(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
 
+def PLTTitleModified(TitleText, paramPLT, X=0.5, Y=0.95):
+    """
+    Allows to have a different title style than the default one.
+    Parameters:
+    - TitleText: Text of the title with the desired style. 
+        Example: 'Text with <highlighted color::{"color": "red", "fontstyle": "italic", "fontweight": "bold"}>'
+    - paramPLT: Object containing plot parameters.
+    - X: X position of the title.
+    - Y: Y position of the title.
+    Improvements:
+    - Add highlight_textprops to modify the style of the title without adding that in the TitleText.
+    """
+    fig_text(s=TitleText, x=X, y=Y, 
+             fontsize=paramPLT.getTitleSize, color='black', 
+             ha='center', va='center')
+
 def PLTSizeAxis(paramPLT):
+    """
+    Set the size of the ticks on the plot.
+    """
     plt.xticks(fontsize=paramPLT.getTicksSize)
     plt.yticks(fontsize=paramPLT.getTicksSize)
 
 def PLTLegend(paramPLT):
+    """
+    Add a legend to the plot based on the specified parameters.
+    Parameters:
+    - paramPLT: Object containing plot parameters.
+    """
     if paramPLT.getBLegends:
-        plt.legend(fontsize=paramPLT.getFontSize)
+        if paramPLT.getBLegendsInsideBox:
+            plt.legend(fontsize=paramPLT.getFontSize)
+        else:
+            plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
+
+def UpdatePlotColorsAndLegend(LColors):
+    """
+    Update the colors of the lines in the plot based on a list of colors.
+
+    Parameters:
+    - LColors: List of colors to apply to the lines in the plot.
+    """
+    # Get the current axis
+    ax = plt.gca()
+    
+    # Verify that the number of colors matches the number of lines
+    if len(LColors) != len(ax.lines):
+        print("Error: The number of colors does not match the number of lines.")
+        return
+    
+    # Update the colors of the lines
+    for Line, Color in zip(ax.lines, LColors):
+        Line.set_color(Color)
+
+    # Update the legend
+    plt.legend()
+    # plt.draw()  # Redraws the figure (updates existing)
+    plt.show()
+
+def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0):
+    """
+    Add a legend with a main title and multiple subtitles at specified positions.
+
+    Improvements:
+    - Refine the position of the subtitles based on the number of labels in the legend.
+    - Add an argument to specify the color of the subtitles.
+    """
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    # Adding the subtitles to the legend
+    for Subtitle, Position in zip(LLegendSubtitles, LSubtitlesPositions):
+        if 0 <= Position <= len(handles):  # Prevent IndexError
+            handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
+
+    # Adding the main title to the legend
+    Legend = plt.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
+    # Setting the title properties
+    FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getFontSize * TitleSizeRatio, Weight=None,
+               Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
+
+    # Setting the subtitles properties
+    for text in Legend.get_texts():
+        if text.get_text() in LLegendSubtitles: # In case of the subtitles
+            FormatText(Text=text, Fontsize=paramPLT.getFontSize * SubtitlesSizeRatio, Weight='bold',
+                       Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
+        else:  # In case of the different labels
+            pass
+
+def PLTColorBar(paramPLT):
+    """
+    Add a color bar to the plot based on the specified parameters.
+    """
+    if paramPLT.getColourBarTitle:
+        plt.colorbar(label=paramPLT.getColourBarTitle)
 
 def PLTGrid(paramPLT):
     if paramPLT.getGridAxis:
@@ -657,6 +771,12 @@ def PLTScaleType(paramPLT):
     if paramPLT.getYScaleType:
         plt.yscale(paramPLT.getYScaleType)
 
+def PLTBox(paramPLT):
+    """
+    Remove or add the box around the plot based on the specified parameter.
+    """
+    plt.box(on=paramPLT.getBBox)
+
 def PLTShow(paramPLT, BMultiplot=False):
     PLTTitleAxis(paramPLT)
 
@@ -672,6 +792,8 @@ def PLTShow(paramPLT, BMultiplot=False):
     PLTLimit(paramPLT)
 
     PLTScaleType(paramPLT)
+
+    PLTBox(paramPLT)
 
     if not BMultiplot:
         plt.show(block=False)  # Show plot without blocking
@@ -705,13 +827,6 @@ def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
         plt.pause(0.1) # Pause to allow the window to maximize and UpdateLayout to work
         # in case of unreliable behavior, increase the pause duration
         PLTUpdateLayout()
-
-def PLTColorBar(paramPLT):
-    """
-    Add a color bar to the plot based on the specified parameters.
-    """
-    if paramPLT.getColourBarTitle:
-        plt.colorbar(label=paramPLT.getColourBarTitle)
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
@@ -945,3 +1060,42 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
 # 3D
 
 # 3D Shapes
+
+
+# Text management functions for matplotlib
+def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
+                Color=None, Backgroundcolor=None, Alpha=None):
+    """
+    Applies text formatting options dynamically.
+    If an option is None, it resets to the default Matplotlib setting.
+    
+    Parameters:
+        Text: Matplotlib text object
+        Fontsize: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}
+        Weight: {'light', 'normal', 'medium', 'semibold', 'bold', 'heavy', 'black'}
+        Style: {'normal', 'italic', 'oblique'} or None
+        Family: {'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'} or None
+        Color: Named color, hex ('#FF5733'), or RGB tuple ((1,0,0))
+        Backgroundcolor: Same as color
+        Alpha: float (0.0 to 1.0, where 0 is fully transparent and 1 is opaque)
+    """
+    if Fontsize is not None:
+        Text.set_fontsize(Fontsize)
+
+    if Weight is not None:
+        Text.set_weight(Weight)
+
+    if Style is not None:
+        Text.set_style(Style)
+
+    if Family is not None:
+        Text.set_family(Family)
+
+    if Color is not None:
+        Text.set_color(Color)
+
+    if Backgroundcolor is not None:
+        Text.set_backgroundcolor(Backgroundcolor)
+
+    if Alpha is not None:
+        Text.set_alpha(Alpha)
