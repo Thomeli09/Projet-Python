@@ -46,6 +46,7 @@ class ParamPLT:
         self.Title = None
         self.Legends = []
         self.BLegends = True
+        self.BLegendsInsideBox = True  # To put the legend inside the plot or not
         self.ColourBarTitle = None
 
         # Scale
@@ -65,6 +66,7 @@ class ParamPLT:
         self.GridLineType = None
         self.GridLineSize = 0.4
         self.GridAlpha = 1
+        self.BBox = True # To add a box around the plot or not
 
         # Limits
         self.XLimit = []
@@ -416,6 +418,14 @@ class ParamPLT:
         self.BLegends = Bool
 
     @property
+    def getBLegendsInsideBox(self):
+        return self.BLegendsInsideBox
+
+    @getBLegendsInsideBox.setter
+    def getBLegendsInsideBox(self, Bool):
+        self.BLegendsInsideBox = Bool
+
+    @property
     def getColourBarTitle(self):
         return self.ColourBarTitle
 
@@ -544,6 +554,14 @@ class ParamPLT:
         self.GridAlpha = Val
 
     @property
+    def getBBox(self):
+        return self.BBox
+
+    @getBBox.setter
+    def getBBox(self, Bool):
+        self.BBox = Bool
+
+    @property
     def getXLimit(self):
         if not self.XLimit:
             return None
@@ -652,17 +670,12 @@ def PLTLegend(paramPLT):
     Add a legend to the plot based on the specified parameters.
     Parameters:
     - paramPLT: Object containing plot parameters.
-    - BOutSideBox: Boolean flag to specify if the legend should be outside the plot box.
-
-    Improvements:
-    - Link the BOutSideBox parameter to the paramPLT object.
     """
-    BOutSideBox = False
     if paramPLT.getBLegends:
-        if BOutSideBox:
-            plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
-        else:
+        if paramPLT.getBLegendsInsideBox:
             plt.legend(fontsize=paramPLT.getFontSize)
+        else:
+            plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
 
 def UpdatePlotColorsAndLegend(LColors):
     """
@@ -758,11 +771,11 @@ def PLTScaleType(paramPLT):
     if paramPLT.getYScaleType:
         plt.yscale(paramPLT.getYScaleType)
 
-def PLTBox():
+def PLTBox(paramPLT):
     """
-    Remove the box around the plot.
+    Remove or add the box around the plot based on the specified parameter.
     """
-    plt.box(False)
+    plt.box(on=paramPLT.getBBox)
 
 def PLTShow(paramPLT, BMultiplot=False):
     PLTTitleAxis(paramPLT)
@@ -779,6 +792,8 @@ def PLTShow(paramPLT, BMultiplot=False):
     PLTLimit(paramPLT)
 
     PLTScaleType(paramPLT)
+
+    PLTBox(paramPLT)
 
     if not BMultiplot:
         plt.show(block=False)  # Show plot without blocking
