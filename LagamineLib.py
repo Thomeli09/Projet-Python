@@ -88,23 +88,55 @@ class DataLag:
 
     @property
     def getNRow(self):
+        """
+        Returns the number of rows in the data matrix.
+        """
         if self.getDataMatrix is None:
             print("Error: No data matrix.")
             return None
         print("Number of rows: [ 0 ;", self.getDataMatrix.shape[0], "]")
+
         return self.getDataMatrix.shape[0]
 
     @property
-    def getNCol(self):
+    def getNRowSimpli(self):
+        """
+        Returns the number of rows in the data matrix. Simplified version, without print
+        """
         if self.getDataMatrix is None:
             print("Error: No data matrix.")
             return None
 
+        return self.getDataMatrix.shape[0]
+
+    @property
+    def getNCol(self):
+        """
+        Returns the number of columns in the data matrix.
+        """
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
         print("Number of columns: [ 0 ;", self.getDataMatrix.shape[1], "]")
+
+        return self.getDataMatrix.shape[1]
+
+    @property
+    def getNColSimpli(self):
+        """
+        Returns the number of columns in the data matrix. Simplified version, without print
+        """
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+
         return self.getDataMatrix.shape[1]
 
     @property
     def getNStep(self):
+        """
+        Returns the number of time steps in the data matrix.
+        """
         if self.getDataMatrix is None:
             print("Error: No data matrix.")
             return None
@@ -123,6 +155,30 @@ class DataLag:
         NStep = len(TimeStepArray)
 
         print("Number of time steps: [ 0 ;", NStep, "]")
+        return NStep
+
+    @property
+    def getNStepSimpli(self):
+        """
+        Returns the number of time steps in the data matrix. Simplified version, without print
+        """
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+
+        if self.getTimeCol is None:
+            print("Error: No time column selected.")
+            return None
+
+        # Extract the time steps
+        if self.getTimeStepArray is None:
+            TimeStepArray = self.SetTimeStepArray
+        else:
+            TimeStepArray = self.getTimeStepArray
+
+        # Count the number of time steps
+        NStep = len(TimeStepArray)
+
         return NStep
 
 
@@ -202,7 +258,7 @@ class DataLag:
     @property
     def ResetPLTIndex(self):
         """ Resets the index selection array."""
-        self.PLTIndex = np.arange(self.getNRow)
+        self.PLTIndex = np.arange(self.getNRowSimpli)
         self.getPLTDataMatrix = self.getDataMatrix
 
     @property
@@ -230,14 +286,14 @@ class DataLag:
         self.getTimeStepArray = np.unique(TimeVal)
         return self.getTimeStepArray
 
-
-
-    # to be done
-
+    """
     # Methods
+    """
     # File loading
     def LoadFile(self, BLoadMatrix=False):
-        """Reads the file and extracts numerical data, keeping row structure intact."""
+        """
+        Reads the file and extracts numerical data, keeping row structure intact.
+        """
         if not self.BoolApprovedFiles:
             print("Error: File format not approved.")
             return None
@@ -280,7 +336,9 @@ class DataLag:
                 return None
   
     def LoadDataMatrix(self):
-        """Returns the extracted data as a NumPy matrix."""
+        """
+        Returns the extracted data as a NumPy matrix.
+        """
         if self.getData is None:
             print("Error: No data to convert.")
             return False
@@ -289,12 +347,11 @@ class DataLag:
         return self.getDataMatrix
 
     # Data Analysis and Visualization
-
     def SelectIndex(self, Col=None, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
         """
         Selects rows based on the values in a column and updates the index selection array.
         
-        Improvement to be done:
+        Improvements:
         - Add the possibility to extract the values directly from the pltDataMatrix
         """
 
@@ -363,7 +420,7 @@ class DataLag:
         """
         Sorts the differents values by a given column.
 
-        Improvement to be done:
+        Improvements:
         - Add the possibility to extract the values directly from the pltDataMatrix
         """
         # Verify that the index selection array is not empty
@@ -393,7 +450,9 @@ class DataLag:
             self.getPLTDataMatrix = self.getDataMatrix[IndexOrder, :]
 
     def PLTPreprocessing(self):
-        """Preprocesses data for plotting by putting them into the right variables."""
+        """
+        Preprocesses data for plotting by putting them into the right variables.
+        """
         # Verify that the index selection array is not empty
         if self.getPLTIndex is None:
             print("Warning: No index selected. Resetting the index.")
@@ -426,8 +485,6 @@ def TimeStep2Time(self):
     # permet de faire la traduction de time step ? un temps
 
     # S'aider de la colonne de unique time step
-
-
 
 def Time2TimeStep(self):
     pass
