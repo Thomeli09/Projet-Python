@@ -37,8 +37,8 @@ class ParamPLT:
         self.HatchType = ''
 
         # Text
-        self.FontSize = fontsize
         self.TitleSize = fontsize
+        self.FontSize = fontsize
         self.TicksSize = fontsize
         self.XLabel = None
         self.YLabel = None
@@ -73,6 +73,7 @@ class ParamPLT:
         self.YLimit = []
         self.Zlimit = []
 
+    # Plot
     @property
     def getBoolColour(self):
         if not self.Colour:
@@ -101,7 +102,7 @@ class ParamPLT:
         else:
             self.Colour = colour
 
-    def getColourFillList(self, ShadesNumber, FloatMin=0.0, FloatMax=1.0):
+    def getColourFillList(self, ShadesNumber, FloatMin=0.0, FloatMax=1.0, B2ParamPLTColor=True):
         """
         Create a list of colours based on a colour map and a range of values.
 
@@ -109,12 +110,16 @@ class ParamPLT:
             ShadesNumber (int): Number of shades to generate.
             FloatMin (float): Minimum value of the range.
             FloatMax (float): Maximum value of the range.
+            B2ParamPLTColor (bool): If True, transfer the colour to the ParamPLT object. Else, return the list of colours.
         """
         CMap = cm.get_cmap(self.getColourMap)
         ColorRange = np.linspace(FloatMin, FloatMax, ShadesNumber)
         ListColours = [CMap(Value) for Value in ColorRange]
 
-        return ListColours
+        if B2ParamPLTColor:
+            self.getColour = ListColours
+        else:
+            return ListColours
 
     def getColourFullList(self, BEmptying=False):
         if isinstance(self.Colour, list):
@@ -323,7 +328,7 @@ class ParamPLT:
             print("Warning: No list of hatch found.")
             return self.HatchType  # Return the current value of `HatchType`
 
-
+    # Text
     @property
     def getTitleSize(self):
         return self.TitleSize
@@ -433,6 +438,7 @@ class ParamPLT:
     def getColourBarTitle(self, Title):
         self.ColourBarTitle = Title
 
+    # Scale
     @property
     def getScale(self):
         return self.Scale
@@ -495,6 +501,7 @@ class ParamPLT:
         fmt = f"{self.getMarker}{self.getLineSize}{self.getColour}"
         return fmt
 
+    # Plot Format
     @property
     def getAspect(self):
         return self.PltAspect
@@ -503,6 +510,7 @@ class ParamPLT:
     def getAspect(self, Aspect):
         self.PltAspect = Aspect
 
+    # Grid
     def getGrid(self, Axis, Colour=None):
         if Axis == 1:
             self.GridAxis = 'x'
@@ -561,6 +569,7 @@ class ParamPLT:
     def getBBox(self, Bool):
         self.BBox = Bool
 
+    # Limits
     @property
     def getXLimit(self):
         if not self.XLimit:
@@ -645,12 +654,14 @@ def PLTTitleAxis(paramPLT):
 def PLTTitleModified(TitleText, paramPLT, X=0.5, Y=0.95):
     """
     Allows to have a different title style than the default one.
-    Parameters:
+
+    Args:
     - TitleText: Text of the title with the desired style. 
         Example: 'Text with <highlighted color::{"color": "red", "fontstyle": "italic", "fontweight": "bold"}>'
     - paramPLT: Object containing plot parameters.
     - X: X position of the title.
     - Y: Y position of the title.
+
     Improvements:
     - Add highlight_textprops to modify the style of the title without adding that in the TitleText.
     """
@@ -668,7 +679,8 @@ def PLTSizeAxis(paramPLT):
 def PLTLegend(paramPLT):
     """
     Add a legend to the plot based on the specified parameters.
-    Parameters:
+
+    Args:
     - paramPLT: Object containing plot parameters.
     """
     if paramPLT.getBLegends:
@@ -681,7 +693,7 @@ def UpdatePlotColorsAndLegend(LColors):
     """
     Update the colors of the lines in the plot based on a list of colors.
 
-    Parameters:
+    Args:
     - LColors: List of colors to apply to the lines in the plot.
     """
     # Get the current axis
@@ -704,6 +716,10 @@ def UpdatePlotColorsAndLegend(LColors):
 def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0):
     """
     Add a legend with a main title and multiple subtitles at specified positions.
+
+    Note: 
+    -The subtitles are added as empty lines with the specified text, that can lead to some issues.
+    -This function should be used after PLTShow() to work properly.
 
     Improvements:
     - Refine the position of the subtitles based on the number of labels in the legend.
@@ -863,7 +879,7 @@ def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """
     Creates a filled plot between two curves (primary and secondary) using customizable parameters.
 
-    Inputs:
+    Args:
     - XValues (list or array-like): X-axis values.
     - YValues (list or array-like): Y-axis values for the primary curve.
     - paramPLT (object): Object containing plot parameters.
@@ -926,7 +942,7 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
     """
     Creates a pie plot with customizable options, including optional annotations.
 
-    Parameters:
+    Args:
     - Val (list): Values for the pie chart.
     - paramPLT (object): Object containing plot parameters (e.g., colors, labels, hatches).
     - TypeAutopct (int): Type of percentage display:
@@ -1069,7 +1085,7 @@ def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
     Applies text formatting options dynamically.
     If an option is None, it resets to the default Matplotlib setting.
     
-    Parameters:
+    Args:
         Text: Matplotlib text object
         Fontsize: float or {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}
         Weight: {'light', 'normal', 'medium', 'semibold', 'bold', 'heavy', 'black'}

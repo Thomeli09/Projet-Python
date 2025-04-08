@@ -108,3 +108,56 @@ def ListSum(ListOfSumList, BPrint=True):
     return SumListVal
 
 # Text management functions
+
+# Vector management functions
+def VectorSelectVal(Vector, Val, AbsTol=1e-6, BFirst=False):
+    """
+    Select values in a numpy array that are equal to a given value within a tolerance and return the indices.
+    If BFirst is True, return the first occurrence only.
+    """
+    IndexVect = np.where(np.isclose(Vector, Val, atol=AbsTol))[0]
+    SelectedVal = Vector[IndexVect]
+
+    if BFirst:
+        if IndexVect.size == 0:
+            print("Error: Value not found.")
+            return None, None
+        IndexVect = IndexVect[0]
+        SelectedVal = SelectedVal[0]
+
+    return SelectedVal, IndexVect
+
+def VectorSelectClosestVal(Vector, Val, BFirst=False):
+    """
+    Select values in a numpy array that are the closest to a given value and return the indices.
+    If BFirst is True, return the first occurrence only.
+    """
+    IndexVect = np.argmin(np.abs(Vector - Val))
+    SelectedVal = Vector[IndexVect]
+
+    if IndexVect.size == 0:
+        print("Error: Value not found.")
+
+    return SelectedVal, IndexVect
+
+# Matrix management functions
+def MatrixSelectRowOrColumn(Matrix, Index, Axis=0):
+    """
+    Select a row or column from a 2D numpy array.
+    """
+    # Check if the index is within the matrix dimensions
+    if Axis == 0 and (Index >= Matrix.shape[0] or Index < 0):
+        print("Error: Row index out of bounds.")
+        return None
+    elif Axis == 1 and (Index >= Matrix.shape[1] or Index < 0):
+        print("Error: Column index out of bounds.")
+        return None
+
+    # Select the row or column
+    if Axis == 0:  # Selecting a row
+        return Matrix[Index, :]
+    elif Axis == 1:  # Selecting a column
+        return Matrix[:, Index]
+    else:
+        print("Error: Axis should be 0 or 1.")
+        return None
