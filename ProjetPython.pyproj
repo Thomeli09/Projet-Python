@@ -36,6 +36,7 @@
     <Compile Include="ObjectManagementLib.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />
+    <Compile Include="Python2TikZandPGF.py" />
     <Compile Include="RheologyLib.py" />
     <Compile Include="SoilLib.py" />
     <Compile Include="StructuralLib.py" />

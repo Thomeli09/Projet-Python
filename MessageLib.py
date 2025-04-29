@@ -7,13 +7,13 @@ Created on Wed Jan 29 16:33:57 2025
 
 # Library of Messages
 
-# Other Lib
 
+# Other Lib
+import tkinter as tk
+from tkinter import messagebox
 
 # Custom Lib
 
-import tkinter as tk
-from tkinter import messagebox
 
 """
 For non-locking error can go to the control pannel by printing text, showing the time of the error.

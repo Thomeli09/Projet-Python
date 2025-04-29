@@ -13,10 +13,13 @@ from highlight_text import fig_text
 
 
 # Custom Lib
-
+from DataManagementLib import LenData
 
 """
 Base de donnée
+
+Improvements:
+    Should add a list of axes to the ParamPLT object to avoid having to call plt.gca() each time as an option.
 """
 
 
@@ -713,19 +716,36 @@ def UpdatePlotColorsAndLegend(LColors):
     # plt.draw()  # Redraws the figure (updates existing)
     plt.show()
 
-def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0):
+def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0, ax=None):
     """
     Add a legend with a main title and multiple subtitles at specified positions.
 
+    Args:
+        LegendTitle: Main title of the legend.
+        LLegendSubtitles: List of subtitles to be added to the legend.
+        LSubtitlesPositions: List of positions for the subtitles in the legend.
+        paramPLT: Object containing plot parameters.
+        TitleSizeRatio: Ratio to adjust the size of the main title.
+        SubtitlesSizeRatio: Ratio to adjust the size of the subtitles.
+        ax: Axis object to which the legend will be added. If None, the current axis will be used.
+
+    Returns:
+
     Note: 
     -The subtitles are added as empty lines with the specified text, that can lead to some issues.
-    -This function should be used after PLTShow() to work properly.
+    -This function should be used after PLTShow() or PLTMultiPlot() to work properly.
 
     Improvements:
     - Refine the position of the subtitles based on the number of labels in the legend.
     - Add an argument to specify the color of the subtitles.
     """
-    handles, labels = plt.gca().get_legend_handles_labels()
+    # Get the current axis if not provided
+    if ax is None:
+        print("Info: No axis provided, using the current axis.")
+        ax = plt.gca()
+
+    # Get the current legend handles and labels
+    handles, labels = ax.get_legend_handles_labels()
 
     # Adding the subtitles to the legend
     for Subtitle, Position in zip(LLegendSubtitles, LSubtitlesPositions):
@@ -733,7 +753,7 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
             handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
 
     # Adding the main title to the legend
-    Legend = plt.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
+    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
     # Setting the title properties
     FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getFontSize * TitleSizeRatio, Weight=None,
                Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
@@ -774,12 +794,19 @@ def PLTCmptLimit(Variable, Ratio=0.1):
     Improvements:
     - Based the computation on the current registered limits (self.XLimit, self.YLimit, self.ZLimit).
     """
-    MaxVal = max(Variable)
-    MinVal = min(Variable)
-    Delta = MaxVal-MinVal
-    LowerLimit = MinVal-Delta*Ratio
-    UpperLimit = MaxVal+Delta*Ratio
-    return [LowerLimit, UpperLimit]
+    # Verify if the variable is empty
+    if LenData(Variable) == 0:
+        print("Warning: The variable is empty, no plotting range will be set.")
+        # Return None for both limits
+        return [None, None] 
+    
+    else:
+        MaxVal = max(Variable)
+        MinVal = min(Variable)
+        Delta = MaxVal-MinVal
+        LowerLimit = MinVal-Delta*Ratio
+        UpperLimit = MaxVal+Delta*Ratio
+        return [LowerLimit, UpperLimit]
 
 def PLTScaleType(paramPLT):
     if paramPLT.getXScaleType:
@@ -814,21 +841,51 @@ def PLTShow(paramPLT, BMultiplot=False):
     if not BMultiplot:
         plt.show(block=False)  # Show plot without blocking
 
-def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True):
+def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapping=True, BCurrPLTax=False):
+    """
+    Allows to create a grid of subplots in a single figure.
+
+    Args:
+        paramPLT (ParamPLT): ParamPLT object containing plot parameters.
+        Rows (int): Number of rows for the subplot grid.
+        Cols (int): Number of columns for the subplot grid.
+        Index (int): Current index for the subplot.
+        BStartPLT (bool): Flag to indicate whether to start a new plot.
+        BAvoidOverlapping (bool): Flag to avoid overlapping of labels, plots, etc.
+        BCurrPLTax (bool): Flag to indicate whether the function returns the current axis object or not.
+
+    Warning:
+        The title of the plot should be set before calling this function, otherwise it will set the subtitle.
+        BAvoidOverlapping may need to be set to False in some cases when filling the plot does not work as intended.
+
+    Returns :
+        Index: Updated index for the next subplot.
+        AxesSubplot or None: Current axis object if BCurrPLTax is True; otherwise not returned.
+    """
     if Index == 1:
         if BStartPLT:  # To start a new plot or not
             StartPlots()
-        plt.subplot(Rows, Cols, Index)
-        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
-    elif Index == Rows*Cols+1:
-        plt.tight_layout()
+        ax = plt.subplot(Rows, Cols, Index)
+        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
+    elif Index == Rows * Cols + 1:
+        if BAvoidOverlapping:
+            plt.tight_layout() # Avoid overlapping of labels, plots, etc.
         PLTShow(paramPLT)
-    elif 1 < Index <= Rows*Cols:
+        ax = None
+    elif 1 < Index <= Rows * Cols:
         PLTShow(paramPLT, BMultiplot=True)
-        plt.subplot(Rows, Cols, Index)
+        ax = plt.subplot(Rows, Cols, Index)
     else:
         print("Warning: Invalid index for subplot.")
-    return Index + 1
+        ax = None
+
+    Index += 1  # Increment the index for the next subplot
+
+    # Return the current index and None if the index is invalid and the current axis object
+    if BCurrPLTax:
+        return Index, ax
+    else:
+        return Index
 
 def PLTUpdateLayout():
     plt.tight_layout()
