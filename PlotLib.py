@@ -50,6 +50,7 @@ class ParamPLT:
         self.Legends = []
         self.BLegends = True
         self.BLegendsInsideBox = True  # To put the legend inside the plot or not
+        self.LegendsLoc = 0  # Location of the legend (0 = best, ...)
         self.ColourBarTitle = None
 
         # Scale
@@ -434,6 +435,24 @@ class ParamPLT:
         self.BLegendsInsideBox = Bool
 
     @property
+    def getLegendsLoc(self):
+        return self.LegendsLoc
+
+    @getLegendsLoc.setter
+    def getLegendsLoc(self, Loc):
+        if isinstance(Loc, int):
+            # Dictionary mapping integer values to legend locations
+            LegendLocDict = {0: 'best', 1: 'upper right', 2: 'upper left', 3: 'lower left', 4: 'lower right',
+                             5: 'right', 6: 'center left', 7: 'center right', 8: 'lower center', 9: 'upper center',
+                             10: 'center'}
+        elif isinstance(Loc, str):
+            # Dictionary mapping string values to legend locations
+            LegendLocDict = {'best': 0, 'upper right': 1, 'upper left': 2, 'lower left': 3, 'lower right': 4,
+                             'right': 5, 'center left': 6, 'center right': 7, 'lower center': 8, 'upper center': 9,
+                             'center': 10}
+        self.LegendsLoc = LegendLocDict.get(Loc, 0)
+
+    @property
     def getColourBarTitle(self):
         return self.ColourBarTitle
 
@@ -688,7 +707,7 @@ def PLTLegend(paramPLT):
     """
     if paramPLT.getBLegends:
         if paramPLT.getBLegendsInsideBox:
-            plt.legend(fontsize=paramPLT.getFontSize)
+            plt.legend(fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
         else:
             plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
 
@@ -741,7 +760,7 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
     """
     # Get the current axis if not provided
     if ax is None:
-        print("Info: No axis provided, using the current axis.")
+        print("Info: No axis provided, the current axis is used.")
         ax = plt.gca()
 
     # Get the current legend handles and labels
@@ -861,11 +880,14 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
     Returns :
         Index: Updated index for the next subplot.
         AxesSubplot or None: Current axis object if BCurrPLTax is True; otherwise not returned.
+
+    Improvements:
+        Ability to resize the figure to fit all subplots and take into account the legend size.
     """
     if Index == 1:
         if BStartPLT:  # To start a new plot or not
             StartPlots()
-        ax = plt.subplot(Rows, Cols, Index)
+        ax = plt.subplot(Rows, Cols, Index, layout='constrained')
         plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
     elif Index == Rows * Cols + 1:
         if BAvoidOverlapping:
@@ -874,7 +896,7 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
         ax = None
     elif 1 < Index <= Rows * Cols:
         PLTShow(paramPLT, BMultiplot=True)
-        ax = plt.subplot(Rows, Cols, Index)
+        ax = plt.subplot(Rows, Cols, Index, layout='constrained')
     else:
         print("Warning: Invalid index for subplot.")
         ax = None

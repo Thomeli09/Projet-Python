@@ -28,7 +28,7 @@ class DataLag:
     def __init__(self):
         # File
         self.FileName = None
-        self.ApprovedFiles = ['ipe', 'IPE', 'ipn', 'IPN', '.csv', '.txt']
+        self.ApprovedFiles = ['ipe', 'IPE', 'ipn', 'IPN', '.csv', '.txt', '.f71', '.F71']
 
         # Data
         self.Data = None
@@ -334,6 +334,61 @@ class DataLag:
             except Exception as e:
                 print(f"Error reading file {self.FileName}: {e}")
                 return None
+
+        # Handling f71 and F71 files
+        elif self.FileName.endswith(('.f71', '.F71')):
+            try:
+                with open(self.FileName, 'r') as file:
+                    lines = file.readlines()
+
+                DataRows = []
+                CurrentGroup = []
+                Capturing = False # Flag to indicate if we are capturing data (Initially not capturing data)
+                for line in lines:
+                    line = line.strip() # Remove leading/trailing whitespace
+                    if not line: 
+                        continue  # Skip empty lines
+                    try:
+                        # Attempt to parse floats from line
+                        Values = [float(Val) for Val in line.split()]
+                        if not Capturing: # If have finished loading data then create a new current group
+                            CurrentGroup = []
+                            Capturing = True
+                        CurrentGroup.extend(Values) # Add the values to the current group
+                    except ValueError:
+                        # Line is not numeric
+                        if Capturing: # If we are capturing data and encouter a new group
+                            if CurrentGroup:
+                                DataRows.append(CurrentGroup)
+                                CurrentGroup = []
+                            Capturing = False
+                        # If there are data after the non-numeric line, we need to add them to the current group. If not, we can skip the line.
+                        # Try to extract any numeric values from the non-numeric line
+                        Values = []
+                        for val in line.split():
+                            try:
+                                Values.append(float(val))
+                            except ValueError:
+                                continue
+                        if Values:
+                            if not Capturing: # If have finished loading data then create a new current group
+                                CurrentGroup = []
+                                Capturing = True
+                            CurrentGroup.extend(Values)
+                # Append last group if still capturing
+                if CurrentGroup:
+                    DataRows.append(CurrentGroup)          
+
+                self.getData = DataRows
+
+                if BLoadMatrix:
+                    self.LoadDataMatrix()
+                return self.getData
+
+            except Exception as e:
+                print(f"Error reading Fortran file {self.FileName}: {e}")
+                return None
+
   
     def LoadDataMatrix(self):
         """
