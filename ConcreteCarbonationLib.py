@@ -169,8 +169,9 @@ def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0):
     # Impose that the concentration at the boundaries is the initial concentration
     CMatrix[:, 0] = Cco20
 
-
+    # Get back to the original XArray and TimeArray
     XArray = XArray + Xini
+    TimeArray[0] = 0
 
     return TimeArray, XArray, CMatrix
 

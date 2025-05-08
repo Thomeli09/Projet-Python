@@ -190,7 +190,7 @@ class Tasks:
             patches = []
             for Item in GroupsColors:
                 patches.append(matplotlib.patches.Patch(color=GroupsColors[Item], alpha=paramPLT.getAlpha))
-            plt.legend(handles=patches, labels=GroupsColors.keys(), fontsize=paramPLT.getFontSize)
+            plt.legend(handles=patches, labels=GroupsColors.keys(), fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
 
         plt.show(block=False)
 
