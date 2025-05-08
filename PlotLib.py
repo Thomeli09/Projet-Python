@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 from highlight_text import fig_text
+import os
 
 
 # Custom Lib
@@ -887,7 +888,7 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
     if Index == 1:
         if BStartPLT:  # To start a new plot or not
             StartPlots()
-        ax = plt.subplot(Rows, Cols, Index, layout='constrained')
+        ax = plt.subplot(Rows, Cols, Index)
         plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
     elif Index == Rows * Cols + 1:
         if BAvoidOverlapping:
@@ -896,7 +897,7 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
         ax = None
     elif 1 < Index <= Rows * Cols:
         PLTShow(paramPLT, BMultiplot=True)
-        ax = plt.subplot(Rows, Cols, Index, layout='constrained')
+        ax = plt.subplot(Rows, Cols, Index)
     else:
         print("Warning: Invalid index for subplot.")
         ax = None
@@ -912,16 +913,100 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
 def PLTUpdateLayout():
     plt.tight_layout()
 
-def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
+def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True, PLTTimePause=0.1):
     if BTaskbar:
         plt.get_current_fig_manager().window.state('zoomed')
     else:
         plt.get_current_fig_manager().full_screen_toggle()
 
     if BUpdateLayout:
-        plt.pause(0.1) # Pause to allow the window to maximize and UpdateLayout to work
+        plt.pause(PLTTimePause) # Pause to allow the window to maximize and UpdateLayout to work
         # in case of unreliable behavior, increase the pause duration
         PLTUpdateLayout()
+
+def PLTScreenSize(Width_cm, Height_cm, Scale=1, BUpdateLayout=True, PLTTimePause=0.1):
+    """
+    Set the size of the plot window in centimeters.
+
+    Args:
+        Width_cm (float): Width of the plot window in centimeters.
+        Height_cm (float): Height of the plot window in centimeters.
+        Scale (float): Optional scaling of width/height.
+        BUpdateLayout (bool): Flag to update the layout after resizing.
+        PLTTimePause (float): Time to pause for layout update.
+
+    """
+    # Convert centimeters to inches (1 inch = 2.54 cm)
+    Width_in = (Width_cm / 2.54) * Scale
+    Height_in = (Height_cm / 2.54) * Scale
+
+    # Set the figure size in inches
+    fig = plt.gcf()  # Get current figure
+    fig.set_size_inches(Width_in, Height_in)
+
+    if BUpdateLayout:
+        plt.pause(PLTTimePause) # Pause to allow the window to maximize and UpdateLayout to work
+        # in case of unreliable behavior, increase the pause duration
+        PLTUpdateLayout()
+
+def PLTSave(FileName, Width_cm, Height_cm, Scale=1, DPI=300, Format=1, BUpdateLayout=True, PLTTimePause=0.1, BCreateDir=False ,BClose=False):
+    """
+    Save the current plot to a file with customizable options.
+    Args:
+        FileName (str): Output filename (extension optional).
+        Width_cm (float): Width of the figure in centimeters.
+        Height_cm (float): Height of the figure in centimeters.
+        Scale (float): Scale factor to apply to width and height.
+        DPI (int): Dots per inch (resolution).
+        Format (str or int): Format type (e.g., "png", 1, "pdf", etc.).
+        BUpdateLayout (bool): Flag to update the layout after resizing.
+        PLTTimePause (float): Time to pause for layout update.
+        BCreateDir (bool): Flag to create the directory if it doesn't exist.
+        BClose (bool): Whether to close the figure after saving.
+    Returns:
+        None: This function does not return anything.
+    """
+
+    # Ensure the directory exists
+    directory = os.path.dirname(FileName) # Get the directory from the filename
+    if directory and not os.path.exists(directory): # Check if there needs a directory and if it exists
+        if BCreateDir: # Create the directory if it doesn't exist
+            print(f"Info : Creating directory: {directory}")
+            os.makedirs(directory)
+        else:
+            print(f"Warning : Directory <<{directory}>> does not exist. File will not be saved.")
+            return
+    
+    # Dictionary to map format values to file extensions
+    FormatDict = {'png': '.png', 1: '.png', 'pdf': '.pdf', 2: '.pdf', 
+                  'svg': '.svg', 3: '.svg', 'eps': '.eps', 4: '.eps', 
+                  'jpg': '.jpg', 5: '.jpg', 'jpeg': '.jpeg', 6: '.jpeg'}
+    FormatName = FormatDict.get(Format, 'png')  # Default to PNG if format is not recognized
+
+    FullName = FileName + FormatName
+
+    # Set the figure size in inches
+    PLTScreenSize(Width_cm=Width_cm, Height_cm=Height_cm, Scale=Scale, BUpdateLayout=BUpdateLayout, PLTTimePause=PLTTimePause)
+
+    # Get the current figure
+    fig = plt.gcf()
+
+    # Save the plot to a file
+    try:
+        fig.savefig(fname=FullName, dpi=DPI, bbox_inches='tight')
+        print(f"Info : Plot saved as {FullName}")
+    except :
+        print(f"Warning : Failed to save the plot as {FullName}. Check the file path and permissions.")
+
+    if BClose:
+        plt.close()
+
+def PLTShowRefSavePlace():
+    """
+    Show the path where the plots are saved.
+    """
+    print("Info : The reference path for saving plots is:")
+    print("Info : ", os.getcwd())
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
