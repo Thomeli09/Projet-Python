@@ -8,6 +8,8 @@ Created on Fri Nov  8 11:20:09 2024
 # Lagamine library for data management  
 
 # Other Lib
+from ast import Index
+from typing import Counter
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -28,7 +30,7 @@ class DataLag:
     def __init__(self):
         # File
         self.FileName = None
-        self.ApprovedFiles = ['ipe', 'IPE', 'ipn', 'IPN', '.csv', '.txt']
+        self.ApprovedFiles = ['ipe', 'IPE', 'ipn', 'IPN', '.csv', '.txt', '.f71', '.F71']
 
         # Data
         self.Data = None
@@ -334,6 +336,61 @@ class DataLag:
             except Exception as e:
                 print(f"Error reading file {self.FileName}: {e}")
                 return None
+
+        # Handling f71 and F71 files
+        elif self.FileName.endswith(('.f71', '.F71')):
+            try:
+                with open(self.FileName, 'r') as file:
+                    lines = file.readlines()
+
+                DataRows = []
+                CurrentGroup = []
+                Capturing = False # Flag to indicate if we are capturing data (Initially not capturing data)
+                for line in lines:
+                    line = line.strip() # Remove leading/trailing whitespace
+                    if not line: 
+                        continue  # Skip empty lines
+                    try:
+                        # Attempt to parse floats from line
+                        Values = [float(Val) for Val in line.split()]
+                        if not Capturing: # If have finished loading data then create a new current group
+                            CurrentGroup = []
+                            Capturing = True
+                        CurrentGroup.extend(Values) # Add the values to the current group
+                    except ValueError:
+                        # Line is not numeric
+                        if Capturing: # If we are capturing data and encouter a new group
+                            if CurrentGroup:
+                                DataRows.append(CurrentGroup)
+                                CurrentGroup = []
+                            Capturing = False
+                        # If there are data after the non-numeric line, we need to add them to the current group. If not, we can skip the line.
+                        # Try to extract any numeric values from the non-numeric line
+                        Values = []
+                        for val in line.split():
+                            try:
+                                Values.append(float(val))
+                            except ValueError:
+                                continue
+                        if Values:
+                            if not Capturing: # If have finished loading data then create a new current group
+                                CurrentGroup = []
+                                Capturing = True
+                            CurrentGroup.extend(Values)
+                # Append last group if still capturing
+                if CurrentGroup:
+                    DataRows.append(CurrentGroup)          
+
+                self.getData = DataRows
+
+                if BLoadMatrix:
+                    self.LoadDataMatrix()
+                return self.getData
+
+            except Exception as e:
+                print(f"Error reading Fortran file {self.FileName}: {e}")
+                return None
+
   
     def LoadDataMatrix(self):
         """
@@ -347,14 +404,22 @@ class DataLag:
         return self.getDataMatrix
 
     # Data Analysis and Visualization
-    def SelectIndex(self, Col=None, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
+    def SelectIndex(self, Col=None, Val=None, Tol=0.001, AbsTol=None, ValMin=None, ValMax=None, BClosest=False):
         """
         Selects rows based on the values in a column and updates the index selection array.
+
+        Args:
+            Col (int): Column index to select by.
+            Val (float): Value to select.
+            Tol (float): Tolerance for selection.
+            AbsTol (float): Absolute tolerance for selection.
+            ValMin (float): Minimum value for selection.
+            ValMax (float): Maximum value for selection.
+            BClosest (bool): If True, selects the closest value to val value instead of exact match.
         
         Improvements:
         - Add the possibility to extract the values directly from the pltDataMatrix
         """
-
         # Verify that the data matrix is not empty
         if self.getDataMatrix is None:
             print("Error: No data matrix.")
@@ -371,15 +436,31 @@ class DataLag:
         ArrayExtractedVal = self.getDataMatrix[:, Col]
 
         # Select rows based on the values in the column
-        if Val is not None:
-            # Defining the tolerance
+        if Val is not None and BClosest is False:
+            # Get the accepted tolerance
             if AbsTol is None:
                 AbsTol = np.abs(Tol*Val)
 
+            # Get the indexes of the values that are within the tolerance to the given value
             NewPLTIndex = np.where(np.abs(ArrayExtractedVal - Val) <= AbsTol)[0]
 
         elif ValMin is not None and ValMax is not None:
+            # Select the values in the range [ValMin, ValMax]
             NewPLTIndex = np.where((ArrayExtractedVal >= ValMin) & (ArrayExtractedVal <= ValMax))[0]
+
+        elif BClosest:
+            # Find the index of the closest value to the given value
+            IndexClosestVal = np.argmin(np.abs(ArrayExtractedVal - Val))
+
+            # Get the first closest value
+            ValClosest = ArrayExtractedVal[IndexClosestVal]
+
+            # Get the accepted tolerance
+            if AbsTol is None:
+                AbsTol = np.abs(Tol*ValClosest)
+
+            # Get the indexes of the values that are within the tolerance to the closest value
+            NewPLTIndex = np.where(np.abs(ArrayExtractedVal - ValClosest) <= AbsTol)[0]
 
         else:
             print("Error: No value or range selected.")
@@ -401,20 +482,135 @@ class DataLag:
         else:
             self.getPLTDataMatrix = self.getDataMatrix[self.getPLTIndex, :]
 
-    def SelectTime(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
+    def SelectTime(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None, BClosest=False):
         self.SelectIndex(Col=self.getTimeCol,
                          Val=Val, Tol=Tol, AbsTol=AbsTol,
-                         ValMin=ValMin, ValMax=ValMax)
+                         ValMin=ValMin, ValMax=ValMax, BClosest=BClosest)
 
-    def SelectAbs(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
+    def SelectAbs(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None, BClosest=False):
         self.SelectIndex(Col=self.getAbsCol,
                          Val=Val, Tol=Tol, AbsTol=AbsTol,
-                         ValMin=ValMin, ValMax=ValMax)
+                         ValMin=ValMin, ValMax=ValMax, BClosest=BClosest)
 
-    def SelectOrd(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None):
+    def SelectOrd(self, Val=None, Tol=0, AbsTol=None, ValMin=None, ValMax=None, BClosest=False):
         self.SelectIndex(Col=self.getOrdCol,
                          Val=Val, Tol=Tol, AbsTol=AbsTol,
-                         ValMin=ValMin, ValMax=ValMax)
+                         ValMin=ValMin, ValMax=ValMax, BClosest=BClosest)
+
+    def SelectIndexNoDuplicate(self, Col=None, Tol=0.001, AbsTol=None, ValPolicy=0):
+        """
+        From the selected index, select the unique values in the given column.
+
+        Args:
+            Col (int): Column index to select by.
+            Tol (float): Tolerance for selection.
+            AbsTol (float): Absolute tolerance for selection.
+            ValPolicy (int): Policy for selecting the value to keep in case of duplicates. (-1: last, 0: first, x: x+1th value)
+        
+        Improvements:
+        - Add the possibility to extract the values directly from the pltDataMatrix
+        """
+        # Verify that the data matrix is not empty
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return False
+
+        # Select the column to select by
+        if Col is None:
+            if self.getSelectCol is None:
+                print("Error: No column selected.")
+                return False
+            Col = self.getSelectCol
+
+        # Extract the values of the selected column inside the data matrix
+        ArrayExtractedVal = self.getDataMatrix[:, Col]
+
+        # In case AbsTol is None, the tolerance is set based on the relative tolerance
+        if AbsTol is None:
+            BRelTol = True
+        else:
+            BRelTol = False
+
+        # Sort the values and keep the indices
+        SortedIndices = np.argsort(ArrayExtractedVal)
+        SortedArrayExtractedVal = ArrayExtractedVal[SortedIndices]
+
+        # Append a dummy value to trigger final group processing
+        if BRelTol:
+            DummyVal = SortedArrayExtractedVal[-1] + 10 * np.abs(Tol * SortedArrayExtractedVal[-1])
+        else:
+            DummyVal = SortedArrayExtractedVal[-1] + 10 * AbsTol
+
+        SortedArrayExtractedVal = np.append(SortedArrayExtractedVal, DummyVal)
+        SortedIndices = np.append(SortedIndices, -1) # dummy index to match length
+
+        NewPLTIndex = []  # Index kept for the unique values
+        TempIndexList = []  # List to keep temporarily the indices of the duplicates
+        Counter = 0  # Counter for duplicates
+
+        for i in range(len(SortedArrayExtractedVal) - 1):
+            CurrentVal = SortedArrayExtractedVal[i]
+            NextVal = SortedArrayExtractedVal[i + 1]
+
+            # Get the accepted absolute tolerance if not given. Based on the relative tolerance
+            if BRelTol:
+                AbsTol = np.abs(Tol * CurrentVal)
+
+            # Check if the difference between the current and previous value is greater than the absolute tolerance
+            if np.abs(NextVal - CurrentVal) > AbsTol:
+                # The value is unique
+                if Counter == 0:
+                    # If the value is unique, keep it
+                    NewPLTIndex.append(SortedIndices[i])
+                else:
+                    # If there are duplicates values
+
+                    # Add the last index of the duplicates in the temporary list
+                    TempIndexList.append(SortedIndices[i])
+
+                    # Choose the index to be kept
+                    KeptSubIndex = ValPolicy
+
+                    if KeptSubIndex >= len(TempIndexList):
+                        # If the number of duplicates is less than the value to keep, take the last one
+                        KeptSubIndex = -1
+                    elif KeptSubIndex < -1:
+                        # If the value to keep is negative, take the last one
+                        KeptSubIndex = -1
+
+                    if TempIndexList[KeptSubIndex] != -1:
+                        NewPLTIndex.append(TempIndexList[KeptSubIndex])
+
+                # Reset the list of temporary indexess
+                TempIndexList = []
+                # Reset the counter
+                Counter = 0
+
+            else:
+                # The value is not unique and needs to be kept to check after wich one to choose
+                TempIndexList.append(SortedIndices[i])  # Keep the index of the duplicate value
+                # Update the counter
+                Counter += 1
+
+        # Sort the index of the kept values by resorting the original array
+        NewPLTIndex = np.array(NewPLTIndex)
+        NewPLTIndex = np.sort(NewPLTIndex)
+
+        # Update the index selection array
+        if self.getPLTIndex is not None and NewPLTIndex is not None:
+            self.getPLTIndex = np.intersect1d(self.getPLTIndex, NewPLTIndex)
+        else:
+            self.getPLTIndex = NewPLTIndex
+
+        # Verifies that the selection is not empty
+        if len(self.getPLTIndex) == 0:
+            print("Warning: No data selected.")
+
+        # Update the PLTDataMatrix
+        if self.getPLTDataMatrix is not None:
+            self.getPLTDataMatrix = self.getDataMatrix[self.getPLTIndex, :]
+        else:
+            self.getPLTDataMatrix = self.getDataMatrix[self.getPLTIndex, :]
 
     def SortResults(self, Col=None):
         """

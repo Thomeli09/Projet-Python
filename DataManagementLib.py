@@ -9,10 +9,11 @@ Created on Wed Jan 29 16:39:19 2025
 
 # Other Lib
 import numpy as np
+import math
 
 # Custom Lib
 
-
+# General functions
 def LenData(Data):
     """
     Count the number of elements in a given data structure.
@@ -87,7 +88,6 @@ def ListFindFirstMaxPair(L1, L2):
     MaxIndex = L1.index(max(L1))  # Find the index of the first max value
     return L1[MaxIndex], L2[MaxIndex]  # Return (max_value, paired_value)
 
-
 def ListMult(Val, ListVal, BPrint=True):
     """
     Multiply a list of values by a constant value.
@@ -96,7 +96,6 @@ def ListMult(Val, ListVal, BPrint=True):
     if BPrint:
         print("Multiplication of list by value:", MultListVal)
     return MultListVal
-
 
 def ListSum(ListOfSumList, BPrint=True):
     """
@@ -107,7 +106,28 @@ def ListSum(ListOfSumList, BPrint=True):
         print("Sum of lists:", SumListVal)
     return SumListVal
 
+def ListGCD(LVals):
+    """
+    Calculate the greatest common divisor (GCD) of a list of integers.
+
+    Args:
+        LVals (list): List of integers.
+    """
+    # Check if the list is empty
+    if not LVals:
+        print("Error: The list is empty.")
+        return None
+
+    # Check if the list contains only integers
+    if not all(isinstance(i, int) for i in LVals):
+        print("Warning : Not all elements are integers. The GCD will be calculated on rounded values.")
+        LVals = [int(round(i)) for i in LVals]
+
+    GCDVal = math.gcd(*LVals)
+    return GCDVal
+
 # Text management functions
+
 
 # Vector management functions
 def VectorSelectVal(Vector, Val, AbsTol=1e-6, BFirst=False):
@@ -139,6 +159,7 @@ def VectorSelectClosestVal(Vector, Val, BFirst=False):
         print("Error: Value not found.")
 
     return SelectedVal, IndexVect
+
 
 # Matrix management functions
 def MatrixSelectRowOrColumn(Matrix, Index, Axis=0):

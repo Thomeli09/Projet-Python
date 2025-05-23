@@ -10,13 +10,17 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 from highlight_text import fig_text
+import os
 
 
 # Custom Lib
-
+from DataManagementLib import LenData
 
 """
 Base de donnée
+
+Improvements:
+    Should add a list of axes to the ParamPLT object to avoid having to call plt.gca() each time as an option.
 """
 
 
@@ -47,6 +51,7 @@ class ParamPLT:
         self.Legends = []
         self.BLegends = True
         self.BLegendsInsideBox = True  # To put the legend inside the plot or not
+        self.LegendsLoc = 0  # Location of the legend (0 = best, ...)
         self.ColourBarTitle = None
 
         # Scale
@@ -431,6 +436,24 @@ class ParamPLT:
         self.BLegendsInsideBox = Bool
 
     @property
+    def getLegendsLoc(self):
+        return self.LegendsLoc
+
+    @getLegendsLoc.setter
+    def getLegendsLoc(self, Loc):
+        if isinstance(Loc, int):
+            # Dictionary mapping integer values to legend locations
+            LegendLocDict = {0: 'best', 1: 'upper right', 2: 'upper left', 3: 'lower left', 4: 'lower right',
+                             5: 'right', 6: 'center left', 7: 'center right', 8: 'lower center', 9: 'upper center',
+                             10: 'center'}
+        elif isinstance(Loc, str):
+            # Dictionary mapping string values to legend locations
+            LegendLocDict = {'best': 0, 'upper right': 1, 'upper left': 2, 'lower left': 3, 'lower right': 4,
+                             'right': 5, 'center left': 6, 'center right': 7, 'lower center': 8, 'upper center': 9,
+                             'center': 10}
+        self.LegendsLoc = LegendLocDict.get(Loc, 0)
+
+    @property
     def getColourBarTitle(self):
         return self.ColourBarTitle
 
@@ -685,7 +708,7 @@ def PLTLegend(paramPLT):
     """
     if paramPLT.getBLegends:
         if paramPLT.getBLegendsInsideBox:
-            plt.legend(fontsize=paramPLT.getFontSize)
+            plt.legend(fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
         else:
             plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
 
@@ -713,19 +736,36 @@ def UpdatePlotColorsAndLegend(LColors):
     # plt.draw()  # Redraws the figure (updates existing)
     plt.show()
 
-def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0):
+def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositions, paramPLT, TitleSizeRatio=1.1, SubtitlesSizeRatio=1.0, ax=None):
     """
     Add a legend with a main title and multiple subtitles at specified positions.
 
+    Args:
+        LegendTitle: Main title of the legend.
+        LLegendSubtitles: List of subtitles to be added to the legend.
+        LSubtitlesPositions: List of positions for the subtitles in the legend.
+        paramPLT: Object containing plot parameters.
+        TitleSizeRatio: Ratio to adjust the size of the main title.
+        SubtitlesSizeRatio: Ratio to adjust the size of the subtitles.
+        ax: Axis object to which the legend will be added. If None, the current axis will be used.
+
+    Returns:
+
     Note: 
     -The subtitles are added as empty lines with the specified text, that can lead to some issues.
-    -This function should be used after PLTShow() to work properly.
+    -This function should be used after PLTShow() or PLTMultiPlot() to work properly.
 
     Improvements:
     - Refine the position of the subtitles based on the number of labels in the legend.
     - Add an argument to specify the color of the subtitles.
     """
-    handles, labels = plt.gca().get_legend_handles_labels()
+    # Get the current axis if not provided
+    if ax is None:
+        print("Info: No axis provided, the current axis is used.")
+        ax = plt.gca()
+
+    # Get the current legend handles and labels
+    handles, labels = ax.get_legend_handles_labels()
 
     # Adding the subtitles to the legend
     for Subtitle, Position in zip(LLegendSubtitles, LSubtitlesPositions):
@@ -733,7 +773,7 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
             handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
 
     # Adding the main title to the legend
-    Legend = plt.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
+    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
     # Setting the title properties
     FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getFontSize * TitleSizeRatio, Weight=None,
                Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
@@ -774,12 +814,19 @@ def PLTCmptLimit(Variable, Ratio=0.1):
     Improvements:
     - Based the computation on the current registered limits (self.XLimit, self.YLimit, self.ZLimit).
     """
-    MaxVal = max(Variable)
-    MinVal = min(Variable)
-    Delta = MaxVal-MinVal
-    LowerLimit = MinVal-Delta*Ratio
-    UpperLimit = MaxVal+Delta*Ratio
-    return [LowerLimit, UpperLimit]
+    # Verify if the variable is empty
+    if LenData(Variable) == 0:
+        print("Warning: The variable is empty, no plotting range will be set.")
+        # Return None for both limits
+        return [None, None] 
+    
+    else:
+        MaxVal = max(Variable)
+        MinVal = min(Variable)
+        Delta = MaxVal-MinVal
+        LowerLimit = MinVal-Delta*Ratio
+        UpperLimit = MaxVal+Delta*Ratio
+        return [LowerLimit, UpperLimit]
 
 def PLTScaleType(paramPLT):
     if paramPLT.getXScaleType:
@@ -814,35 +861,152 @@ def PLTShow(paramPLT, BMultiplot=False):
     if not BMultiplot:
         plt.show(block=False)  # Show plot without blocking
 
-def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True):
+def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapping=True, BCurrPLTax=False):
+    """
+    Allows to create a grid of subplots in a single figure.
+
+    Args:
+        paramPLT (ParamPLT): ParamPLT object containing plot parameters.
+        Rows (int): Number of rows for the subplot grid.
+        Cols (int): Number of columns for the subplot grid.
+        Index (int): Current index for the subplot.
+        BStartPLT (bool): Flag to indicate whether to start a new plot.
+        BAvoidOverlapping (bool): Flag to avoid overlapping of labels, plots, etc.
+        BCurrPLTax (bool): Flag to indicate whether the function returns the current axis object or not.
+
+    Warning:
+        The title of the plot should be set before calling this function, otherwise it will set the subtitle.
+        BAvoidOverlapping may need to be set to False in some cases when filling the plot does not work as intended.
+
+    Returns :
+        Index: Updated index for the next subplot.
+        AxesSubplot or None: Current axis object if BCurrPLTax is True; otherwise not returned.
+
+    Improvements:
+        Ability to resize the figure to fit all subplots and take into account the legend size.
+    """
     if Index == 1:
         if BStartPLT:  # To start a new plot or not
             StartPlots()
-        plt.subplot(Rows, Cols, Index)
-        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
-    elif Index == Rows*Cols+1:
-        plt.tight_layout()
+        ax = plt.subplot(Rows, Cols, Index)
+        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
+    elif Index == Rows * Cols + 1:
+        if BAvoidOverlapping:
+            plt.tight_layout() # Avoid overlapping of labels, plots, etc.
         PLTShow(paramPLT)
-    elif 1 < Index <= Rows*Cols:
+        ax = None
+    elif 1 < Index <= Rows * Cols:
         PLTShow(paramPLT, BMultiplot=True)
-        plt.subplot(Rows, Cols, Index)
+        ax = plt.subplot(Rows, Cols, Index)
     else:
         print("Warning: Invalid index for subplot.")
-    return Index + 1
+        ax = None
+
+    Index += 1  # Increment the index for the next subplot
+
+    # Return the current index and None if the index is invalid and the current axis object
+    if BCurrPLTax:
+        return Index, ax
+    else:
+        return Index
 
 def PLTUpdateLayout():
     plt.tight_layout()
 
-def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True):
+def PLTScreenMaximize(BTaskbar=True, BUpdateLayout=True, PLTTimePause=0.1):
     if BTaskbar:
         plt.get_current_fig_manager().window.state('zoomed')
     else:
         plt.get_current_fig_manager().full_screen_toggle()
 
     if BUpdateLayout:
-        plt.pause(0.1) # Pause to allow the window to maximize and UpdateLayout to work
+        plt.pause(PLTTimePause) # Pause to allow the window to maximize and UpdateLayout to work
         # in case of unreliable behavior, increase the pause duration
         PLTUpdateLayout()
+
+def PLTScreenSize(Width_cm, Height_cm, Scale=1, BUpdateLayout=True, PLTTimePause=0.1):
+    """
+    Set the size of the plot window in centimeters.
+
+    Args:
+        Width_cm (float): Width of the plot window in centimeters.
+        Height_cm (float): Height of the plot window in centimeters.
+        Scale (float): Optional scaling of width/height.
+        BUpdateLayout (bool): Flag to update the layout after resizing.
+        PLTTimePause (float): Time to pause for layout update.
+
+    """
+    # Convert centimeters to inches (1 inch = 2.54 cm)
+    Width_in = (Width_cm / 2.54) * Scale
+    Height_in = (Height_cm / 2.54) * Scale
+
+    # Set the figure size in inches
+    fig = plt.gcf()  # Get current figure
+    fig.set_size_inches(Width_in, Height_in)
+
+    if BUpdateLayout:
+        plt.pause(PLTTimePause) # Pause to allow the window to maximize and UpdateLayout to work
+        # in case of unreliable behavior, increase the pause duration
+        PLTUpdateLayout()
+
+def PLTSave(FileName, Width_cm, Height_cm, Scale=1, DPI=300, Format=1, BUpdateLayout=True, PLTTimePause=0.1, BCreateDir=False ,BClose=False):
+    """
+    Save the current plot to a file with customizable options.
+    Args:
+        FileName (str): Output filename (extension optional).
+        Width_cm (float): Width of the figure in centimeters.
+        Height_cm (float): Height of the figure in centimeters.
+        Scale (float): Scale factor to apply to width and height.
+        DPI (int): Dots per inch (resolution).
+        Format (str or int): Format type (e.g., "png", 1, "pdf", etc.).
+        BUpdateLayout (bool): Flag to update the layout after resizing.
+        PLTTimePause (float): Time to pause for layout update.
+        BCreateDir (bool): Flag to create the directory if it doesn't exist.
+        BClose (bool): Whether to close the figure after saving.
+    Returns:
+        None: This function does not return anything.
+    """
+
+    # Ensure the directory exists
+    directory = os.path.dirname(FileName) # Get the directory from the filename
+    if directory and not os.path.exists(directory): # Check if there needs a directory and if it exists
+        if BCreateDir: # Create the directory if it doesn't exist
+            print(f"Info : Creating directory: {directory}")
+            os.makedirs(directory)
+        else:
+            print(f"Warning : Directory <<{directory}>> does not exist. File will not be saved.")
+            return
+    
+    # Dictionary to map format values to file extensions
+    FormatDict = {'png': '.png', 1: '.png', 'pdf': '.pdf', 2: '.pdf', 
+                  'svg': '.svg', 3: '.svg', 'eps': '.eps', 4: '.eps', 
+                  'jpg': '.jpg', 5: '.jpg', 'jpeg': '.jpeg', 6: '.jpeg'}
+    FormatName = FormatDict.get(Format, 'png')  # Default to PNG if format is not recognized
+
+    FullName = FileName + FormatName
+
+    # Set the figure size in inches
+    PLTScreenSize(Width_cm=Width_cm, Height_cm=Height_cm, Scale=Scale, BUpdateLayout=BUpdateLayout, PLTTimePause=PLTTimePause)
+
+    # Get the current figure
+    fig = plt.gcf()
+
+    # Save the plot to a file
+    try:
+        fig.savefig(fname=FullName, dpi=DPI, bbox_inches='tight')
+        print(f"Info : Plot saved as {FullName}")
+    except :
+        print(f"Warning : Failed to save the plot as {FullName}. Check the file path and permissions.")
+
+    if BClose:
+        plt.close()
+
+def PLTShowRefSavePlace():
+    """
+    Show the path where the plots are saved.
+    """
+    print("Info : The reference path for saving plots is:")
+    print("Info : ", os.getcwd())
 
 def DefaultParamPLT():
     return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
