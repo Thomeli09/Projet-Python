@@ -649,7 +649,7 @@ def ClosePlot(PlotOBJ=None):
     else:
         plt.close(PlotOBJ)
 
-def CloseALLPlots():
+def CloseAllPlots():
     plt.close('all')
 
 def ClosePlotsOnDemand():
@@ -674,7 +674,7 @@ def PLTTitleAxis(paramPLT):
     plt.ylabel(paramPLT.getYLabel, fontsize=paramPLT.getFontSize)
     plt.title(paramPLT.getTitle, fontsize=paramPLT.getTitleSize)
 
-def PLTTitleModified(TitleText, paramPLT, X=0.5, Y=0.95):
+def PLTTitleModified(paramPLT, X=0.5, Y=0.95):
     """
     Allows to have a different title style than the default one.
 
@@ -688,7 +688,7 @@ def PLTTitleModified(TitleText, paramPLT, X=0.5, Y=0.95):
     Improvements:
     - Add highlight_textprops to modify the style of the title without adding that in the TitleText.
     """
-    fig_text(s=TitleText, x=X, y=Y, 
+    fig_text(s=paramPLT.getTitle, x=X, y=Y, 
              fontsize=paramPLT.getTitleSize, color='black', 
              ha='center', va='center')
 
