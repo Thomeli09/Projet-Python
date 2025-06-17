@@ -815,7 +815,7 @@ def PLTCmptLimit(Variable, Ratio=0.1):
     - Based the computation on the current registered limits (self.XLimit, self.YLimit, self.ZLimit).
     """
     # Verify if the variable is empty
-    if LenData(Variable) == 0:
+    if LenData(Variable) <= 0:
         print("Warning: The variable is empty, no plotting range will be set.")
         # Return None for both limits
         return [None, None] 
@@ -1023,21 +1023,37 @@ def PLTPlot(XValues, YValues, paramPLT):
     Creates a 2D plot using customizable parameters.
 
     Args:
-        XValues (list ou array-like): Les valeurs de l'axe X.
-        YValues (list ou array-like): Les valeurs de l'axe Y.
-        paramPLT (objet): Un objet contenant les attributs suivants pour personnaliser l'apparence du graphique
+        XValues (list ou array-like): X-axis values for the plot.
+        YValues (list ou array-like): Y-axis values for the plot.
+        paramPLT (objet): Object containing plot parameters.
 
     Returns:
-        None: Cette fonction ne retourne rien. Elle affiche simplement le graphique.
+        None: This function does not return anything. It simply displays the plot.
     """
     plt.plot(XValues, YValues,
-            color=paramPLT.getColour,      # Couleur de la courbe
-            alpha=paramPLT.getAlpha,       # Transparence de la courbe
-            linestyle=paramPLT.getLineType,  # Style de la ligne (continu, pointillé, etc.)
-            linewidth=paramPLT.getLineSize,  # Épaisseur de la ligne
-            marker=paramPLT.getMarker,          # Style des marqueurs pour les points
-            markersize=paramPLT.getMarkerSize, # Taille des marqueurs
-            label=paramPLT.getLegends)       # Texte pour la légende
+            color=paramPLT.getColour,
+            alpha=paramPLT.getAlpha,
+            linestyle=paramPLT.getLineType,
+            linewidth=paramPLT.getLineSize,
+            marker=paramPLT.getMarker,
+            markersize=paramPLT.getMarkerSize,
+            label=paramPLT.getLegends)
+
+def PLTPlotSeries(LXValues, LYValues, paramPLT):
+    """
+    Creates a 2D plot with multiple curves from lists of X and Y values.
+
+    Args:
+        LXValues (list of lists or array-like): List of X-axis values for each curve.
+        LYValues (list of lists or array-like): List of Y-axis values for each curve.
+        paramPLT (object): Object containing plot parameters.
+
+    Returns:
+        None: This function does not return anything. It simply displays the plot.
+    """
+
+    for XValues, YValues in zip(LXValues, LYValues):
+        PLTPlot(XValues, YValues, paramPLT)
 
 def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """

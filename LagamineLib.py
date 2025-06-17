@@ -537,7 +537,7 @@ class DataLag:
 
         # Append a dummy value to trigger final group processing
         if BRelTol:
-            DummyVal = SortedArrayExtractedVal[-1] + 10 * np.abs(Tol * SortedArrayExtractedVal[-1])
+            DummyVal = SortedArrayExtractedVal[-1] + 10 * np.abs(Tol * (SortedArrayExtractedVal[-1] + 1))
         else:
             DummyVal = SortedArrayExtractedVal[-1] + 10 * AbsTol
 
