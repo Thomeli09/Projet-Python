@@ -452,14 +452,14 @@ class DataLag:
             # Find the index of the closest value to the given value
             IndexClosestVal = np.argmin(np.abs(ArrayExtractedVal - Val))
 
-            # Get the first closest value
+            # Get the first closest value to the given value and will be used to select the values within the tolerance
             ValClosest = ArrayExtractedVal[IndexClosestVal]
 
             # Get the accepted tolerance
             if AbsTol is None:
                 AbsTol = np.abs(Tol*ValClosest)
 
-            # Get the indexes of the values that are within the tolerance to the closest value
+            # Get the indexes of the values that are within the tolerance to the closest value (Close enough to the given value)
             NewPLTIndex = np.where(np.abs(ArrayExtractedVal - ValClosest) <= AbsTol)[0]
 
         else:

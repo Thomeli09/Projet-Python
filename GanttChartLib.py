@@ -6,14 +6,14 @@ Created on Fri Nov  8 10:16:55 2024
 """
 
 # GanttChart library
+from datetime import datetime
 from queue import Empty
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime
 
 # Custom Lib
-from PlotLib import ParamPLT, PLTGrid, PLTLimit, CloseALLPlots, StartPlots, ClosePlotsOnDemand
+from PlotLib import ParamPLT, PLTGrid, PLTLimit
 
 
 """
@@ -205,6 +205,7 @@ def DatePlusNumDays(Date, NumDays):
 Example
 -------
 # Default use of the Tasks class
+from PlotLib import ParamPLT, PLTGrid, PLTLimit, ClosePlotsOnDemand
 
 # Define the Tasks instance
 my_tasks = Tasks()
