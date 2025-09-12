@@ -7,6 +7,7 @@ Created on Wed Oct 30 14:15:29 2024
 
 # General Plotting library
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from matplotlib import cm
 import numpy as np
 from highlight_text import fig_text
@@ -59,6 +60,9 @@ class ParamPLT:
         self.XScaleType = 'linear'
         self.YScaleType = 'linear'
         self.ZScaleType = 'linear'
+        self.BXAxisDate = False
+        self.XAxisDateFormat = mdates.DateFormatter('%Y-%m-%d')
+        self.BXAxisDateRotate = False
         self.GenericScaleType = 'linear'
         self.Scale3D = 1
 
@@ -503,6 +507,30 @@ class ParamPLT:
         self.ZScaleType = self.ScaleVal2Name(Val)
 
     @property
+    def getBXAxisDate(self):
+        return self.BXAxisDate
+
+    @getBXAxisDate.setter
+    def getBXAxisDate(self, Bool):
+        self.BXAxisDate = Bool
+
+    @property
+    def getXAxisDateFormat(self):
+        return self.XAxisDateFormat
+
+    @getXAxisDateFormat.setter
+    def getXAxisDateFormat(self, DateFormat):
+        self.XAxisDateFormat = mdates.DateFormatter(DateFormat)
+
+    @property
+    def getBXAxisDateRotate(self):
+        return self.BXAxisDateRotate
+
+    @getBXAxisDateRotate.setter
+    def getBXAxisDateRotate(self, Bool):
+        self.BXAxisDateRotate = Bool
+
+    @property
     def getGenericScaleType(self):
         return self.GenericScaleType
 
@@ -829,10 +857,23 @@ def PLTCmptLimit(Variable, Ratio=0.1):
         return [LowerLimit, UpperLimit]
 
 def PLTScaleType(paramPLT):
+    """
+
+    """
     if paramPLT.getXScaleType:
         plt.xscale(paramPLT.getXScaleType)
     if paramPLT.getYScaleType:
         plt.yscale(paramPLT.getYScaleType)
+
+def PLTDate(paramPLT):
+    """
+    Format the x-axis to display dates properly.
+    """
+    if paramPLT.getBXAxisDate:
+        plt.gca().xaxis.set_major_formatter(paramPLT.getXAxisDateFormat)
+
+        if paramPLT.getBXAxisDateRotate:
+            plt.gcf().autofmt_xdate() # Rotate labels
 
 def PLTBox(paramPLT):
     """
@@ -855,6 +896,8 @@ def PLTShow(paramPLT, BMultiplot=False):
     PLTLimit(paramPLT)
 
     PLTScaleType(paramPLT)
+
+    PLTDate(paramPLT)
 
     PLTBox(paramPLT)
 

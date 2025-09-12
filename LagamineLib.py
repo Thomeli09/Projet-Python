@@ -343,8 +343,7 @@ class DataLag:
                 with open(self.FileName, 'r') as file:
                     lines = file.readlines()
 
-                DataRows = []
-                CurrentGroup = []
+                DataRows, CurrentGroup = [], []
                 Capturing = False # Flag to indicate if we are capturing data (Initially not capturing data)
                 for line in lines:
                     line = line.strip() # Remove leading/trailing whitespace
