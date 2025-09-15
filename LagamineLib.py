@@ -303,7 +303,7 @@ class DataLag:
         # Handling CSV and TXT files
         if self.FileName.endswith(('.csv', '.txt')):
             try:
-                self.getData = pd.read_csv(self.FileName, delim_whitespace=True, header=None).values
+                self.getData = pd.read_csv(self.FileName, header=None, sep=r'\s+', engine="python").values
 
                 if BLoadMatrix:
                     self.LoadDataMatrix()
