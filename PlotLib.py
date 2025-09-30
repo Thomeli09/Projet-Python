@@ -6,9 +6,13 @@ Created on Wed Oct 30 14:15:29 2024
 """
 
 # General Plotting library
+from matplotlib import axes
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib import cm
+from matplotlib.cm import ScalarMappable
+from matplotlib.axes import Axes
 import numpy as np
 from highlight_text import fig_text
 import os
@@ -49,6 +53,7 @@ class ParamPLT:
         self.YLabel = None
         self.ZLabel = None
         self.Title = None
+        self.LegendTitle = None
         self.Legends = []
         self.BLegends = True
         self.BLegendsInsideBox = True  # To put the legend inside the plot or not
@@ -81,6 +86,13 @@ class ParamPLT:
         self.XLimit = []
         self.YLimit = []
         self.Zlimit = []
+
+        # Link to Figure and Axes
+        self.Figure = None  # Figure
+        self.BAxes = False  
+        self.LAxes = []  # List of axes if BAxes = True
+        self.BMappable = False
+        self.LMappable = []  # List of mappable if BMappable = True
 
     # Plot
     @property
@@ -371,6 +383,14 @@ class ParamPLT:
         self.Title = Title
 
     @property
+    def getLegendTitle(self):
+        return self.LegendTitle
+
+    @getLegendTitle.setter
+    def getLegendTitle(self, LegendTitle):
+        self.LegendTitle = LegendTitle
+
+    @property
     def getXLabel(self):
         return self.XLabel
 
@@ -445,17 +465,14 @@ class ParamPLT:
 
     @getLegendsLoc.setter
     def getLegendsLoc(self, Loc):
-        if isinstance(Loc, int):
-            # Dictionary mapping integer values to legend locations
-            LegendLocDict = {0: 'best', 1: 'upper right', 2: 'upper left', 3: 'lower left', 4: 'lower right',
-                             5: 'right', 6: 'center left', 7: 'center right', 8: 'lower center', 9: 'upper center',
-                             10: 'center'}
-        elif isinstance(Loc, str):
-            # Dictionary mapping string values to legend locations
-            LegendLocDict = {'best': 0, 'upper right': 1, 'upper left': 2, 'lower left': 3, 'lower right': 4,
-                             'right': 5, 'center left': 6, 'center right': 7, 'lower center': 8, 'upper center': 9,
-                             'center': 10}
-        self.LegendsLoc = LegendLocDict.get(Loc, 0)
+        # Dictionary mapping integer values to legend locations
+        LegendLocDict = {0: 'best', 1: 'upper right', 2: 'upper left', 3: 'lower left', 4: 'lower right',
+                         5: 'right', 6: 'center left', 7: 'center right', 8: 'lower center', 9: 'upper center',
+                         10: 'center', 'best': 'best', 'upper right': 'upper right', 'upper left': 'upper left', 
+                         'lower left': 'lower left', 'lower right': 'lower right', 'right': 'right', 
+                         'center left': 'center left', 'center right': 'center right', 
+                         'lower center': 'lower center', 'upper center': 'upper center', 'center': 'center'}
+        self.LegendsLoc = LegendLocDict.get(Loc, 'best')
 
     @property
     def getColourBarTitle(self):
@@ -666,7 +683,103 @@ class ParamPLT:
     def getBoolZLimit(self):
         return bool(self.ZLimit)
 
+    # Link to Figure and Axes
+    @property
+    def getFigure(self):
+        return self.Figure
 
+    @getFigure.setter
+    def getFigure(self, Figure):
+        self.Figure = Figure
+
+    @property
+    def getBAxes(self):
+        return self.BAxes
+
+    @getBAxes.setter
+    def getBAxes(self, Bool):
+        self.BAxes = Bool
+
+    @property
+    def getAxes(self):
+        if not self.getBAxes:
+            return None
+        else:
+            return self.Axes
+
+    @getAxes.setter
+    def getAxes(self, Ax):
+        Axes2Add = []
+
+        # Case 1: Single Axes
+        if isinstance(Ax, Axes):
+            Axes2Add = [Ax]
+
+        # Case 2: List / tuple / np.ndarray of Axes
+        elif isinstance(Ax, (list, tuple, np.ndarray)):
+            # If it's a numpy array, flatten it
+            if isinstance(Ax, np.ndarray):
+                Ax = Ax.flatten()
+            # Collect valid Axes
+            Axes2Add = [a for a in Ax if isinstance(a, Axes)]
+            if not Axes2Add:
+                print("Error: No valid Axes found in the provided collection.")
+                return
+
+        # Case 3: Not valid
+        else:
+            print("Error: The provided Ax is not a valid Axes or collection of Axes.")
+            return
+
+        # Store
+        if self.getBAxes:
+            self.Axes.extend(Axes2Add)
+        else:
+            self.Axes = Axes2Add
+            self.getBAxes = True
+
+    @property
+    def getLastAx(self):
+        if not self.getBAxes:
+            print("Warning: No axes found.")
+            return None
+        else:
+            return self.Axes[-1]
+
+    @property
+    def getBMappable(self):
+        return self.BMappable
+
+    @getBMappable.setter
+    def getBMappable(self, Bool):
+        self.BMappable = Bool
+
+    @property
+    def getMappable(self):
+        if not self.getBMappable:
+            return None
+        else:
+            return self.LMappable
+
+    @getMappable.setter
+    def getMappable(self, Mappable):
+        # Verify if Mappable is an instance of Axes
+        if not isinstance(Mappable, ScalarMappable):
+            print("Error: The provided Mappable is not a valid mappable object.")
+            return
+        if not self.getBMappable:
+            self.LMappable = [Mappable]
+            self.getBMappable = True
+        else:
+            self.LMappable.append(Mappable)
+
+    @property
+    def getLastMappable(self):
+        if not self.getBMappable:
+            print("Warning: No mappable found.")
+            return None
+        else:
+            return self.LMappable[-1]
 
 """
 Fcts générales
@@ -685,8 +798,14 @@ def ClosePlotsOnDemand():
     input("Press Enter to close all plots...") 
     plt.close('all')
 
-def StartPlots():
-    plt.figure()
+def StartPlots(paramPLT=None, Rows=1, Cols=1):
+    """
+    Start a new plot and link it to the ParamPLT object if provided.
+    """
+    Fig, Ax = plt.subplots(nrows=Rows, ncols=Cols)
+    if paramPLT is not None:
+        paramPLT.getFigure = Fig
+        paramPLT.getAxes = Ax
 
 def PLTLatexStyle():
     """
@@ -736,9 +855,9 @@ def PLTLegend(paramPLT):
     """
     if paramPLT.getBLegends:
         if paramPLT.getBLegendsInsideBox:
-            plt.legend(fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
+            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
         else:
-            plt.legend(fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
+            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
 
 def UpdatePlotColorsAndLegend(LColors):
     """
@@ -814,12 +933,49 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
         else:  # In case of the different labels
             pass
 
-def PLTColorBar(paramPLT):
+def PLTColorBar(paramPLT, Location=0, Fraction=0.10, Padding=-1, Spacing=0, BDrawEdges=False):
     """
     Add a color bar to the plot based on the specified parameters.
+
+    Args:
+    - paramPLT: Object containing plot parameters.
+    - Location: Location of the color bar (0: right, 1: left, 2: top, 3: bottom).
+    - Fraction: Fraction of the original axes to use for the color bar.
+    - Padding: Padding between the color bar and the plot. If negative, a default value is used based on the location.
+    - Spacing: Uniformity of the color bar (0: uniform, 1: proportional).
+    - BDrawEdges: Boolean indicating whether to draw edges around the color bar.
     """
-    if paramPLT.getColourBarTitle:
-        plt.colorbar(label=paramPLT.getColourBarTitle)
+    Fig = paramPLT.getFigure
+    if Fig is None:
+        print("Warning: No figure found for the color bar.")
+        return
+    Mappable = paramPLT.getLastMappable
+    if Mappable is None:
+        print("Warning: No mappable found for the color bar.")
+        return
+    Ax = paramPLT.getLastAx
+    if Ax is None:
+        print("Warning: No axis found for the color bar.")
+        return
+    # Location of the color bar
+    LocationDict = {0: 'right', 1: 'left', 2: 'top', 3: 'bottom'}
+    Location = LocationDict.get(Location, 'right')
+
+    # Padding between the color bar and the plot
+    if Padding<0:
+        PaddingDict = {'right': 0.05, 'left': 0.05, 'top': 0.15, 'bottom': 0.15}
+        Padding = PaddingDict.get(Location, 0.05)
+    else:
+        Padding = Padding
+
+    # Uniformity of the color bar
+    SpacingDict = {0: 'uniform', 1: 'proportional'}
+    Spacing = SpacingDict.get(Spacing, 'uniform')
+
+    Cb = Fig.colorbar(mappable=Mappable, ax=Ax, location=Location, fraction=Fraction, pad=Padding, 
+                      format=None, spacing=Spacing, drawedges=BDrawEdges)
+    Cb.set_label(label=paramPLT.getColourBarTitle, size=paramPLT.getFontSize)
+    Cb.ax.tick_params(labelsize=paramPLT.getTicksSize)
 
 def PLTGrid(paramPLT):
     if paramPLT.getGridAxis:
@@ -930,7 +1086,7 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
     """
     if Index == 1:
         if BStartPLT:  # To start a new plot or not
-            StartPlots()
+            StartPlots(paramPLT=paramPLT, Rows=Rows, Cols=Cols)
         ax = plt.subplot(Rows, Cols, Index)
         plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
     elif Index == Rows * Cols + 1:
@@ -1061,6 +1217,70 @@ Type de Plots
 """
 # 2D
 
+
+def PLTText(XY, Text, paramPLT, FontFamily=0, FontStyle=0, FontWeight=0, HAlignement=0, Rotation=-1, RotationMode=0, BAbsoluteCoord=True):
+    """
+    Adds text to a plot at specified coordinates with customizable parameters.
+
+    Args:
+        XY (tuple): Coordinates (x, y) where the text will be placed.
+        Text (str): The text to be displayed on the plot.
+        paramPLT (object): Object containing plot parameters.
+        FontFamily (int): Integer value representing the font family.
+        FontStyle (int): Integer value representing the font style.
+        FontWeight (int): Integer value representing the font weight.
+        HAlignement (int): Integer value representing the horizontal alignment of the text.
+        Rotation (int or float): Angle of rotation for the text.
+        RotationMode (int): Mode of rotation (0 for default, 1 for anchor).
+        BAbsoluteCoord (bool): If True, the coordinates are in absolute terms; if False, they are relative to the axes.
+
+    Returns:
+        None: This function does not return anything. It simply adds text to the plot.
+    """
+    # Dictionary mapping integer values to font families
+    TextFontDict = {0: 'sans-serif', 1: 'serif', 2: 'cursive', 3: 'fantasy', 4: 'monospace'}
+    FontFamily = TextFontDict.get(FontFamily, 'sans-serif')
+
+    # Dictionary mapping integer values to fontstyles
+    TextFontStyleDict = {0: 'normal', 1: 'italic', 2: 'oblique'}
+    FontStyle = TextFontStyleDict.get(FontStyle, 'normal')
+
+    # Dictionary mapping integer values to font weights
+    TextFontWeightDict = {0: 'normal', 1: 'ultralight', 2: 'light', 3: 'regular', 4: 'book', 5: 'medium', 6: 'roman',
+                      7: 'semibold', 8: 'demibold', 9: 'bold', 10: 'heavy', 11: 'extra bold', 12: 'black'}
+    FontWeight = TextFontWeightDict.get(FontWeight, 'normal')
+
+    # Dictionary mapping integer values to horizontal alignment
+    TextHAlignementDict = {0: 'center', 1: 'left', 2: 'right'}
+    HAlignement = TextHAlignementDict.get(HAlignement, 'center')
+
+    # Dictionary mapping integer values to rotation
+    TextRotationDict = {-1: 'horizontal', -2: 'vertical'}
+    Rotation = TextRotationDict.get(Rotation, Rotation)
+
+    # Dictionary mapping integer values to rotation mode
+    TextRotationModeDict = {0: 'default', 1: 'anchor'}
+    RotationMode = TextRotationModeDict.get(RotationMode, 'default')
+
+    # Position in absolute coordinates or relative to the axes
+    CoordType = None
+    if not BAbsoluteCoord:
+        ax = plt.gca()
+        CoordType = ax.transAxes
+
+    # Based on stored Ax or on Ax from plt.gca()
+    if paramPLT.getBAxes:
+        Ax = paramPLT.getLastAx
+    else:
+        Ax = plt.gca()
+       
+    if Ax is not None:
+        Ax.text(x=XY[0], y=XY[1], s=Text,
+                color=paramPLT.getColour, alpha=paramPLT.getAlpha,
+                fontfamily=FontFamily, fontstyle=FontStyle, fontweight=FontWeight, fontsize=paramPLT.getTicksSize,
+                horizontalalignment=HAlignement, rotation=Rotation, rotation_mode=RotationMode, bbox=dict(facecolor='white', alpha=0.5, edgecolor='k'))
+        # transform=CoordType
+
 def PLTPlot(XValues, YValues, paramPLT):
     """
     Creates a 2D plot using customizable parameters.
@@ -1098,6 +1318,96 @@ def PLTPlotSeries(LXValues, LYValues, paramPLT):
     for XValues, YValues in zip(LXValues, LYValues):
         PLTPlot(XValues, YValues, paramPLT)
 
+
+def PLTVHLine(Val, paramPLT, BRelative=True, SecValMin=0, SecValMax=1, BOrientation=True):
+    """
+    Plots a vertical or horizontal line on the plot, based on the specified parameters.
+
+    Args:
+    - Val (float): Value at which to draw the line (x-coordinate for vertical line, y-coordinate for horizontal line),
+        but allows Array-like input to draw multiple lines only if BRelative is False.
+    - paramPLT (object): Object containing plot parameters.
+    - BRelative (bool): Boolean flag to specify if the secondary axis values are in relative units (0 to 1) or absolute units.
+    - SecValMin (float): Minimum value for the secondary axis (y-axis for vertical line, x-axis for horizontal line) 
+        and is in relative units (0 to 1) or absolute units based on BRelative.
+    - SecValMax (float): Maximum value for the secondary axis (y-axis for vertical line, x-axis for horizontal line) 
+        and is in relative units (0 to 1) or absolute units based on BRelative.
+    - BOrientation (bool): Boolean flag to specify the orientation of the line.
+    """
+    if BOrientation:  # Vertical line
+        if BRelative:
+            plt.axvline(x=Val, ymin=SecValMin, ymax=SecValMax,
+                        color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                        marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
+                        alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+        else:
+            plt.vlines(x=Val, ymin=SecValMin, ymax=SecValMax,
+                       color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                       marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
+                       alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+    elif BOrientation == False:  # Horizontal line
+        if BRelative:
+            plt.axhline(y=Val, xmin=SecValMin, xmax=SecValMax,
+                        color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                        marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
+                        alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+        else:
+            plt.hlines(y=Val, xmin=SecValMin, xmax=SecValMax,
+                       color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                       marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
+                       alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+
+
+def PLTAXLine(XY1, paramPLT,XY2=(0,0), Slope=None):
+    """
+    Plots an infinite line defined by two points or a point and a slope.
+
+    Args:
+    - XY1 (tuple): Coordinates of the first point (x1, y1).
+    - paramPLT (object): Object containing plot parameters.
+    - XY2 (tuple): Coordinates of the second point (x2, y2). Default is (0, 0).
+    - Slope (float): Slope of the line. If provided, XY2 is ignored.
+
+    Returns:
+    - None: This function does not return anything. It simply displays the line on the plot.
+    """
+    if Slope is not None:
+        plt.axline(xy=XY1, slope=Slope,
+                   color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                   marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize,
+                   alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+    else:
+        plt.axline(xy1=XY1, xy2=XY2,
+                   color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                   marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize,
+                   alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
+
+
+def PLTCoordsSpan(ValMin, ValMax, paramPLT, SecValMin=0, SecValMax=1, BOrientation=True):
+    """
+    Plots a shaded span (rectangle) on the plot, either vertically or horizontally, based on the specified parameters.
+
+    Args:
+    - ValMin (float): Minimum value for the primary axis (x-axis for vertical span, y-axis for horizontal span).
+    - ValMax (float): Maximum value for the primary axis (x-axis for vertical span, y-axis for horizontal span).
+    - paramPLT (object): Object containing plot parameters.
+    - SecValMin (float): Minimum value for the secondary axis (y-axis for vertical span, x-axis for horizontal span) and is in relative units (0 to 1).
+    - SecValMax (float): Maximum value for the secondary axis (y-axis for vertical span, x-axis for horizontal span) and is in relative units (0 to 1).
+    - BOrientation (bool): Boolean flag to specify the orientation of the span.
+    """
+    if BOrientation:  # Vertical line
+        plt.axvspan(xmin=ValMin, xmax=ValMax, ymin=SecValMin, ymax=SecValMax,
+                    facecolor=paramPLT.getColour, hatch=paramPLT.getHatch,
+                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
+                    label=paramPLT.getLegends)
+
+    elif BOrientation == False:
+        plt.axhspan(ymin=ValMin, ymax=ValMax, xmin=SecValMin, xmax=SecValMax,
+                    facecolor=paramPLT.getColour, hatch=paramPLT.getHatch,
+                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
+                    label=paramPLT.getLegends)
+
+
 def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
     """
     Creates a filled plot between two curves (primary and secondary) using customizable parameters.
@@ -1121,14 +1431,15 @@ def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
                  label=paramPLT.getLegends)
 
 
-def PLTBar(Labels, Vals, paramPLT, StdErrors=None, BOrientation=True):
+def PLTBar(XBars, Heights, paramPLT, Width=0.8, StdErrors=None, BOrientation=True, Bottom=0):
     """
     Creates a bar plot with optional error bars, customizable colors, labels, and orientation.
 
     Args:
-    - Labels: List of labels for the bars.
-    - Vals: List of values corresponding to the height (or width) of each bar.
+    - XBars: List or array of x-coordinates for the bars or labels of each bar
+    - Heights: List or array of heights for each bar or values of each bar
     - paramPLT: An object containing plot parameters 
+    - Width: Width of each bar (default is 0.8) and can be specified for all bars or individually
     - StdErrors (optional): List or array of standard errors for each bar.
         - Scalar: Symmetric +/- error for all bars.
         - Shape (N,): Symmetric +/- error for each bar.
@@ -1138,26 +1449,114 @@ def PLTBar(Labels, Vals, paramPLT, StdErrors=None, BOrientation=True):
     - BOrientation: Boolean flag to specify the orientation of the bars.
         - True: Vertical bar plot (default).
         - False: Horizontal bar plot.
+    - Bottom: Y-coordinate of the bottom of each bar (default is 0) and can be specified for all bars or individually
 
     Returns:
-        None: Cette fonction ne retourne rien. Elle affiche simplement le graphique.
+        None: This function does not return anything. It simply displays the bar plot.
 
     Improovements:
-    - Allows stacking bars: Use `bottom=` parameter with previous bar values.
-    - Allows grouping bars: Create offsets using arrays like:
-        br1 = np.arange(len(Labels))
-        br2 = [x + barWidth for x in br1]
-        br3 = [x + barWidth for x in br2]
+    
     """
     if BOrientation:
-        plt.bar(Labels, Vals, yerr=StdErrors,
-                facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(),
-                width=paramPLT.getLineSize, label=paramPLT.getLegends)
+        # Scale type for Y axis
+        if paramPLT.getYScaleType:
+            BLogScale = True if paramPLT.getYScaleType == 'log' else False
+        elif paramPLT.getGenericScaleType:
+            BLogScale = True if paramPLT.getGenericScaleType == 'log' else False
+        plt.bar(x=XBars, height=Heights, width=Width, yerr=StdErrors, ecolor='k',
+                facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(), 
+                align='center', bottom=Bottom, label=paramPLT.getLegends)
     else:
-        plt.barh(Labels, Vals, xerr=StdErrors,
-                 facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(),
-                 alpha=paramPLT.getAlpha,
-                 height=paramPLT.getLineSize, label=paramPLT.getLegends)
+        # Scale type for X axis
+        if paramPLT.getXScaleType:
+            BLogScale = True if paramPLT.getXScaleType == 'log' else False
+        elif paramPLT.getGenericScaleType:
+            BLogScale = True if paramPLT.getGenericScaleType == 'log' else False
+        plt.barh(y=XBars, height=Width, width=Heights, yerr=StdErrors, ecolor='k',
+                facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(), 
+                align='center', left=Bottom, label=paramPLT.getLegends)
+
+
+def PLTHist(XValues, paramPLT, NBins=0, HistType=0, BNormalizeArea=False, BStacked=False, BCumulative=False, Weights=None, HeightShift=None):
+    """
+    Creates a histogram plot using customizable parameters.
+    
+    Args:
+    - XValues (list or array-like): Data values for the histogram.
+    - paramPLT (object): Object containing plot parameters.
+    - NBins (int): Number of bins or binning strategy:
+        0: 'auto' (default)
+        -1: 'fd' (Freedman-Diaconis Estimator)
+        -2: 'doane' (Doane's formula)
+        -3: 'scott' (Scott's rule)
+        -4: 'stone' (Stone's rule)
+        -5: 'rice' (Rice rule)
+        -6: 'sturges' (Sturges' formula)
+        -7: 'sqrt' (Square root choice)
+        Or: Exact number of bins
+    - HistType (int): Type of histogram:
+        0: 'bar' (default)
+        1: 'barstacked'
+        2: 'step'
+        3: 'stepfilled'
+    - BNormalizeArea (bool): Whether to normalize the histogram area to 1.
+    - BStacked (bool): Whether to stack multiple histograms.
+    - BCumulative (bool): Whether to compute a cumulative histogram.
+    - Weights (list or array-like): Weights for each value in XValues.
+    - HeightShift (float): Value to shift the height of the histogram bars.
+
+    Returns:
+    - None: This function does not return anything. It simply displays the histogram.
+    """
+    # Dict to map NBins values to matplotlib options
+    NBinsDIct = {0: 'auto', -1: 'fd', -2: 'doane', -3: 'scott', -4: 'stone', -5: 'rice', -6: 'sturges', -7: 'sqrt'}
+    NBins = NBinsDIct.get(NBins, int(abs(NBins)))  # Default to absolute value if not in dict
+
+    # Dict to map histogram type values to matplotlib options
+    HistTypeDict = {0: 'bar', 1: 'barstacked', 2: 'step', 3: 'stepfilled'}
+    HistType = HistTypeDict.get(HistType, 'bar')  # Default to 'bar' if not in dict
+    
+    # Scale type for Y axis
+    if paramPLT.getYScaleType:
+        BLogScale = True if paramPLT.getYScaleType == 'log' else False
+    elif paramPLT.getGenericScaleType:
+        BLogScale = True if paramPLT.getGenericScaleType == 'log' else False
+
+    im = plt.hist(XValues, bins=NBins, density=BNormalizeArea, stacked=BStacked, cumulative=BCumulative, weights=Weights,
+             bottom=HeightShift, histtype=HistType, align='mid', orientation='vertical', rwidth=None, log=BLogScale, 
+             color=paramPLT.getColour, label=paramPLT.getLegends)
+
+   
+def PLTHist2D(XValues, YValues, paramPLT, NBins=10, BNormalizeArea=False, BCumulative=False, 
+              CountMin=None, CountMax=None, ValMin=None, ValMax=None, Weights=None):
+    """
+    Creates a 2D histogram plot using customizable parameters.
+
+    Args:
+    - XValues (list or array-like): X-axis data values for the histogram.
+    - YValues (list or array-like): Y-axis data values for the histogram.
+    - paramPLT (object): Object containing plot parameters.
+    - NBins : Number of bins:
+        - If int, the number of bins for the two dimensions (nx = ny = bins).
+        - If [int, int], the number of bins in each dimension (nx, ny = bins).
+        - If array-like, the bin edges for the two dimensions (x_edges = y_edges = bins).
+        - If [array, array], the bin edges in each dimension (x_edges, y_edges = bins)
+    - BNormalizeArea (bool): Whether to normalize the histogram area to 1.
+    - BCumulative (bool): Whether to compute a cumulative histogram.
+    - Weights (list or array-like): Weights for each value in XValues and YValues.
+    - CountMin (float): Minimum count threshold to display a bin.
+    - CountMax (float): Maximum count threshold to display a bin.
+    - ValMin (float): Minimum value for the color scale.
+    - ValMax (float): Maximum value for the color scale.
+
+    Returns:
+    - None: This function does not return anything. It simply displays the 2D histogram.
+    """
+
+    counts, xedges, yedges, im = plt.hist2d(XValues, YValues, bins=NBins, density=BNormalizeArea, weights=Weights, cmin=CountMin, cmax=CountMax,
+               cmap=paramPLT.getColourMap, norm=None, vmin=ValMin, vmax=ValMax, alpha=paramPLT.getAlpha)
+    paramPLT.getMappable = im  # Store the mappable object for colorbar
+
 
 def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAbs=0, 
            Radius=1, StartAngle=0, LabelDist=1.25, PctDist=0.6, BShadow=False, explode=None, 

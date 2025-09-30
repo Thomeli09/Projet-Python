@@ -5,7 +5,7 @@ Created on Fri Nov  8 11:20:09 2024
 @author: Thommes Eliott
 """
 
-# Lagamine library for data management  
+# Library for data storage and treatment 
 
 # Other Lib
 import numpy as np
@@ -17,7 +17,7 @@ from pykalman import KalmanFilter
 
 
 """
-DataLag
+DataRecord
 
 # Improvement to be done:
 - Ability to load multiple files at the same time
@@ -25,7 +25,7 @@ DataLag
 - Ability to read DAE files from Yokogawa software
 - Ability to read Excel files
 """
-class DataLag:
+class DataRecord:
     def __init__(self):
         # File
         self.FileName = None
@@ -696,142 +696,3 @@ def Time2TimeStep(self):
 # Fonction de traitement des donn?es
 # Fonction d'affichage
 # Fonction d'export de donn?e
-
-
-"""
-DataTreatment
-
-# Improvement to be done:
-- Add differents data treatment methods
-- Add differents links with DataLag class
-"""
-class DataTreatment:
-    def __init__(self):
-        pass
-        # Data
-
-    def DTMovingAverage(self, Data, FWindow=5):
-        """
-        Applys a moving average filter to the data.
-        From scipy library.
-        
-        Args:
-            Data (array): Input data array.
-            FWindow (int): Size of the moving average filter window.
-
-        Returns:
-            Data (array): Filtered data array.
-        """
-        return np.convolve(Data, np.ones(FWindow)/FWindow, mode='same')
-
-    def DTMedianFilter(self, Data, FWindow=5):
-        """
-        Applys a median filter to the data.
-        From scipy library.
-        
-        Args:
-            Data (array): Input data array.
-            FWindow (int): Size of the median filter window. Must be an odd integer.
-        Returns:
-            Data (array): Filtered data array.
-        """
-        return medfilt(Data, kernel_size=FWindow)
-
-    def DTSavitzkyGolay(self, Data, FWindow=5, PolyOrder=2):
-        """
-        Applys a Savitzky-Golay filter to the data.
-        From scipy library.
-
-        Args:
-            Data (array): Input data array.
-            FWindow (int): Size of the filter window. Must be an odd integer.
-            PolyOrder (int): Order of the polynomial used to fit the samples. Must be less than FWindow.
-
-        Returns:
-            Data (array): Filtered data array.
-        """
-        return savgol_filter(Data, window_length=FWindow, polyorder=PolyOrder)
-
-    def DTButterworth(self, Data, FSample=1.0, FCut=0.1, Order=4, BType='low'):
-        """
-        Applys a Butterworth filter to the data.
-        From scipy library.
-        Args:
-            Data (array): Input data array.
-            FSample (float): Sampling frequency of the data.
-            FCut (float): Cutoff frequency of the filter.
-            Order (int): Order of the filter.
-            BType (str): Type of the filter. Can be 'low', 'high', 'bandpass' or 'bandstop'.
-        Returns:
-            Data (array): Filtered data array.
-        """
-        Nyquist = 0.5 * FSample
-        NormalCutoff = FCut / Nyquist
-        BButter, AButter = butter(N=Order, Wn=NormalCutoff, btype=BType, analog=False)
-        return filtfilt(BButter, AButter, Data)
-
-    def DTBessel(self, Data, FSample=1.0, FCut=0.1, Order=4, BType='low'):
-        """
-        Applys a Bessel filter to the data.
-        From scipy library.
-        Args:
-            Data (array): Input data array.
-            FSample (float): Sampling frequency of the data.
-            FCut (float): Cutoff frequency of the filter.
-            Order (int): Order of the filter.
-            BType (str): Type of the filter. Can be 'low', 'high', 'bandpass' or 'bandstop'.
-
-        Returns:
-            Data (array): Filtered data array.
-        """
-        Nyquist = 0.5 * FSample
-        NormalCutoff = FCut / Nyquist
-        BBessel, ABessel = bessel(N=Order, Wn=NormalCutoff, btype=BType, analog=False)
-        return filtfilt(BBessel, ABessel, Data)
-
-    def DTWiener(self, Data, MySize=5, Noise=None):
-        """
-        Applys a Wiener filter to the data.
-        From scipy library.
-
-        Args:
-            Data (array): Input data array.
-            MySize (int): Size of the Wiener filter window.
-            Noise (float): Estimated noise power. If None, it is estimated from the data.
-
-        Returns:
-            Data (array): Filtered data array.
-        """
-        return wiener(Data, mysize=MySize, noise=Noise)
-
-    def DTKalman(self, Data, TransitionMatrix=1, ObservationMatrix=1, InitialStateMean=0, 
-                 InitialStateCovariance=1, ObservationCovariance=1, TransitionCovariance=0.01):
-        """
-        Applys a Kalman filter to the data.
-        From pykalman library.
-
-        Args:
-            Data (array): Input data array.
-            TransitionMatrix (float or array): State transition matrix.
-            ObservationMatrix (float or array): Observation matrix.
-            InitialStateMean (float or array): Initial state mean.
-            InitialStateCovariance (float or array): Initial state covariance.
-            ObservationCovariance (float or array): Observation covariance.
-            TransitionCovariance (float or array): Transition covariance.
-
-        Returns:
-            Data (array): Filtered data array.
-        """
-        kf = KalmanFilter(transition_matrices=TransitionMatrix,
-                          observation_matrices=ObservationMatrix,
-                          initial_state_mean=InitialStateMean,
-                          initial_state_covariance=InitialStateCovariance,
-                          observation_covariance=ObservationCovariance,
-                          transition_covariance=TransitionCovariance)
-        StateMeans, _ = kf.filter(Data)
-        return StateMeans.flatten()
-
-
-
-
-

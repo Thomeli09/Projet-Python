@@ -34,6 +34,12 @@
     <Compile Include="LagamineLib.py" />
     <Compile Include="LoadingLib.py" />
     <Compile Include="MessageLib.py" />
+    <Compile Include="DataStorageLib.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MathOperationLib.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ObjectManagementLib.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />
