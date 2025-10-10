@@ -5,7 +5,7 @@ Created on Fri Nov  8 11:20:09 2024
 @author: Thommes Eliott
 """
 
-# Lagamine library for data management  
+# Library for data storage and treatment 
 
 # Other Lib
 import numpy as np
@@ -17,7 +17,7 @@ from pykalman import KalmanFilter
 
 
 """
-DataLag
+DataRecord
 
 # Improvement to be done:
 - Ability to load multiple files at the same time
@@ -25,7 +25,7 @@ DataLag
 - Ability to read DAE files from Yokogawa software
 - Ability to read Excel files
 """
-class DataLag:
+class DataRecord:
     def __init__(self):
         # File
         self.FileName = None
@@ -696,4 +696,3 @@ def Time2TimeStep(self):
 # Fonction de traitement des donn?es
 # Fonction d'affichage
 # Fonction d'export de donn?e
-
