@@ -1088,7 +1088,7 @@ def PLTMultiPlot(paramPLT, Rows, Cols=1, Index=1, BStartPLT=True, BAvoidOverlapp
         if BStartPLT:  # To start a new plot or not
             StartPlots(paramPLT=paramPLT, Rows=Rows, Cols=Cols)
         ax = plt.subplot(Rows, Cols, Index)
-        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize) # Set the main title of the plot
+        plt.suptitle(paramPLT.getTitle, fontsize=paramPLT.getTitleSize, fontweight='bold') # Set the main title of the plot
     elif Index == Rows * Cols + 1:
         if BAvoidOverlapping:
             plt.tight_layout() # Avoid overlapping of labels, plots, etc.
