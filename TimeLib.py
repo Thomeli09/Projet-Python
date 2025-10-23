@@ -163,7 +163,8 @@ def Time2OptiTime(Value: float, Unit: str, NDecimals: int = 3, ReturnAsStr: bool
         "h": 3600.0, "hr": 3600.0, "hour": 3600.0, "hours": 3600.0,
         "d": 86400.0, "day": 86400.0, "days": 86400.0,
         "wk": 604800.0, "w": 604800.0, "week": 604800.0, "weeks": 604800.0,
-        "yr": 31557600.0, "y": 31557600.0, "year": 31557600.0, "years": 31557600.0,
+        "mo": 2592000.0, "month": 2592000.0, "months": 2592000.0,  # 1 month = 30 days
+        "yr": 31557600.0, "y": 31557600.0, "year": 31557600.0, "years": 31557600.0,  # 1 year = 365.25 days
     }
     if UnitStr not in Alias:
         raise ValueError(f"Unknown unit '{Unit}'")
@@ -178,7 +179,8 @@ def Time2OptiTime(Value: float, Unit: str, NDecimals: int = 3, ReturnAsStr: bool
         ("h", 3600.0),
         ("d", 86400.0),
         ("wk", 604800.0),
-        ("yr", 31557600.0),  # 365.25 days
+        ("mo", 2592000.0),  # 1 month = 30 days
+        ("yr", 31557600.0),  # 1 year = 365.25 days
     ]
 
     Seconds = float(Value) * Alias[UnitStr]
