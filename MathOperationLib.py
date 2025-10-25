@@ -7,6 +7,7 @@ Created on Tuesday Sept  30 11:20:09 2025
 
 # Library for mathematical operations on data 
 
+
 # Other Lib
 import numpy as np
 import pandas as pd
@@ -14,8 +15,10 @@ from scipy.signal import medfilt, savgol_filter, butter, filtfilt, bessel, wiene
 from scipy import integrate
 from pykalman import KalmanFilter
 
+
 # Custom Lib
 from DataManagementLib import LenData
+
 
 """
 DataTreatment

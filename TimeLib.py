@@ -13,8 +13,10 @@ import time
 import matplotlib.pyplot as plt
 from typing import Tuple
 
+
 # Custom Lib
 from PlotLib import ParamPLT, StartPlots, PLTShow, PLTBar
+
 
 """
 Chronometer structure

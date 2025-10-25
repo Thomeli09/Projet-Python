@@ -7,11 +7,14 @@ Created on Wed Jan 29 16:39:19 2025
 
 # Data management function Library
 
+
 # Other Lib
 import numpy as np
 import math
 
+
 # Custom Lib
+
 
 # General functions
 def LenData(Data):
@@ -81,8 +84,16 @@ def ListFindFirstMaxPair(L1, L2):
     Returns:
         tuple: (max_value, paired_value) or None if lists are empty or mismatched.
     """
-    if not L1 or not L2 or not isinstance(L1,list) or not isinstance(L1,list) or len(L1) != len(L2):
-        print("Error: There is not 2 lists ot the two lists should have the same length.")
+    if not L1 or not L2:
+        print("Error: The two lists should be non-empty.")
+        return None
+
+    if not isinstance(L1,list) or not isinstance(L1,list):
+        print("Error: The two inputs should be lists.")
+        return None
+
+    if len(L1) != len(L2):
+        print("Error: The two lists should have the same length.")
         return None
 
     MaxIndex = L1.index(max(L1))  # Find the index of the first max value

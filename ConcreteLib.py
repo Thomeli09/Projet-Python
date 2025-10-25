@@ -1,36 +1,54 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jan 26 11:17:57 2025
+Created on Fri Oct 25 15:43:03 2025
 
 @author: Thommes Eliott
 """
 
-# Experiment extension to cementious materials library
+# Concrete library
 
 
 # Other Lib
+from turtle import color
 import pandas as pd
 import numpy as np
-from ExperimentLib import Composition
+
 
 # Custom Lib
 from PlotLib import ParamPLT, StartPlots, CloseALLPlots, PLTShow, DefaultParamPLT, PLTPie, PLTPlot
 from DataManagementLib import ListSort, ListFindFirstMaxPair
+from MaterialLib import Material
+
 
 """
-CemMaterials : Cementious materials objects
+CemMat : Cementious materials objects
 """
-class CemMaterials(Composition):
-    def __init__(self, Name, ProductionDate, Experiments):
-        super().__init__(Name=Name, ProductionDate=ProductionDate,
-                         Experiments=Experiments)
-        
+class CemMat(Material):
+    def __init__(self, Name, ID, Type):
+        # Type of cementious material
+        if isinstance(Type, int):
+            if Type==1:
+                MatType="Concrete"
+            elif Type==2:
+                MatType="Mortar"
+            elif Type==3:
+                MatType="Cement Paste"
+            else:
+                print("Error : Type of cementious material not defined")
+        else:
+            if Type not in ["Concrete", "Mortar", "Cement Paste"]:
+                print("Error : Type of cementious material not defined")
+            else:
+                MatType = Type
+
+        super().__init__(Name=Name, ID=ID, Type=MatType)
+
         # Ingredients
-        # Absolute volume of=> p:Gravel,s:Sand ,c:Cement, e:Water, v:Void
+        # Absolute volume of => p:Gravel, s:Sand, c:Cement, e:Water, v:Void
         self.Cement = False  # [Cement] Cement object (Limited to one object)
         self.Water = False  # [Water] Water object (Limited to one object)
-        self.Aggregates = []  # [Aggregat] Aggregates objects (Unlimited)
-        self.Adjuvants = []  # [Adjuvant] Adjuvants objects (Unlimited)
+        self.LAggregates = []  # [Aggregat] Aggregates objects (Unlimited)
+        self.LAdjuvants = []  # [Adjuvant] Adjuvants objects (Unlimited)
 
         # Properties of the composition
         self.VRock = 0  # [float] Volume of rock (p) [m^3/m^3 of concrete]
@@ -39,19 +57,21 @@ class CemMaterials(Composition):
         self.VVoids = 0  # [float] Volume of voids in the concrete (v) [m^3/m^3 of concrete]
 
         self.VConcrete = 0  # [float] Volume of concrete (p+s+c+e+v) [m^3/m^3 of concrete]
-        self.VSOlids = 0  # [float] Volume of solids (p+s+c) [m^3/m^3 of concrete]
+        self.VSolids = 0  # [float] Volume of solids (p+s+c) [m^3/m^3 of concrete]
         self.VAggregats = 0  # [float] Volume of aggregates (p+s) [m^3/m^3 of concrete]
         self.VMortar = 0  # [float] Volume of mortar (s+c+e+v) [m^3/m^3 of concrete]
         self.VCementPaste = 0  # [float] Volume of cement paste (c+e+v) [m^3/m^3 of concrete]
 
-
         self.DMax = 0  # [float] Maximum diameter of the composition [mm]
         self.Obectif = 0  # [float] Objective of composition 
 
-        
         # Parameters
         self.DmaxSand = 2  # [float] Maximum diameter of sand [mm]
 
+        # Experiments
+        self.LExperiments = []  # [L of Experiment] Experiments done on the cementious material
+
+    # Ingredients
     @property
     def getCement(self):
         return self.Cement
@@ -76,31 +96,31 @@ class CemMaterials(Composition):
 
     @property
     def getAggregates(self):
-        return self.Aggregates
+        return self.LAggregates
 
     @getAggregates.setter
     def getAggregates(self, ItemAggregat):
         if isinstance(ItemAggregat, list):
-            self.Aggregates = ItemAggregat
+            self.LAggregates = ItemAggregat
         elif isinstance(ItemAggregat, Aggregat):
-            self.Aggregates.append(ItemAggregat)
+            self.LAggregates.append(ItemAggregat)
         else:
             print("Error : Invalid input for Aggregates")
 
     @property
     def getAdjuvants(self):
-        return self.Adjuvants
+        return self.LAdjuvants
 
     @getAdjuvants.setter
     def getAdjuvants(self, Adjuvants):
         if isinstance(Adjuvants, list):
-            self.Adjuvants = Adjuvants
+            self.LAdjuvants = Adjuvants
         elif isinstance(Adjuvants, Adjuvant):
-            self.Adjuvants.append(Adjuvants)
+            self.LAdjuvants.append(Adjuvants)
         else:
             print("Error : Invalid input for Adjuvants")
 
-
+    
     def PLTGranulos(self, paramPLT, BPourcent=True):
         if not paramPLT:
             paramPLT = DefaultParamPLT()
@@ -257,22 +277,15 @@ class CemMaterials(Composition):
     # Eeff volume of water
 
         
-    
-
-
-
-
 """
-Ingredients : Genrals ingredients for cementious materials
+Ingredients : General class for all the ingredients in cementious materials
 """
-class Ingredients:
-    def __init__(self, Name, MatType, Color=None):
-        self.Name = Name
-        self.MatType = MatType
+class Ingredient(Material):
+    def __init__(self, Name, ID, MatType, Color=None):
+        super().__init__(Name=Name, ID=ID, Type=MatType)
 
         # Graphics
-        self.Color = Color
-        self.Hatch = None
+        self.getColor = Color
 
         # Properties
         self.BulkDensity = 0  # [float] Bulk density of the ingredient [kg/m^3]
@@ -283,56 +296,13 @@ class Ingredients:
         self.Mass = 0  # [float] Mass of the ingredient [kg/m^3 of concrete]
 
     @property
-    def getName(self):
-        return self.Name
-
-    @getName.setter
-    def getName(self, Name):
-        self.Name = Name
-
-    @property
-    def getMatType(self):
-        return self.MatType
-
-    @getMatType.setter
-    def getMatType(self, MatType):
-        self.MatType = MatType
-
-    @property
-    def getColor(self):
-        return self.Color
-
-    @getColor.setter
-    def getColor(self, Color):
-        self.Color = Color
-
-    @property
-    def getHatch(self):
-        return self.Hatch
-
-    @getHatch.setter
-    def getHatch(self, Hatch):
-        self.Hatch = Hatch
-
-    @property
-    def getVolume(self):
-        return self.Volume
-
-    @getVolume.setter
-    def getVolume(self, Volume, BParticleDensity=False):
-        self.Volume = Volume
-        if BParticleDensity:
-            self.Mass = self.Volume * self.getParticleDensity
-        else:
-            self.Mass = self.Volume * self.getBulkDensity
-
-    @property
     def getBulkDensity(self):
         return self.BulkDensity
 
     @getBulkDensity.setter
     def getBulkDensity(self, BulkDensity):
         self.BulkDensity = BulkDensity
+        self.Mass = self.getVolume * BulkDensity
 
     @property
     def getParticleDensity(self):
@@ -343,39 +313,43 @@ class Ingredients:
         self.ParticleDensity = ParticleDensity
 
     @property
+    def getVolume(self):
+        return self.Volume
+
+    @getVolume.setter
+    def getVolume(self, Volume):
+        self.Volume = Volume
+        self.Mass = Volume * self.getBulkDensity
+
+    @property
     def getMass(self):
         return self.Mass
 
     @getMass.setter
-    def getMass(self, Mass, BParticleDensity=False):
+    def getMass(self, Mass):
         self.Mass = Mass
-        if BParticleDensity:
-            if self.getParticleDensity != 0:
-                self.Volume = self.Mass / self.getParticleDensity
-            else:
-                print("Error : Particle Density not defined")
-                self.Volume = 0
+        if self.getParticleDensity != 0:
+            self.Volume = Mass / self.getBulkDensity
         else:
-            if self.getBulkDensity != 0:
-                self.Volume = self.Mass / self.getBulkDensity
-            else:
-                print("Error : Bulk Density not defined")
-                self.Volume = 0
-
+            print("Error : Bulk Density not defined")
+            self.Volume = 0
 
 """
 Cement
-Colors : Grey
+Default colors : Gray
 """
-class Cement(Ingredients):
-    def __init__(self, Name, CementClass, CementType, CementStrength):
-        super().__init__(Name=Name, MatType="Cement")
-        self.CementClass = None  # [int] Class of cement (CEM X, ...)
-        self.getCementClass = CementClass
+class Cement(Ingredient):
+    def __init__(self, Name, ID, CementClass, CementType, CementStrength):
+        super().__init__(Name=Name, ID=ID, MatType="Cement", Color="slategray")
+
+
+        self.CementClass = None  # [int] Class of cement (CEM X)
         self.CementType = None  # [str] Type of cement (Portland, Blast Furnace, ...)
-        self.getCementType = CementType
         self.CementStrength = CementStrength  # [float] Strength of the cement [MPa]
 
+        self.getCementClass = CementClass
+        self.getCementType = CementType
+        
     @property
     def getCementClass(self):
         return self.CementClass
@@ -443,30 +417,56 @@ class Cement(Ingredients):
             self.CementStrength = 0
 
 
-
 """
 Water
-Colors : Blue
+Default colors : Blue
 """
-class Water(Ingredients):
-    def __init__(self, Name):
-        super().__init__(Name=Name, MatType="Water")
+class Water(Ingredient):
+    def __init__(self, Name, ID):
+        super().__init__(Name=Name, ID=ID, MatType="Water", Color="b")
 
         self.VolumeEeff = 0
 
+    @property
+    def getVolumeEeff(self):
+        return self.VolumeEeff
+
+    @getVolumeEeff.setter
+    def getVolumeEeff(self, VolumeEeff):
+        self.VolumeEeff = VolumeEeff
+
+
 """
 Aggregat
-Colors : Brown
+Default colors : Brown
 """
-class Aggregat(Ingredients):
-    def __init__(self, Name, StrRockType, StrAggregatType, StrDiamExtend=None):
-        super().__init__(Name=Name, MatType="Aggregat")
-        """
-        Improovements :
-        - Add caracteristics of the aggregates 
-        (Rock type, Size (min/max), Type of aggregates (rolled, crushed, ...))
-        """
-        # Nomenclature
+"""
+Improovements :
+- Add caracteristics of the aggregates (Rock type, Size (min/max), Type of aggregates (rolled, crushed, ...))
+"""
+class Aggregat(Ingredient):
+    def __init__(self, Name, ID, MatType, StrRockType, StrAggregatType, StrDiamExtend=None):
+        # MatType : Type of aggregate (Gravel, Sand, ...)
+        if isinstance(MatType, int):
+            if MatType==1:
+                MatType="Aggregat"
+                Color = "sienna"
+            elif MatType==2:
+                MatType="Sand"
+                Color = "orange"
+            else:
+                print("Error : Type of aggregate not defined")
+        elif isinstance(MatType, str):
+            if MatType=="Aggregat":
+                Color = "sienna"
+            elif MatType=="Sand":
+                Color = "orange"
+            else:
+                print("Error : Type of aggregate not defined")
+
+        super().__init__(Name=Name, ID=ID, MatType=MatType, Color=Color)
+
+        # Caracteristics of the aggregate
         self.RockType = StrRockType  # [str] Type of rock (Granite, Basalt, Limestone, ...)
         self.AggregatType = StrAggregatType  # [str] Type of aggregates (Rolled, Crushed, ...)
         self.DiamExtend = StrDiamExtend  # [str] Maximum and minimum diameter of the aggregates [mm]
@@ -475,6 +475,32 @@ class Aggregat(Ingredients):
         self.GranuloDiam = [] # [float] Diameter of granulometry [mm]
         self.GranuloRatio = [] # [float] Ratio of granulometry [0; 1]
 
+    # Caracteristics of the aggregate
+    @property
+    def getRockType(self):
+        return self.RockType
+
+    @getRockType.setter
+    def getRockType(self, RockType):
+        self.RockType = RockType
+
+    @property
+    def getAggregatType(self):
+        return self.AggregatType
+
+    @getAggregatType.setter
+    def getAggregatType(self, AggregatType):
+        self.AggregatType = AggregatType
+
+    @property
+    def getDiamExtend(self):
+        return self.DiamExtend
+
+    @getDiamExtend.setter
+    def getDiamExtend(self, DiamExtend):
+        self.DiamExtend = DiamExtend
+
+    # Granulometry
     @property
     def getGranuloDiam(self):
        return self.GranuloDiam
@@ -513,8 +539,7 @@ class Aggregat(Ingredients):
             print("Error: Granulometry not defined")
             return 0
 
-
-
+    # Granulometry plot
     def PLTGranulometry(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
         if not paramPLT:
             paramPLT = DefaultParamPLT()
@@ -524,12 +549,12 @@ class Aggregat(Ingredients):
 
         # Parameters of the plot
         paramPLT.getTitle = "Particle size distribution of the " + self.getName
-        paramPLT.getXLabel = "Particle size [mm]"
-        paramPLT.getYLabel = "Ratio of passers-by [-]"
+        paramPLT.getXLabel = "Particle size (mm)"
+        paramPLT.getYLabel = "Ratio of passers-by (-)"
 
         GranuloRatio = self.getGranuloRatio
         if BPourcent:
-            paramPLT.getYLabel = "Percentage of passers-by [%]"
+            paramPLT.getYLabel = "Percentage of passers-by (%)"
             GranuloRatio = [x*100 for x in GranuloRatio]
 
         TempColor = paramPLT.getColor
@@ -546,14 +571,18 @@ class Aggregat(Ingredients):
 
 """
 Adjuvant
-Colors : Green
+Default colors : Green
 """
-class Adjuvant(Ingredients):
-    def __init__(self, Name):
-        super().__init__(Name=Name, MatType="Adjuvant")
+class Adjuvant(Ingredient):
+    def __init__(self, Name, ID):
+        super().__init__(Name=Name, ID=ID, MatType="Adjuvant", Color="lime")
 
 
 """
 Experiments : Experiments specific to cementious materials
 """
 # Adsorption par immersion, ...
+
+
+
+# Type of differents typical samples in concrete sector

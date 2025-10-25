@@ -7,11 +7,15 @@ Created on Fri Oct 25 14:54:03 2024
 
 # Geometrical library
 
+
+# Other Lib
 import math
 import numpy as np
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
 
+
+# Custom Lib
 from PlotLib import ParamPLT
 
 
@@ -509,4 +513,17 @@ Volume
 """
 Should allow to define from trim body compute intersection, Extrusion from surface
 """
+class Volume:
+    def __init__(self, LSurface, Name=None):
+        self.LSurface = LSurface
+        self.SpaceDim = None
+        self.Area = None
+        self.Volume = None
+        self.Name = Name
+        """
+        self.UpdateSpaceDim
+        self.UpdatePerimeter
+        self.UpdateArea
+        """
+
 

@@ -7,17 +7,17 @@ Created on Fri Nov  8 11:20:09 2024
 
 # Library for data storage and treatment 
 
+
 # Other Lib
 import numpy as np
 import pandas as pd
-from scipy.signal import medfilt, savgol_filter, butter, filtfilt, bessel, wiener
-from pykalman import KalmanFilter
+
 
 # Custom Lib
 
 
 """
-DataRecord
+DataLog
 
 # Improvement to be done:
 - Ability to load multiple files at the same time
@@ -25,7 +25,7 @@ DataRecord
 - Ability to read DAE files from Yokogawa software
 - Ability to read Excel files
 """
-class DataRecord:
+class DataLog:
     def __init__(self):
         # File
         self.FileName = None

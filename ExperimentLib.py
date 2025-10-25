@@ -7,12 +7,14 @@ Created on Fri Nov  8 11:03:41 2024
 
 # Experiment library
 
+
 # Other Lib
 import pandas as pd
 import numpy as np
-# from typing import Type
+
 
 # Custom Lib
+
 
 """
 Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisible par un humain)
@@ -22,7 +24,7 @@ Sauvegarde et lecture des données JSON ou YAML ou (Pickle, HDF5, mais pas lisib
 Databasis : Default class for all the data
 """
 class DataBasis:
-    def __init__(self, Name, UpperLevel):
+    def __init__(self, Name, UpperLevel=False):
         self.Name = Name
 
         self.UpperLevel = UpperLevel
@@ -34,7 +36,7 @@ class DataBasis:
 
         self.LLowerLevel = []
 
-        self.LTest = []
+        self.LExperiments = []
 
         self.LComment = []
 
@@ -69,11 +71,15 @@ class DataBasis:
 
     @property
     def getExperiments(self):
-        return self.LTest
+        return self.LExperiments
 
     @getExperiments.setter
     def getExperiments(self, Experiment):
-        self.LTest.append(Experiment)
+        self.LExperiments.append(Experiment)
+        Experiment.AddSample = self
+
+    def AddExperiment(self, Experiment):
+        self.LExperiments.append(Experiment)
 
     @property
     def getComment(self):
@@ -91,7 +97,7 @@ class Experiments(DataBasis):
     def __init__(self, Name, StartDate):
         super().__init__(Name=Name, UpperLevel=None)
         self.StartDate = StartDate
-        self.EndDate = 0
+        self.EndDate = None
 
     @property
     def getStartDate(self):
@@ -111,14 +117,15 @@ class Experiments(DataBasis):
 
 
 """
-2) Composition
+2) Batch of samples
 """
-class Composition(DataBasis):
+class Batch(DataBasis):
     def __init__(self, Name, ProductionDate, Experiments):
         super().__init__(Name=Name, UpperLevel=Experiments)
 
         self.ProductionDate = ProductionDate
         self.Volume = None
+        self.Material = None
 
     @property
     def getProdDate(self):
@@ -136,14 +143,22 @@ class Composition(DataBasis):
     def getVolume(self, Volume):
         self.Volume = Volume
 
+    @property
+    def getMaterial(self):
+        return self.Material
+
+    @getMaterial.setter
+    def getMaterial(self, Material):
+        self.Material = Material
+        Material.AddBatch = self
 
 
 """
-3) ParentSample
+3) Sample
 """
-class ParentSample(DataBasis):
-    def __init__(self, Name, Type, ProductionDate, Composition):
-        super().__init__(Name=Name, UpperLevel=Composition)
+class Sample(DataBasis):
+    def __init__(self, Name, Type, ProductionDate, SampleOrComposition):
+        super().__init__(Name=Name, UpperLevel=SampleOrComposition)
 
         self.Type = Type
         self.ProductionDate = ProductionDate
@@ -172,54 +187,29 @@ class ParentSample(DataBasis):
     @getVolume.setter
     def getVolume(self, Volume):
         self.Volume = Volume
-
-
-"""
-4) Sample
-"""
-class Sample(DataBasis):
-    def __init__(self, Name, ExtractionDate, Type, ParentSample):
-        super().__init__(Name=Name, UpperLevel=ParentSample)
-
-        self.Type = Type
-        self.LCaract = []
-        self.ExtractionDate = ExtractionDate
-
-    @property
-    def getType(self):
-        return self.Type
-
-    @getType.setter
-    def getType(self, Type):
-        self.Type = Type
-
-    @property
-    def getLCaract(self):
-        return self.LCaract
-
-    @getLCaract.setter
-    def getLCaract(self, Caract):
-        self.LCaract.append(Caract)
-
-    @property
-    def getExtractDate(self):
-        return self.ExtractionDate
-
-    @getExtractDate.setter
-    def getExtractDate(self, ExtractionDate):
-        self.ExtractionDate = ExtractionDate
 
 
 """
 Experiment base class
 """
 class Experiment:
-    def __init__(self, Name, StartDate, EndDate):
+    def __init__(self, Name, ID, Type, StartDate, EndDate):
+        # Metadata
         self.Name = Name
+        self.ID = ID
+        self.Type = Type
+
+        # Dates
         self.StartDate = StartDate
         self.EndDate = EndDate
+
+        # Samples
+        self.LSamples = []
+
+        # Comments
         self.LComment = []
 
+    # Metadata
     @property
     def getName(self):
         return self.Name
@@ -229,6 +219,23 @@ class Experiment:
         self.Name = Name
 
     @property
+    def getID(self):
+        return self.ID
+
+    @getID.setter
+    def getID(self, ID):
+        self.ID = ID
+
+    @property
+    def getType(self):
+        return self.Type
+
+    @getType.setter
+    def getType(self, Type):
+        self.Type = Type
+
+    # Dates
+    @property
     def getStartDate(self):
         return self.StartDate
 
@@ -244,6 +251,20 @@ class Experiment:
     def getEndDate(self, EndDate):
         self.EndDate = EndDate
 
+    # Samples
+    @property
+    def getSamples(self):
+        return self.LSamples
+
+    @getSamples.setter
+    def getSamples(self, Sample):
+        self.LSamples.append(Sample)
+        Sample.AddExperiment = self
+
+    def AddSample(self, Sample):
+        self.LSamples.append(Sample)
+
+    # Comments
     @property
     def getComments(self):
         return self.Comment
@@ -252,6 +273,9 @@ class Experiment:
     def getComments(self, Comment):
         self.LComment.append(Comment)
 
+
+
+# A retirer et Définir un type de fichier pour chaque type d'expérience
 
 """
 Sorption and Desorption

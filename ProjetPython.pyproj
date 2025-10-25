@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>ProjetPython</Name>
     <RootNamespace>ProjetPython</RootNamespace>
-    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.12</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,12 +26,10 @@
     <Compile Include="ConcreteRVELib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
-    <Compile Include="ExtensionCementiousMaterialsLib.py" />
     <Compile Include="FormworkLib.py" />
     <Compile Include="GanttChartLib.py" />
     <Compile Include="GeometryLib.py" />
     <Compile Include="GUITKLib.py" />
-    <Compile Include="LagamineLib.py" />
     <Compile Include="LoadingLib.py" />
     <Compile Include="MessageLib.py" />
     <Compile Include="DataStorageLib.py">
@@ -40,6 +38,8 @@
     <Compile Include="MathOperationLib.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ConcreteLib.py" />
+    <Compile Include="MaterialLib.py" />
     <Compile Include="ObjectManagementLib.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />

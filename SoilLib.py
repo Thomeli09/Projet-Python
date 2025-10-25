@@ -7,8 +7,11 @@ Created on Thu Nov 14 14:20:19 2024
 
 # Soil library
 
+
 # Other Lib
 
+
+# Custom Lib
 from GeometryLib import Surface2D
 from PlotLib import ParamPLT
 
@@ -52,7 +55,7 @@ class Soil2D(SoilEasy):
     def ToContinue():
         return False
 
-    "Définir des layers"
+    "DÃ©finir des layers"
 
 
 class Geotech2D:
