@@ -9,7 +9,6 @@ Created on Fri Nov  8 11:20:09 2024
 
 
 # Other Lib
-from curses import def_prog_mode
 import numpy as np
 import pandas as pd
 
