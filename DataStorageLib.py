@@ -9,6 +9,7 @@ Created on Fri Nov  8 11:20:09 2024
 
 
 # Other Lib
+from curses import def_prog_mode
 import numpy as np
 import pandas as pd
 
@@ -50,6 +51,12 @@ class DataLog:
 
         self.TimeStepArray = None
 
+        # Register for functions
+        self.FuncInput = None # Data let to be used by other functions
+        self.FuncTempData = None
+        self.FuncOutput = None
+
+
     # File
     @property
     def getFileName(self):
@@ -70,6 +77,7 @@ class DataLog:
             return any(self.getFileName.endswith(ext) for ext in self.getApprovedFiles)
         return False
     
+
     # Data
     @property
     def getData(self):
@@ -182,6 +190,42 @@ class DataLog:
 
         return NStep
 
+    def getUniqueSteps(self, IntCol):
+        """
+        Returns the unique time steps in the data matrix.
+
+        Args:
+            IntCol (int): Column index for time steps.
+
+        Returns:
+            UniqueValArray (array): Array of unique time steps.
+        """
+        # Verify that the data matrix is not empty
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return None
+
+        # Verify that the column index is valid
+        if IntCol < 0 or IntCol >= self.getNColSimpli:
+            print("Error: Invalid column index.")
+            return None
+        
+        # Extract the array of values from the specified column
+        ValArray = self.getDataMatrix[:, IntCol]
+        # Extract the unique values
+        UniqueValArray = np.unique(ValArray)
+        return UniqueValArray, len(UniqueValArray)
+
+    @property
+    def getUniqueTimeSteps(self):
+        """
+        Returns the unique time steps in the data matrix.
+        """
+        if self.getTimeCol is None:
+            print("Error: No time column selected.")
+            return None
+        return self.getUniqueSteps(self.getTimeCol)
+
 
     # Data Analysis and Visualization
     @property
@@ -286,6 +330,42 @@ class DataLog:
         # Extract the unique time steps
         self.getTimeStepArray = np.unique(TimeVal)
         return self.getTimeStepArray
+
+
+    # Register for functions
+    @property
+    def ResetFuncRegister(self):
+        """
+        Resets the function register.
+        """
+        self.FuncInput = None
+        self.FuncTempData = None
+        self.FuncOutput = None
+
+    @property
+    def getFuncInput(self):
+        return self.FuncInput
+
+    @getFuncInput.setter
+    def getFuncInput(self, Data):
+        self.FuncInput = Data
+
+    @property
+    def getFuncTempData(self):
+        return self.FuncTempData
+
+    @getFuncTempData.setter
+    def getFuncTempData(self, Data):
+        self.FuncTempData = Data
+
+    @property
+    def getFuncOutput(self):
+        return self.FuncOutput
+
+    @getFuncOutput.setter
+    def getFuncOutput(self, Data):
+        self.FuncOutput = Data
+
 
     """
     # Methods
@@ -685,6 +765,50 @@ def Time2TimeStep(self):
     # permet de faire la traduction de temps ? un time step
 
     # S'aider de la colonne de unique time step
+
+def CMPTFunctionPerTimeStep(self, Func, AbsTol=0.0001):
+    """
+    Function that apply a function to a given column per time step
+
+    Args:
+        Func (function): Function to apply to the data.
+        AbsTol (float): Absolute tolerance for time selection.
+
+    Returns:
+        BoolSuccess (bool): True if the function was applied successfully, otherwise False.
+
+    """
+    
+    # Verify that the data matrix is not empty
+    if self.getDataMatrix is None:
+        print("Error: No data matrix.")
+        return False
+
+    # Verify that the time column is selected
+    if self.getTimeCol is None:
+        print("Error: No time column selected.")
+        return False
+
+    # Verify that the ordinate column is selected
+    if self.getOrdCol is None:
+        print("Error: No ordinate column selected.")
+        return False
+
+    # Extract the unique time steps
+    UniqueTimeSteps, NTimeSteps = self.getUniqueTimeSteps
+
+    # List to store the results
+    for Time in UniqueTimeSteps:
+        # Select the data for the given time step
+        self.ResetPLTIndex
+        self.SelectTime(Val=Time, AbsTol=AbsTol)
+        self.PLTPreprocessing()
+
+        # Apply the function to the selected data
+        Func(self)
+
+    return True
+
 
 """
 -Improvement to be done:

@@ -200,3 +200,28 @@ def CMPTIntegralTrap(VectDerivative, DataAbs=None, FInitialVal=0, FDx=1.0):
         # Trapezoidal integration
         Integral = integrate.cumulative_trapezoid(y=Derivative, x=DataAbs, initial=FInitialVal)
     return Integral
+
+def CMPTInterpolationLinear(XPointData, YPointData, XNew, ValLeft=0, ValRight=0):
+    """
+    Performs linear interpolation on the given data.
+    
+    Args:
+        XPointData (array): Known x-values.
+        YPointData (array): Known y-values.
+        XNew (array): New x-values to interpolate.
+        ValLeft (float): Value to return for x-values less than the minimum of XPointData.
+        ValRight (float): Value to return for x-values greater than the maximum of XPointData.
+        
+    Returns:
+        YNew (array): Interpolated y-values corresponding to XNew.
+    """
+    XPointData = np.asarray(XPointData)
+    YPointData = np.asarray(YPointData)
+    XNew = np.asarray(XNew)
+
+    if LenData(XPointData) != LenData(YPointData):
+        print("Error: XPointData and YPointData must have the same length.")
+        return None
+    
+    YNew = np.interp(x=XNew, xp=XPointData, fp=YPointData, left=ValLeft, right=ValRight)
+    return YNew

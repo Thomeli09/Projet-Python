@@ -18,6 +18,7 @@ import numpy as np
 from PlotLib import ParamPLT, StartPlots, CloseALLPlots, PLTShow, DefaultParamPLT, PLTPie, PLTPlot
 from DataManagementLib import ListSort, ListFindFirstMaxPair
 from MaterialLib import Material
+from GeometryLib import Volume
 
 
 """
@@ -120,8 +121,8 @@ class CemMat(Material):
         else:
             print("Error : Invalid input for Adjuvants")
 
-    
-    def PLTGranulos(self, paramPLT, BPourcent=True):
+    # Plot of the granulometries of the ingredients
+    def PLTGranuloIngredients(self, paramPLT, BPourcent=True):
         if not paramPLT:
             paramPLT = DefaultParamPLT()
 
@@ -134,6 +135,53 @@ class CemMat(Material):
 
         PLTShow(paramPLT)
 
+    # Plot of the granulometry curves of the composition
+    def PLTGranuloMix(self, paramPLT, BPourcent=True):
+        """
+        Plot the granulometry of the mix of aggregates
+        
+        Args:
+            paramPLT: Parameters of the plot
+            BPourcent: Boolean to indicate if the y-axis is in percentage (True) or ratio (False)
+
+        Returns:
+            Plot of the granulometry of the mix
+
+        Needs to be verified
+        """
+        if not paramPLT:
+            paramPLT = DefaultParamPLT()
+        StartPlots()
+        # Parameters of the plot
+        paramPLT.getTitle = "Particle size distribution of the " + self.getName
+        paramPLT.getXLabel = "Particle size (mm)"
+        paramPLT.getYLabel = "Ratio of passers-by (-)"
+        GranuloDiamMix = []
+        GranuloRatioMix = []
+        # Compute the granulometry of the mix
+        for Aggregat in self.getAggregates:
+            for i in range(len(Aggregat.getGranuloDiam)):
+                Diam = Aggregat.getGranuloDiam[i]
+                Ratio = Aggregat.getGranuloRatio[i] * (Aggregat.getVolume / self.VAggregats)
+                if Diam in GranuloDiamMix:
+                    Index = GranuloDiamMix.index(Diam)
+                    GranuloRatioMix[Index] += Ratio
+                else:
+                    GranuloDiamMix.append(Diam)
+                    GranuloRatioMix.append(Ratio)
+        # Sort the granulometry
+        TempDF = pd.DataFrame({'Diam': GranuloDiamMix, 'Ratio': GranuloRatioMix})
+        TempDF = TempDF.sort_values(by=['Diam'])
+        GranuloDiamMix = TempDF['Diam'].tolist()
+        GranuloRatioMix = TempDF['Ratio'].tolist()
+        if BPourcent:
+            paramPLT.getYLabel = "Percentage of passers-by (%)"
+            GranuloRatioMix = [x*100 for x in GranuloRatioMix]
+        paramPLT.getXScaleType = 1
+        PLTPlot(GranuloDiamMix, GranuloRatioMix, paramPLT)
+        PLTShow(paramPLT)
+
+    # Plots of the composition
     def PLTIngredients(self, paramPLT):
         if not paramPLT:
             paramPLT = DefaultParamPLT()
@@ -153,6 +201,7 @@ class CemMat(Material):
 
         PLTShow(paramPLT)
 
+    # Computation of the composition
     def CmptComposition(self):
         # Compute the composition of the cementious material
 
@@ -168,9 +217,8 @@ class CemMat(Material):
             return
 
         # Compute the composition by means of differents methods
+        # # Water to cement ratio
 
-
-    # Water to cement ratio
     def FeretFormula(self, BSimpli=False):
         """
         Compute the Feret formula for the composition
@@ -578,11 +626,40 @@ class Adjuvant(Ingredient):
         super().__init__(Name=Name, ID=ID, MatType="Adjuvant", Color="lime")
 
 
-"""
-Experiments : Experiments specific to cementious materials
-"""
-# Adsorption par immersion, ...
-
-
-
 # Type of differents typical samples in concrete sector
+class SampleConcrete(Volume):
+    def __init__(self, Name, ID, LSurface):
+        # Metadata
+        super().__init__(LSurface=LSurface, Name=Name)
+        self.ID = ID
+
+        # Results of computations
+        self.CMPTResults = None
+
+    # Metadata
+    @property
+    def getID(self):
+        return self.ID
+
+    @getID.setter
+    def getID(self, ID):
+        self.ID = ID
+
+    # Results of computations
+    @property
+    def getCMPTResults(self):
+        return self.CMPTResults
+
+    @getCMPTResults.setter
+    def getCMPTResults(self, CMPTResults):
+        self.CMPTResults = CMPTResults
+
+# Cube : 150x150x150 mm
+class SampleCube(SampleConcrete):
+    def __init__(self, Name, ID, LSurface):
+        super().__init__(Name="Cube", ID=ID, LSurface=LSurface)
+
+# Cylinder : 150 mm diameter, 300 mm height
+class SampleCylinder(SampleConcrete):
+    def __init__(self, Name, ID, LSurface):
+        super().__init__(Name="Cylinder", ID=ID, LSurface=LSurface)
