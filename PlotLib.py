@@ -50,6 +50,7 @@ class ParamPLT:
         self.TitleSize = fontsize
         self.FontSize = fontsize
         self.TicksSize = fontsize
+        self.LegendsSize = fontsize
         self.XLabel = None
         self.YLabel = None
         self.ZLabel = None
@@ -218,7 +219,7 @@ class ParamPLT:
     @property
     def getLineType(self):
         # Determine line type based on linetype input
-        LineTypeDict = {0: '-', 1: '--', 2: '-.', 3: ':'}
+        LineTypeDict = {0: '-', 1: '--', 2: '-.', 3: ':', 4: 'None'}
         LineType = LineTypeDict.get(self.LineType, '-')
         return LineType
 
@@ -374,6 +375,14 @@ class ParamPLT:
     @getTicksSize.setter
     def getTicksSize(self, TicksSize):
         self.TicksSize = TicksSize
+
+    @property
+    def getLegendsSize(self):
+        return self.LegendsSize
+
+    @getLegendsSize.setter
+    def getLegendsSize(self, LegendsSize):
+        self.LegendsSize = LegendsSize
 
     @property
     def getTitle(self):
@@ -856,9 +865,9 @@ def PLTLegend(paramPLT):
     """
     if paramPLT.getBLegends:
         if paramPLT.getBLegendsInsideBox:
-            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getFontSize, loc=paramPLT.getLegendsLoc)
+            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getLegendsSize, loc=paramPLT.getLegendsLoc)
         else:
-            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getFontSize, bbox_to_anchor=(1, 1), loc='upper left')
+            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getLegendsSize, bbox_to_anchor=(1, 1), loc='upper left')
 
 def UpdatePlotColorsAndLegend(LColors):
     """
@@ -921,15 +930,15 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
             handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
 
     # Adding the main title to the legend
-    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getFontSize)
+    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getLegendsSize)
     # Setting the title properties
-    FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getFontSize * TitleSizeRatio, Weight=None,
+    FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getLegendsSize * TitleSizeRatio, Weight=None,
                Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
 
     # Setting the subtitles properties
     for text in Legend.get_texts():
         if text.get_text() in LLegendSubtitles: # In case of the subtitles
-            FormatText(Text=text, Fontsize=paramPLT.getFontSize * SubtitlesSizeRatio, Weight='bold',
+            FormatText(Text=text, Fontsize=paramPLT.getLegendsSize * SubtitlesSizeRatio, Weight='bold',
                        Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
         else:  # In case of the different labels
             pass

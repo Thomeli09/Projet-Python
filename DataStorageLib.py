@@ -753,60 +753,60 @@ class DataLog:
             self.getTimeVal = None
             print("Warning: No time column selected.")
 
-def TimeStep2Time(self):
-    pass
-    # permet de faire la traduction de time step ? un temps
+    def TimeStep2Time(self):
+        pass
+        # permet de faire la traduction de time step ? un temps
 
-    # S'aider de la colonne de unique time step
+        # S'aider de la colonne de unique time step
 
-def Time2TimeStep(self):
-    pass
-    # permet de faire la traduction de temps ? un time step
+    def Time2TimeStep(self):
+        pass
+        # permet de faire la traduction de temps ? un time step
 
-    # S'aider de la colonne de unique time step
+        # S'aider de la colonne de unique time step
 
-def CMPTFunctionPerTimeStep(self, Func, AbsTol=0.0001):
-    """
-    Function that apply a function to a given column per time step
+    def CMPTFunctionPerTimeStep(self, Func, AbsTol=0.0001):
+        """
+        Function that apply a function to a given column per time step
 
-    Args:
-        Func (function): Function to apply to the data.
-        AbsTol (float): Absolute tolerance for time selection.
+        Args:
+            Func (function): Function to apply to the data.
+            AbsTol (float): Absolute tolerance for time selection.
 
-    Returns:
-        BoolSuccess (bool): True if the function was applied successfully, otherwise False.
+        Returns:
+            BoolSuccess (bool): True if the function was applied successfully, otherwise False.
 
-    """
+        """
     
-    # Verify that the data matrix is not empty
-    if self.getDataMatrix is None:
-        print("Error: No data matrix.")
-        return False
+        # Verify that the data matrix is not empty
+        if self.getDataMatrix is None:
+            print("Error: No data matrix.")
+            return False
 
-    # Verify that the time column is selected
-    if self.getTimeCol is None:
-        print("Error: No time column selected.")
-        return False
+        # Verify that the time column is selected
+        if self.getTimeCol is None:
+            print("Error: No time column selected.")
+            return False
 
-    # Verify that the ordinate column is selected
-    if self.getOrdCol is None:
-        print("Error: No ordinate column selected.")
-        return False
+        # Verify that the ordinate column is selected
+        if self.getOrdCol is None:
+            print("Error: No ordinate column selected.")
+            return False
 
-    # Extract the unique time steps
-    UniqueTimeSteps, NTimeSteps = self.getUniqueTimeSteps
+        # Extract the unique time steps
+        UniqueTimeSteps, NTimeSteps = self.getUniqueTimeSteps
 
-    # List to store the results
-    for Time in UniqueTimeSteps:
-        # Select the data for the given time step
-        self.ResetPLTIndex
-        self.SelectTime(Val=Time, AbsTol=AbsTol)
-        self.PLTPreprocessing()
+        # List to store the results
+        for Time in UniqueTimeSteps:
+            # Select the data for the given time step
+            self.ResetPLTIndex
+            self.SelectTime(Val=Time, AbsTol=AbsTol)
+            self.PLTPreprocessing()
 
-        # Apply the function to the selected data
-        Func(self)
+            # Apply the function to the selected data
+            Func(self)
 
-    return True
+        return True
 
 
 """

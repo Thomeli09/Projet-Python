@@ -6,11 +6,15 @@ Created on Fri Feb 21 11:24:54 2025
 """
 
 # Carbonation of concrete Library
+from tkinter import W
 import numpy as np
 import math
 import scipy.special
 
 # Custom Lib
+from DataStorageLib import DataLog
+from MathOperationLib import CMPTInterpolationLinear, CMPTInterpolationSpline
+from DataManagementLib import DataSort
 
 
 
@@ -356,7 +360,7 @@ def CarboSilva(SigmaCO2, RH, RhoClincker, fc, ExpositionClass=1, tMax=5, Dt=0.1)
     Silva's model for the carbonation of concrete.
     Model class : 1
     
-    Inputs:
+    Args:
         SigmaCO2: float
             Volumic concentration of CO2 in the air (m^3/m^3).
         RH: float
@@ -371,13 +375,18 @@ def CarboSilva(SigmaCO2, RH, RhoClincker, fc, ExpositionClass=1, tMax=5, Dt=0.1)
             Maximum time for the simulation (years).
         Dt: float
             Time step for the simulation (years).
+    Returns:
+        tVect: numpy.ndarray
+            Array of time steps (years).
+        xc: numpy.ndarray
+            Array of carbonation depths (mm).
     """
     tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
 
     if 0 <= RH <= 70:  # Dry environment
         kd = 0.556*SigmaCO2 - 3.602*ExpositionClass - 0.148*fc + 18.734
         xc = kd*tVect**0.5  # [mm]
-    elif 70 <= RH <= 10:  # Wet environment
+    elif 70 <= RH <= 100:  # Wet environment
         kw = 3.355*SigmaCO2 - 0.019*RhoClincker - 0.042*fc + 10.830  # Wet environment
         xc = kw*tVect**0.5  # [mm]
 
@@ -388,7 +397,7 @@ def CarboPetreLazar(Gamma, RH, fc, tMax=5, Dt=0.1):
     Petre Lazar's model for the carbonation of concrete.
     Model class : 1
 
-    Inputs:
+    Args:
         Gamma: float
             Carbonation exposition coefficient.
             Gamma = 1.5 in structures exposed to high concentrations of CO2.
@@ -402,6 +411,11 @@ def CarboPetreLazar(Gamma, RH, fc, tMax=5, Dt=0.1):
             Maximum time for the simulation (years).
         Dt: float
             Time step for the simulation (years).
+    Returns:
+        tVect: numpy.ndarray
+            Array of time steps (years).
+        xc: numpy.ndarray
+            Array of carbonation depths (mm).
 
     """
     tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
@@ -412,33 +426,158 @@ def CarboPetreLazar(Gamma, RH, fc, tMax=5, Dt=0.1):
 
     return tVect, xc
 
-def CarboCEB():
+def CarboCEB(SigmaCO2, DCO2Ref, SigmaCement, OmegaCementCaO, ECRatio, CondCure, CondSurface, CondProtecTRH, tMax=5, Dt=0.1):
     """
     CEB model for the carbonation of concrete.
     Model class : 2
 
-    Inputs:
+    Args:
+
+    Returns:
+        tVect: numpy.ndarray
+            Array of time steps (years).
+        xc: numpy.ndarray
+            Array of carbonation depths (mm).
 
     """
-    pass
+    # Constants
+    MCO2 = 44.01  # g/mol
+    MCaO = 56.08  # g/mol
 
-def CarboPapadakis():
+    tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
+    t0 = 1  # year
+
+    # Model Coefficients
+    if CondCure == "Mauvaise" or CondCure == 0:
+        k1 = 0.3
+        k2 = 2.0
+        k3 = 1.5
+        W = 0.3
+
+    elif CondCure == "Bonne" or CondCure == 1:
+        if CondProtecTRH == "Mauvaise" or CondProtecTRH == 0:
+            if CondSurface == "Mauvaise" or CondSurface == 0:
+                k1 = 0.3
+                k2 = 1.0
+                k3 = 1.2
+                W = 0.3
+            elif CondSurface == "Bonne" or CondSurface == 1:
+                k1 = 0.4
+                k2 = 1.0
+                k3 = 1.2
+                W = 0.2
+        elif CondProtecTRH == "Bonne" or CondProtecTRH == 1:
+            if CondSurface == "Mauvaise" or CondSurface == 0:
+                k1 = 0.5
+                k2 = 1.0
+                k3 = 1.0
+                W = 0.1
+            elif CondSurface == "Bonne" or CondSurface == 1:
+                k1 = 0.6
+                k2 = 1.0
+                k3 = 1.0
+                W = 0.05
+        elif CondProtecTRH == "Intérieur" or CondProtecTRH == 2:
+            k1 = 1.0
+            k2 = 1.0
+            k3 = 1.0
+            W = 0
+
+
+    AlphaH = HydrationDegree(ECRatio=ECRatio, BPrint=False)  # Hydration degree
+    CrCO2 = 0.75*SigmaCement*OmegaCementCaO*AlphaH*(MCO2/MCaO)  # [kg/m^3]
+    DeltaCO2 = SigmaCO2
+    xc = (2*k1*k2*k3*DCO2Ref*DeltaCO2/CrCO2)*(tVect**(0.5))*((t0/tVect)**W) # [mm]
+
+    return tVect, xc
+
+def CarboPapadakis(SigmaCO2, DCO2Ref=False, tMax=5, Dt=0.1):
     """
     Papadakis model for the carbonation of concrete.
     Model class : 2
-    Inputs:
+    Args:
+
+    Returns:
+        tVect: numpy.ndarray
+            Array of time steps (years).
+        xc: numpy.ndarray
+            Array of carbonation depths (mm).
         
     """
-    pass
+    tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
+    """
+    # CO2 concentration in air from volumic to massic [mol/m^3]
+    CCO2 = SigmaCO2
 
-def CarboHyvert():
+    # Chemical concentrations in concrete [mol/m^3]
+    CCH =
+    CCSH = 
+    CC3S = 
+    CC2S = 
+
+    # Diffusion coefficient of CO2 in concrete [m^2/s]
+    PhiP = Phi*(1+(ACRatio*RhoC/RhoA)/(1+ECRatio*RhoC/RhoE))
+    DCO2Ref = 1.64*10**(-6)*PhiP**1.8*(1-HR/100)**2.2
+    
+    # Carbonation depth calculation
+    xc =  ((2*DCO2Ref*CCO2/(CCH+3*CCSH+3*CC3S+2*CC2S))**0.5)*(tVect**0.5)  # [mm]
+
+    return tVect, xc
+    """
+def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurcent=65, tCure=7, tMax=5, Dt=0.1):
     """
     Hyvert model for the carbonation of concrete.
     Model class : 3
-    Inputs:
+    Args:
+        SigmaCO2: float Volumic concentration of CO2 in the air (m^3/m^3).
+        DCO2: float Diffusion coefficient of CO2 in concrete (m^2/s) in any condition.
+        But in reference conditions : RH=65%, T=20°C, tCure=7 days, if provide RHRealPurcent, tCure must be provided.
+        CCH: float Chemical concentration of Ca(OH)2 in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
+        CCSH: float Chemical concentration of C-S-H in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
+        CAFm: float Chemical concentration of C4AF in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
+        CAFt: float Chemical concentration of C3A in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
+        PhiCP: float Volumic fraction of cement paste in concrete Vol cement paste / Vol concrete.
+        RHRealPurcent: float Real relative humidity of the air (%).
+        tCure: float Curing time of the concrete (days).
+    Returns:
+        tVect: numpy.ndarray
+            Array of time steps (years).
+        xc: numpy.ndarray
+            Array of carbonation depths (mm).
 
     """
-    pass
+    tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
+
+    # CO2 concentration in air from volumic to massic [mol/m^3]
+    PAtm = 101325  # Pa
+    PCO2 = PAtm*SigmaCO2
+    R = 8.314  # J/(mol*K)
+    T = 293  # K
+
+    # Chemical concentrations in concrete [mol/m^3]
+    Q1 = PhiCP*(CCH+4*CAFm+6*CAFt)
+    C2 = CCSH*1.65 # mol/L Concentration of Calcium inside the cement paste in C-S-H phase
+    C2Prim = PhiCP*CCSH*1.65
+
+    # Model Coefficients
+    RHRealScal = RHRealPurcent/100
+    RHRefScal = 65/100
+    g_e = 2.5
+    f_e = 5.0
+    ke = ((1-RHRealScal**f_e)/(1-RHRefScal**f_e))**g_e  # Environmental coefficient
+    kc = (tCure/7)**(-0.57)  # Curing coefficient 
+    kt = 1  # Temperature coefficient
+
+    Alpha = 23.5  # 23.5 L/mol
+    n = 0.67  # By default
+
+    # Diffusion coefficient of CO2 in concrete [m^2/s]
+    DCO2Ref = DCO2
+    
+    # Carbonation depth calculation
+    xc = ((2*ke*kc*kt*DCO2Ref*PCO2*tVect)/(R*T*(1+Alpha*C2*(PCO2/PAtm)**n)*(C2Prim/(n+1)*(PCO2/PAtm)**n+Q1)))**0.5  # [mm]
+
+    return tVect, xc
     
 
 # Hydration Degree
@@ -458,3 +597,91 @@ def  HydrationDegree(ECRatio, BPrint=True):
         if BPrint:
             print(f"E/C: {ECRatio} -> Hydration Degree: {HydrationDegreeVal}")
         return HydrationDegreeVal
+
+def CarboSimul2CarboDepth(DataSimul):
+    """
+    Returns the carbonation depth from a carbonation simulation.
+
+    Args:
+        DataSimul (DataLog): DataLog object containing the simulation data.
+    """
+
+    # Extract Data inputs and outputs
+    DataInput = DataSimul.getFuncInput
+    DataOutput = DataSimul.getFuncOutput
+
+    # Verify the status of the FuncOutput register
+    if DataOutput == None:
+        # Initialize the FuncOutput register
+        print("Info: FuncOutput register is empty. Initializing")
+        UniqueTimeSteps, NTimeSteps = DataSimul.getUniqueTimeSteps
+        Index = 0
+        CarboDepthArray = np.zeros(NTimeSteps) # to be modified
+        Temp = [UniqueTimeSteps, CarboDepthArray, Index]
+    else:
+        # Extract the current Index
+        Temp = DataOutput
+        UniqueTimeSteps = Temp[0]
+        CarboDepthArray = Temp[1]
+        Index = Temp[2]
+
+    # Extract necessary parameters
+    ReactionRatioThreshold = DataInput[0]
+    MaxContent = DataInput[1]
+    Method = DataInput[2]
+
+    if Method not in ["Linear", "Spline", 0, 1]:
+        print("Warning: Invalid Method for CarboDepth calculation. Choose 'Linear' or 'Spline'.")
+        print("Info : Assuming 'Linear' method.")
+        Method = "Linear"
+
+    # Extract Position and Concentration arrays
+    XArrays = DataSimul.getAbsVal
+    CArrays = DataSimul.getOrdVal
+    DataSort(L1=CArrays, L2=XArrays)
+
+
+    # Reaction Ratio Arrays
+    ReactionRatioArrays = CArrays / MaxContent
+
+    # Check if the Reaction Ratio Threshold is within the simulated range
+    MinReactionRatio = min(ReactionRatioArrays)
+    MaxReactionRatio = max(ReactionRatioArrays)
+    if ReactionRatioThreshold < MinReactionRatio or ReactionRatioThreshold > MaxReactionRatio:
+        if ReactionRatioThreshold < MinReactionRatio:
+            CarboDepthValue = 0
+        else:
+            CarboDepthValue = -1  # Indicating that the carbonation front is beyond the maximum simulated depth
+    # Resulting Carbonation Depth Value
+    elif Method == "Linear" or Method == 0:
+        CarboDepthValue = CMPTInterpolationLinear(
+            XPointData=ReactionRatioArrays,
+            YPointData=XArrays,
+            XNew=ReactionRatioThreshold,
+            ValLeft=0,
+            ValRight=0)
+    elif Method == "Spline" or Method == 1:
+        # Find the closest index to the estimated position
+        IndexEstimate = np.argmin((ReactionRatioArrays - ReactionRatioThreshold)**2)
+
+        # Define a small window around the estimated index for spline interpolation
+        WindowSize = 3
+        StartIndex = max(0, IndexEstimate - WindowSize)
+        EndIndex = min(len(XArrays), IndexEstimate + WindowSize+1)
+        ReactionRatioArraysUnique = ReactionRatioArrays[StartIndex:EndIndex]
+        XArraysSec = XArrays[StartIndex:EndIndex]
+
+        # Perform spline interpolation within the defined window
+        CarboDepthValue = CMPTInterpolationSpline(
+            XPointData=ReactionRatioArraysUnique,
+            YPointData=XArraysSec,
+            XNew=ReactionRatioThreshold,
+            ValLeft=0,
+            ValRight=0,
+            Method=5)
+
+
+    # Updating the FuncOutput register
+    CarboDepthArray[Index] = CarboDepthValue
+    Index += 1
+    DataSimul.getFuncOutput = [UniqueTimeSteps, CarboDepthArray, Index]

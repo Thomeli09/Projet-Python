@@ -21,7 +21,7 @@ def LenData(Data):
     """
     Count the number of elements in a given data structure.
 
-    Parameters:
+    Args:
         data: tuple, list, numpy.ndarray, set, dict, or other iterable types
             The input data structure.
 
@@ -56,6 +56,28 @@ def LenData(Data):
         print(f"Error: Unsupported data type: {type(Data)}")
     return 0
 
+def DataSort(L1, L2=None):
+    """
+    Sort list or array of numbers or pairs of values based on the first list.
+    """
+    if L2 is None:  # Sorting a list of numbers
+        if isinstance(L1, np.ndarray):
+            L1 = np.sort(L1)
+        elif isinstance(L1, list):
+            L1 = sorted(L1)
+        return L1
+    else:  # Sorting pairs of values based on the first list
+        if LenData(L1)==LenData(L2):
+            if isinstance(L1, np.ndarray) and isinstance(L2, np.ndarray):
+                SortedIndices = np.argsort(L1)
+                L1 = L1[SortedIndices]
+                L2 = L2[SortedIndices]
+            elif isinstance(L1, list) and isinstance(L2, list):
+                L1, L2 = zip(*sorted(zip(L1, L2)))
+            return L1, L2
+        else:
+            print("Error: The two lists should have the same length.")
+
 
 # List management functions
 def ListSort(L1, L2=False):
@@ -77,7 +99,7 @@ def ListFindFirstMaxPair(L1, L2):
     Finds the first occurrence of the maximum value in list1 
     and returns the paired value from list2.
     
-    Parameters:
+    Args:
         L1 (list): The list to find the max value in.
         L2 (list): The paired list to retrieve the corresponding value.
 

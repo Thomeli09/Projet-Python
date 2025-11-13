@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import medfilt, savgol_filter, butter, filtfilt, bessel, wiener
 from scipy import integrate
+from scipy.interpolate import CubicSpline, CubicHermiteSpline, PchipInterpolator, Akima1DInterpolator, make_interp_spline, make_splrep
 from pykalman import KalmanFilter
 
 
@@ -224,4 +225,69 @@ def CMPTInterpolationLinear(XPointData, YPointData, XNew, ValLeft=0, ValRight=0)
         return None
     
     YNew = np.interp(x=XNew, xp=XPointData, fp=YPointData, left=ValLeft, right=ValRight)
+    return YNew
+
+def CMPTInterpolationSpline(XPointData, YPointData, XNew, Method='CubicSpline', ValLeft=0, ValRight=0, Derivatives=None):
+    """
+    Performs spline interpolation on the given data using various methods.
+    
+    Args:
+        XPointData (array): Known x-values.
+        YPointData (array): Known y-values.
+        XNew (array): New x-values to interpolate.
+        Method (str): Interpolation method. Options are 'CubicSpline', 'Pchip', 'Akima', 'BSpline'.
+        ValLeft (float): Value to return for x-values less than the minimum of XPointData.
+        ValRight (float): Value to return for x-values greater than the maximum of XPointData.
+        Derivatives (array): Optional derivatives for 'CubicHermite' method.
+        
+    Returns:
+        YNew (array): Interpolated y-values corresponding to XNew.
+    """
+    
+    XPointData = np.asarray(XPointData)
+    YPointData = np.asarray(YPointData)
+    XNew = np.asarray(XNew)
+
+    if LenData(XPointData) != LenData(YPointData):
+        print("Error: XPointData and YPointData must have the same length.")
+        return None
+
+    if Method == 'CubicSpline' or Method == 0:
+        """ Interpolate data with a piecewise cubic polynomial, C2 continuous. """
+        SplineFunc = CubicSpline(x=XPointData, y=YPointData, bc_type='natural', extrapolate=False)
+
+    elif Method == 'CubicHermite' or Method == 1:
+        """ Interpolate data with a piecewise cubic Hermite interpolating polynomial, C1 continuous. """
+        if Derivatives is None:
+            Derivatives = CMPTDerivativeFirst(YPointData, XPointData)
+            print("Warning: Derivatives not provided. Computed using first numerical derivative.")
+        SplineFunc = CubicHermiteSpline(x=XPointData, y=YPointData, dydx=Derivatives, extrapolate=False)
+
+    elif Method == 'Pchip' or Method == 2:
+        """ Interpolate data with a piecewise cubic Hermite interpolating polynomial, C1 continuous. 
+        Preserves monotonicity in the interpolation data and does not overshoot if the data is not smooth. """
+        SplineFunc = PchipInterpolator(x=XPointData, y=YPointData, extrapolate=False)
+
+    elif Method == 'Akima' or Method == 3:
+        """ Interpolate data with an Akima1DInterpolator, C1 continuous. 
+        Leads to visually pleasing results for non-smooth data. """
+        SplineFunc = Akima1DInterpolator(x=XPointData, y=YPointData, method='akima', extrapolate=False)
+
+    elif Method == 'BSpline' or Method == 4:
+        """ Interpolate data with a B-Spline representation """
+        SplineFunc = make_interp_spline(XPointData, YPointData)
+
+    elif Method == 'BSplineParametric' or Method == 5:
+        """ Interpolate data with a B-Spline representation depending on parameters """
+        SplineFunc = make_splrep(XPointData, YPointData, s=0.01)
+
+    else:
+        print("Error: Unknown interpolation method.")
+        return None
+
+    YNew = SplineFunc(XNew)
+
+    # Handle out-of-bounds values
+    YNew[XNew < np.min(XPointData)] = ValLeft
+    YNew[XNew > np.max(XPointData)] = ValRight
     return YNew
