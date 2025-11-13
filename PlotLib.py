@@ -817,6 +817,15 @@ def StartPlots(paramPLT=None, Rows=1, Cols=1):
         paramPLT.getFigure = Fig
         paramPLT.getAxes = Ax
 
+def PLTSetWindowSize(Width, Height):
+    """
+    Set the size of the plot window.
+    Args:
+    - Width: Width of the window in inches.
+    - Height: Height of the window in inches.
+    """
+    plt.gcf().set_size_inches(Width, Height)
+
 def PLTLatexStyle():
     """
     Set the style of the plot to use LaTeX for text rendering. But is slower.
