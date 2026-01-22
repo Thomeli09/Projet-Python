@@ -524,7 +524,7 @@ def CarboPapadakis(SigmaCO2, DCO2Ref=False, tMax=5, Dt=0.1):
 
     return tVect, xc
     """
-def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurcent=65, tCure=7, tMax=5, Dt=0.1):
+def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurcent=65, tCure=7, CCO2=0, tMax=5, Dt=0.1):
     """
     Hyvert model for the carbonation of concrete.
     Model class : 3
@@ -532,13 +532,16 @@ def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurc
         SigmaCO2: float Volumic concentration of CO2 in the air (m^3/m^3).
         DCO2: float Diffusion coefficient of CO2 in concrete (m^2/s) in any condition.
         But in reference conditions : RH=65%, T=20°C, tCure=7 days, if provide RHRealPurcent, tCure must be provided.
-        CCH: float Chemical concentration of Ca(OH)2 in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
-        CCSH: float Chemical concentration of C-S-H in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
-        CAFm: float Chemical concentration of C4AF in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
-        CAFt: float Chemical concentration of C3A in the concrete (mol/L) or in the cement paste (mol/L) if PhiCP is provided.
+        CCH: float Chemical concentration of Ca(OH)2 in the concrete (mol/m^3) or in the cement paste (mol/m^3) if PhiCP is provided.
+        CCSH: float Chemical concentration of C-S-H in the concrete (mol/m^3) or in the cement paste (mol/m^3) if PhiCP is provided.
+        CAFm: float Chemical concentration of C4AF in the concrete (mol/m^3) or in the cement paste (mol/m^3) if PhiCP is provided.
+        CAFt: float Chemical concentration of C3A in the concrete (mol/m^3) or in the cement paste (mol/m^3) if PhiCP is provided.
         PhiCP: float Volumic fraction of cement paste in concrete Vol cement paste / Vol concrete.
         RHRealPurcent: float Real relative humidity of the air (%).
         tCure: float Curing time of the concrete (days).
+        CCO2: float Initial chemical concentration of CO2 in the concrete (mol/m^3).
+        tMax: float Maximum time for the simulation (years).
+        Dt: float Time step for the simulation (years).
     Returns:
         tVect: numpy.ndarray
             Array of time steps (years).
@@ -547,7 +550,7 @@ def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurc
 
     """
     tVect = np.linspace(0, tMax, int(tMax/Dt) + 1)
-
+    tVectSec = tVect * 365.25 * 24 * 3600  # Convert years to seconds
     # CO2 concentration in air from volumic to massic [mol/m^3]
     PAtm = 101325  # Pa
     PCO2 = PAtm*SigmaCO2
@@ -575,8 +578,11 @@ def CarboHyvert(SigmaCO2, DCO2, CCH, CCSH=0, CAFm=0, CAFt=0, PhiCP=1, RHRealPurc
     DCO2Ref = DCO2
     
     # Carbonation depth calculation
-    xc = ((2*ke*kc*kt*DCO2Ref*PCO2*tVect)/(R*T*(1+Alpha*C2*(PCO2/PAtm)**n)*(C2Prim/(n+1)*(PCO2/PAtm)**n+Q1)))**0.5  # [mm]
-
+    if PCO2 >= 0:
+        xc = ((2*ke*kc*kt*DCO2Ref*PCO2/R/T*tVectSec)/((1+Alpha*C2*(PCO2/PAtm)**n)*(C2Prim/(n+1)*(PCO2/PAtm)**n+Q1)))**0.5  # [mm]
+    else:
+        PCO2 = CCO2*R*T  # Convert initial concentration to partial pressure
+        xc = ((2*ke*kc*kt*DCO2Ref*CCO2*tVectSec)/((1+Alpha*C2*(PCO2/PAtm)**n)*(C2Prim/(n+1)*(PCO2/PAtm)**n+Q1)))**0.5  # [mm]
     return tVect, xc
     
 

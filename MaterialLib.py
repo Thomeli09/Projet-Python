@@ -18,11 +18,11 @@ Created on Fri Oct 25 15:43:03 2025
 Material : Default class for all the material data
 """
 class Material:
-    def __init__(self, Name, ID, Type):
+    def __init__(self, Name, ID, MatType):
         # Metadata
         self.Name = Name
         self.ID = ID
-        self.Type = Type
+        self.MatType = MatType
 
         # Graphics
         self.Color = None
@@ -32,7 +32,8 @@ class Material:
         self.LBatches = []
         
         # Properties
-        
+        self.Density = 0  # [float] Density of the material [kg/m^3]
+        self.BulkDensity = 0  # [float] Bulk density of the material [kg/m^3]
 
         # Mechanical Properties
         self.CompStrengthCK = None  # Compressive Strength Characteristic
@@ -59,20 +60,20 @@ class Material:
         self.ID = ID
 
     @property
-    def getType(self):
-        return self.Type
+    def getMatType(self):
+        return self.MatType
 
-    @getType.setter
-    def getType(self, Type):
-        self.Type = Type
+    @getMatType.setter
+    def getMatType(self, MatType):
+        self.MatType = MatType
 
     # Graphics
     @property
-    def getColor(self):
+    def getColour(self):
         return self.Color
 
-    @getColor.setter
-    def getColor(self, Color):
+    @getColour.setter
+    def getColour(self, Color):
         self.Color = Color
 
     # Batch Information
@@ -89,6 +90,21 @@ class Material:
         self.LBatches.append(Batch)
 
     # Properties
+    @property
+    def getDensity(self):
+        return self.Density
+
+    @getDensity.setter
+    def getDensity(self, Density):
+        self.Density = Density
+
+    @property
+    def getBulkDensity(self):
+        return self.BulkDensity
+
+    @getBulkDensity.setter
+    def getBulkDensity(self, BulkDensity):
+        self.BulkDensity = BulkDensity
 
     # Mechanical Properties
     @property
