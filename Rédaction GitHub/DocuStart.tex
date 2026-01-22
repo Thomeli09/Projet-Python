@@ -1,0 +1,165 @@
+
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Define the starting pages of the thesis
+
+% ----- Modification des numéro de pages
+\frontmatter
+\pagenumbering{gobble} % Ne plus afficher les numeros de pages
+% The \pagenumbering{gobble} command turns off page numbering, but LaTeX may still assign internal identifiers to the pages. These identifiers can conflict when the same page is processed multiple times, such as when inserting PDFs. This will stop LaTeX from adding page anchors that can lead to conflicting internal identifiers for pages.
+% -----
+
+
+
+% ----- Page de garde officielle
+\hypersetup{pageanchor=false} % Pour corriger une erreur: destination with the same identifier (name{page.}) has been already used, duplicate ignored
+\pdfbookmark[0]{Cover Page}{cover-page}
+\includepdf[pages=-]{PageDeGarde/Page_de_garde_1_5.pdf} % pages=- pour insérer toutes les pages du PDF Attention, la version du pdf est max V1.5
+% -----
+
+
+
+% ----- Page de garde
+\cleardoublepage
+%\pdfbookmark[0]{Title Page}{title-page}
+%\pdfbookmark: This command adds a bookmark in the resulting PDF file when the document is compiled using pdflatex. A bookmark in a PDF file acts like a table of contents entry that can be clicked to navigate to a specific section or page.
+%[0]: The number in square brackets refers to the level of the bookmark. The levels typically correspond to the structure of the document:
+%Level 0 is usually for the main section (like a chapter or title page). Higher numbers (e.g., 1, 2) would represent subsections and sub-subsections.
+%{Title Page}: The first set of curly braces defines the text that will appear as the name of the bookmark in the PDF's sidebar. In this case, it will be "Title Page".
+%{title-page}: The second set of curly braces provides an internal label that is used to link this bookmark to a specific point in the document. You can reference this label elsewhere in the document if needed.
+\begin{titlingpage}
+	\pdfbookmark[0]{Title Page}{title-page}
+	\title{Python Tools for Civil Engineering Applications\\ \textsc{\small Python-based tools for structural and geotechnical engineering analysis, modeling, and visualization}}
+	\author{THOMMES Eliott}
+	\date{\today}
+	\maketitle
+\end{titlingpage}
+% -----
+
+
+\hypersetup{pageanchor=true}
+\pagenumbering{roman} %Use lowercase Roman numerals for page numbers
+
+
+% -----
+\cleardoublepage 
+\phantomsection
+\pdfbookmark[0]{Abstract}{abstract}
+\chapter*{Abstract}
+\vfill
+\noindent\textbf{Keywords:} Python, Civil Engineering.
+% -----
+
+
+% -----
+\cleardoublepage 
+\phantomsection
+\pdfbookmark[0]{Résumé}{résumé}
+\chapter*{Résumé}
+\vfill
+\noindent\textbf{Mots-clés:} Python, Génie Civil.
+% -----
+
+% -----
+\cleardoublepage 
+\phantomsection
+\pdfbookmark[0]{Copyright}{copyright}
+\chapter*{Copyright}
+% -----
+
+
+% -----
+\cleardoublepage
+\tableofcontents
+% -----
+
+
+% -----
+\cleardoublepage
+\listoffigures
+% -----
+
+
+% -----
+\cleardoublepage
+\listoftables
+% -----
+
+
+% ----- Glossaire
+% ----- Entrées du glossaire
+\newglossaryentry{latex}{name=latex, description={Is a markup language specially suited for scientific documents}}
+\newglossaryentry{maths}{name=mathematics, description={Mathematics is what mathematicians do}}
+\newglossaryentry{formula}{name=formula, description={A mathematical expression}}
+
+% ----- Entrées des acronymes
+\newacronym{gcd}{GCD}{Greatest Common Divisor}
+\newacronym{lcm}{LCM}{Least Common Multiple}
+\newacronym{RCA}{RCA}{Recycle concrete aggregate}
+\newacronym{NA}{NA}{Natural aggregate}
+
+
+% ----- Affichage du glossaire
+%\glsaddall % To print all entries
+\printglossary[type=\acronymtype]
+%title=Special Terms is the title to be displayed on top of the glossary
+%toctitle=List of terms this is the entry to be displayed in the table of contents.
+% -----
+
+
+% ----- Nomenclature
+\cleardoublepage
+% ----- Entrées de la nomenclature
+% Constante
+\nomenclature[A]{\(g\)}{Accélération de la pesanteur \nomunit{9,81 [m/s\textsuperscript{2}]}}
+\nomenclature[A]{\(P_{atm}\)}{Pression atmosphérique \nomunit{1013253 [Pa]}}
+\nomenclature[A]{\(R\)}{Constante universelle des gaz parfaits \nomunit{8,3143 [J.mol/K]}}
+\nomenclature[A]{\(M_{\ce{CaCO3}}\)}{Masse molaire du carbonate de calcium \nomunit{100,087 [g/mol]}}
+\nomenclature[A]{\(M_{\ce{Ca(OH)2}}\)}{Masse molaire de l'hydroxyde de calcium \nomunit{74,093 [g/mol]}}
+\nomenclature[A]{\(M_{\ce{CO2}}\)}{Masse molaire du \ce{CO2} \nomunit{44,009 [g/mol]}}
+\nomenclature[A]{\(M_{\ce{H2O}}\)}{Masse molaire de l'eau \nomunit{18,016 [g/mol]}}
+
+% Béton
+\nomenclature[B]{\(E/C\)}{Ratio eau/ciment \nomunit{[-]}}
+\nomenclature[B]{\(\alpha_{h}\)}{Degré d'hydratation \nomunit{[-]}}
+\nomenclature[B]{\(D\)}{Dimension du plus grand granulat \nomunit{[mm]}}
+\nomenclature[B]{\(d\)}{Dimension du plus petit granulat \nomunit{[mm]}}
+\nomenclature[B]{\(\alpha_{h,u}\)}{Degré d'hydratation maximum \nomunit{[-]}}
+\nomenclature[B]{\(n\)}{Porosité \nomunit{[-]}}
+\nomenclature[B]{\(V_v\)}{Volume des vides \nomunit{[m\textsuperscript{3}]}}
+\nomenclature[B]{\(V\)}{Volume total \nomunit{[m\textsuperscript{3}]}}
+\nomenclature[B]{\(e\)}{Indice des vides \nomunit{[-]}}
+\nomenclature[B]{\(V_s\)}{Volume de solide \nomunit{[m\textsuperscript{3}]}}
+\nomenclature[B]{\(\nu\)}{Volume spécifique \nomunit{[-]}}
+\nomenclature[B]{\(S_r\)}{Degré de saturation \nomunit{[-]}}
+
+
+% ----- Affichage de la nomenclature
+%\cleardoublepage
+%\markboth{Nomenclature}{Nomenclature} % Update the header to show 'Nomenclature'
+%\printnomenclature
+% ----- 
+
+
+% ----- Suite du document
+\mainmatter % Now Use Arabic numerals for page numbers
+% -----
+
+% ----- To improove hyperlink anchor
+%\cleardoublepage % command is used to ensure that content following it begins on a new right-hand (odd-numbered) page in two-sided (duplex) documents, such as books or reports. It also forces all pending floats (figures, tables) to be processed and placed before moving to the new page.
+%\phantomsection % Ensures that a specific location in the document is correctly marked for hyperlinking purposes, especially when using hyperref. It is useful when cross-referencing non-section elements.
+% -----
+
+
+% ----- To create blanks pages
+% \afterpage{\blankpage}
+% % Blank page
+%\newcommand\blankpage{%
+	%	\null
+	%	\thispagestyle{empty}%
+	%	\addtocounter{page}{-1}%
+	%	\newpage}
+% -----

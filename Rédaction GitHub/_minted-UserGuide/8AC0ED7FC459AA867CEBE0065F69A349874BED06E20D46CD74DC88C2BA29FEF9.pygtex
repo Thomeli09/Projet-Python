@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{AddTask}\PYG{p}{(}\PYG{n}{title}\PYG{p}{,} \PYG{n}{start}\PYG{p}{,} \PYG{n}{end}\PYG{p}{,} \PYG{n}{completion}\PYGZbs{}\PYG{n}{\PYGZus{}ratio}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{BColorGroup}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{):}
+\end{Verbatim}

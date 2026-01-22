@@ -1,0 +1,61 @@
+% !TeX root = UserGuide.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Main document
+
+\documentclass[12pt,twoside,a4paper,final]{memoir}
+\def\wholethesis{}  % Signals that this is the main file
+
+\input{Preamble.tex}
+
+% ------------------------------ Documents ------------------------------	
+\begin{document}
+	
+	\input{DocuStart.tex}
+	
+	% ----- To improove hyperlink anchor
+	%\cleardoublepage % command is used to ensure that content following it begins on a new right-hand (odd-numbered) page in two-sided (duplex) documents, such as books or reports. It also forces all pending floats (figures, tables) to be processed and placed before moving to the new page.
+	%\phantomsection % Ensures that a specific location in the document is correctly marked for hyperlinking purposes, especially when using hyperref. It is useful when cross-referencing non-section elements.
+	% -----
+	
+	% ----- To create blanks pages
+	%\afterpage{\blankpage}
+	% % Blank page
+	%\newcommand\blankpage{%
+		%	\null
+		%	\thispagestyle{empty}%
+		%	\addtocounter{page}{-1}%
+		%	\newpage}
+	% -----
+	
+	% ----- To include differently the different chapter
+	%\include{chapters/chapter2} % or includeonly
+	% -----
+	\input{ChapterIntroduction.tex}
+	
+	\input{ChapterPlotLib.tex}
+	
+	\input{ChapterGanttChartLib.tex}
+
+	
+	
+	% ----- Bibliographie
+	\bookmarksetup{startatroot}
+	\input{Bibliographie.tex}
+	% -----
+	
+	
+	% ----- Annexes
+	\stopcontents[chapters] % Voir le package Titletoc, le but est d'éviter que les sous-tables des matières continues de prendre en compte les annexes.
+	%\backmatter
+	\appendix
+	%\part{Appendix}
+	% -----
+	
+	
+	\input{DocuEnd.tex}
+	
+\end{document}

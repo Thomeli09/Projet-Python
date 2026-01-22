@@ -1,0 +1,7 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{p} \PYG{o}{=} \PYG{n}{Plot}\PYG{p}{(}\PYG{n}{title}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}My Graph\PYGZdq{}}\PYG{p}{,} \PYG{n}{data}\PYG{o}{=}\PYG{p}{[(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{),} \PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{)])}
+\PYG{n+nb}{print}\PYG{p}{(}\PYG{n}{p}\PYG{o}{.}\PYG{n}{title}\PYG{p}{)}
+\PYG{n}{p}\PYG{o}{.}\PYG{n}{title} \PYG{o}{=} \PYG{l+s+s2}{\PYGZdq{}Updated Title\PYGZdq{}}
+\PYG{n}{p}\PYG{o}{.}\PYG{n}{set\PYGZus{}data}\PYG{p}{([(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{),} \PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{)])}
+\PYG{n}{p}\PYG{o}{.}\PYG{n}{plot}\PYG{p}{()}
+\end{Verbatim}

@@ -1,0 +1,41 @@
+% !TeX root = Chapter.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Chapter document
+
+
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\documentclass[12pt,twoside,a4paper,final]{memoir}
+	\input{Preamble.tex}
+	\begin{document}
+	\input{DocuStart.tex}
+\fi
+% -----
+
+
+\chapter{A faire pour améliorer le visuel}
+\minitoc
+\begin{itemize}
+	\item Indentation de la table des matières en ajustant les paramètres
+	\item Améliorer les footing et headers
+	\item Ajuster l'espace entre le dessus et les chapitres
+	\item Updater la page de garde et vérifier les critères (PDF)
+	\item Ajuster la page de garde du document latex
+	\item Changer l'apparence de la table des matières à partir de la thèse de Gilles
+\end{itemize}
+
+
+\minitocEnd	
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\input{Bibliographie.tex}
+	\input{DocuEnd.tex}
+	\end{document}
+\fi
+% -----

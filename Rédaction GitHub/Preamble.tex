@@ -1,0 +1,454 @@
+
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Preamble document
+
+% ----- Type de document
+\usepackage[a4paper,width=165mm,top=25mm,bottom=25mm]{geometry} % Adapter la géométrie
+% Langue française
+\usepackage[T1]{fontenc} % package defines how characters should be rendered in the output (PDF, DVI, etc.). T1 encoding provides a wide range of glyphs, especially for European languages with accented characters
+\usepackage[utf8]{inputenc} % package is responsible for specifying the input encoding of your document, i.e., how characters are interpreted when you type them in the source code.
+% -----
+
+
+% ----- Mise en page
+\usepackage{lmodern} % font package provides high-quality, scalable fonts derived from Computer Modern, the default font family used by LaTeX.
+\usepackage{setspace} %  package allows you to change the line spacing in your document. You can set the document to single spacing, one-and-a-half spacing, or double spacing. Localized control: You can adjust line spacing within specific environments or sections.
+\usepackage{afterpage} % package allows you to execute LaTeX commands after the current page is finished. This is useful when you want to insert content (e.g., a new page or figure) after the current page, but not immediately.
+\usepackage{etoolbox} % The etoolbox package provides advanced tools for manipulating LaTeX commands and environments. It allows you to change existing macros or create new ones, making LaTeX more flexible. In your case, it is likely used to adjust the spacing between chapter headings and the surrounding text.
+\usepackage{enumitem} % package gives fine control over the formatting of list environments like enumerate, itemize, and description. It allows you to adjust indentation, item labels, spacing, and more.
+% -----
+
+
+% ----- Calculs et manipulations
+\usepackage{calc} % Package in LaTeX enhances the ability to perform calculations within the document, particularly for dimensions and lengths. It allows you to use mathematical expressions directly in the arguments where lengths or dimensions are required.
+\usepackage{pgffor} % For looping through pages
+% --- Leads to Warning: layout scale set to 0.5 on input line %\usepackage{layouts} % Diagnostic tool used primarily for layout and formatting visualization in documents.
+% -----
+
+
+% ----- Dessins et schémas
+\usepackage{tikz} % package is an extremely powerful tool for creating high-quality vector graphics directly within LaTeX documents. It is part of the PGF (Portable Graphics Format) system and is often used to draw diagrams, plots, and custom illustrations in a document without relying on external graphics files.
+\usetikzlibrary{calc, arrows.meta, positioning, patterns, patterns.meta, fit, backgrounds, decorations.markings, decorations.pathreplacing, decorations.pathmorphing, shapes.misc, shapes.geometric, matrix}
+
+\usepackage{pgfplots} % function drawing library
+\pgfplotsset{compat=1.18}
+
+\usepackage{pgf-pie} % Pie chart drawing library
+
+\usepackage{tikz-3dplot} % To draw in 3D spaces
+
+\pgfdeclarelayer{background} % Put the box of the diagram in the background
+\pgfsetlayers{background,main}
+
+\usepackage{color} % Package allows you to use color in your LaTeX documents. It provides a way to set text, background, or drawing colors.
+
+\usepackage{xcolor} % Package allows you to use more colors in your LaTeX documents.
+\usepackage[dvipsnames]{xcolor}
+% -----
+
+
+% ----- Math
+\usepackage{breqn} % Enables automatic line-breaking in displayed math environments.
+\breqnsetup{breakdepth={1}} % Set maximum delimiter nesting depth for line breaks (limit line-breaking to expressions with only one level of nested delimiters)
+\usepackage{amsfonts} % package is part of the AMS (American Mathematical Society) collection, and it provides a variety of special fonts for mathematical symbols, particularly those used in more advanced mathematical typesetting.
+\usepackage{amsmath} % package is fundamental for typesetting complex mathematical expressions. It enhances the default math environment and provides additional functionalities for formatting equations, aligning formulas, creating matrices, etc.
+\usepackage{amssymb} % package (also part of the AMS collection) provides a vast collection of additional mathematical symbols that are not available in the default LaTeX symbol set.
+\usepackage{esint} % package provides additional integral symbols, particularly for areas like vector calculus and complex analysis.
+\usepackage{mathtools} % package is an extension of the amsmath package, offering additional features and tools for typesetting mathematical content.
+\usepackage{diffcoeff} % package simplifies the notation for derivatives, partial derivatives, and other related operations.
+% -----
+
+
+% ----- Science
+%\usepackage{units} % package allows for proper typesetting of units and fractions in a visually appealing way, with special focus on correct spacing and presentation.
+\usepackage{siunitx} % package provides a consistent and proper way to typeset units of measurement according to the International System of Units (SI). It ensures that units are formatted according to scientific standards.
+% Example : \unit{5}{\meter\per\second\squared}
+\usepackage{physics} % package provides commands for various mathematical and physical notations, making it easier to write expressions common in physics and engineering.
+\DeclareSIUnit{\year}{yr} % Manually defining year
+\usepackage[version=4]{mhchem} % package is designed for writing chemical formulas and equations in LaTeX in a clean and easy way. It is widely used in chemistry typesetting.
+% ----- 
+
+
+% ----- Figures et PDF
+\usepackage{graphicx} % package is essential for including graphics (images) in your LaTeX document. It provides the \includegraphics command, which allows you to insert and manipulate images
+\usepackage{float} % package enhances the control over the placement of figures and tables in your document. It allows you to "fix" the position of figures and tables with more precision using the [H] option (which stands for "Here"). Exemple: la commande \begin{figure}[H] 
+\usepackage{caption} % package is used to customize the appearance and layout of captions for figures and tables.
+\usepackage{subcaption} % package allows for the creation of sub-figures and sub-tables, where multiple smaller figures or tables can be grouped together within a main figure or table.
+%Example: 
+%\begin{figure}
+%	\begin{subfigure}{0.45\textwidth}
+%		\includegraphics{image1.png}
+%		\caption{First subfigure}
+%	\end{subfigure}
+%	\begin{subfigure}{0.45\textwidth}
+%		\includegraphics{image2.png}
+%		\caption{Second subfigure}
+%	\end{subfigure}
+%	\caption{Main caption for both subfigures}
+%\end{figure}
+\usepackage[final]{pdfpages} % package allows for the inclusion of entire PDF pages into your LaTeX document.
+%final: Inserts pages. This is the default.
+%draft: Does not insert pages, but prints a box and the filename instead.
+%demo: Inserts empty pages instead of the actual PDFs.
+%nodemo: Disables ‘demo’.
+%enable-survey: Activates survey functionalities. (experimental, subject to change)
+\usepackage{rotating} % package allows you to rotate objects, such as figures and tables, in your document. It provides the sidewaysfigure and sidewaystable environments, which rotate the content by 90 degrees.
+%\usepackage{wrapfig} % Mets le texte autour de la figure.
+% ----- 
+
+
+% ----- Tableaux
+\usepackage{supertabular} % Tableaux sur plusieurs pages
+\usepackage{array} % package enhances the default LaTeX tabular environment by allowing more control over the formatting of table columns.
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}} % Define a new column type for centered text in fixed-width columns
+\newcolumntype{K}[1]{>{\raggedright\arraybackslash}p{#1}}  % Define a new column type similar to l but with an option to define the size
+\newcolumntype{M}[1]{>{\centering}m{#1}} % Nouveau type de colonne ("M") qui centre verticalement le paragraphe par rapport à la ligne (comme le type de colonne m) et aligne le paragraphe à gauche de la colonne
+\usepackage{multicol} %package in LaTeX is used to create multi-column layouts within your document, particularly for text. It provides an easy way to format sections of your document in multiple columns, which is useful for newsletters, articles, or reports where space efficiency or a different layout is required.
+\usepackage{multirow} % package allows you to merge multiple rows of a table into one, similar to how \multicolumn merges columns.
+
+% --- Disabled due to incompatibility with tikz package %\usepackage{ctable} % package simplifies the creation of tables with better typographical formatting. It offers high-quality table layouts with consistent line thicknesses and spacing.
+\usepackage{booktabs} % package is designed for producing high-quality tables. It allows you to use well-defined horizontal rules (\toprule, \midrule, \bottomrule) for clear and professional-looking tables.
+%%\usepackage{tabularx} % For flexible-width tables
+\usepackage{makecell} % For \makecell
+% ----- 
+
+
+% ----- Langue
+\usepackage[english]{babel} % Définition de la langue
+% ----- 
+
+
+% ----- Références
+% Issues cleardoublepage: \aliaspagestyle{cleared}{empty}
+\usepackage{hyperref} % Permet de faire des hyperliens dans le texte
+\hypersetup{colorlinks=true, %false to create a color box or true to color the text ref
+	linkcolor=blue,citecolor=green,filecolor=red,urlcolor=magenta,
+	pdftitle={Multiscale modelling of carbonation in concrete made with recycled concrete aggregates},
+	pdfauthor={\textcopyright Eliott Thommes},
+	pdfsubject={},
+	pdfkeywords={},
+	pdfpagemode=UseOutlines,
+	breaklinks=true,
+	pdfpagelayout=TwoColumnRight}
+%hyperindex 	true 	Makes the page numbers of index entries into hyperlinks
+%linktocpage 	false 	Makes the page numbers instead of the text to be link in the Table of contents.
+%breaklinks 	false 	Allows links to be broken into multiple lines.
+%colorlinks 	false 	Colours the text for links and anchors, these colours will appear in the printed version
+%linkcolor 	red 	Colour for normal internal links
+%anchorcolor 	black 	Colour for anchor (target) text
+%citecolor 	green 	Colour for bibliographical citations
+%filecolor 	cyan 	Colour for links that open local files
+%urlcolor 	magenta 	Colour for linked URLs
+%frenchlinks 	false 	Use small caps instead of colours for links
+
+%bookmarks 	true 	Acrobat bookmarks are written, similar to the table of contents.
+%bookmarksopen 	false 	Bookmarks are shown with all sub-trees expanded.
+%citebordercolor 	0 1 0 	Colour of the box around citations in RGB format.
+%filebordercolor 	0 .5 .5 	Colour of the box around links to files in RGB format.
+%linkbordercolor 	1 0 0 	Colour of the box around normal links in RGB format.
+%menubordercolor 	1 0 0 	Colour of the box around menu links in RGB format.
+%urlbordercolor 	0 1 1 	Colour of the box around links to URLs in RGB format.
+%pdfpagemode 	empty 	Determines how the file is opened. Possibilities are UseThumbs (Thumbnails), UseOutlines (Bookmarks) and FullScreen.
+%pdftitle 		Sets the document title.
+%pdfauthor 		Sets the document Author.
+%pdfstartpage 	1 	Determines on which page the PDF file is opened. 
+
+%\urlstyle{same}
+%urlstyle{same} Default settings print links in mono-style spaced fonts, this command changes that and displays the links in the same style as the rest of the text.
+\usepackage{memhfixc} % To solve incompabilities between memoir class and hypoerref : The memoir class Peter Wilson
+\usepackage{bookmark} % Solve issues with some chapters level bookmarks updated to part bookmarks
+% -----
+
+
+% ----- Bibliographie
+\usepackage{cite} % package in LaTeX is used to manage and format citations in a more efficient and concise manner, especially when dealing with multiple references. It enhances the default citation command \cite by providing options for sorting and compressing citation lists, making them more readable and appropriately formatted for academic and scientific documents.
+% ----- 
+
+
+% ----- Glossaire
+\usepackage[acronym,toc,noredefwarn]{glossaries-extra} % Automake pour pouvoir compiler, "acronym" pour utiliser acronyme type, "toc" pour ajouter à la table des matières, "nonumberlist" pour ne pas afficher les numéros, "noredefwarn" pour éviter les erreurs entre memoir document class et glossaries (overriding `theglossary' environment, \printglossary) -- En cas de problème avec le glossaire, il est utile de retirer le noredefwarn --
+\makeglossaries % Défini les entrés du glossaire
+%Attention différence entre acronyme et définition
+%\gls{ }To print the term, lowercase. For example, \gls{maths} prints mathematics when used.
+%\Gls{ }The same as \gls but the first letter will be printed in uppercase. Example: \Gls{maths} prints Mathematics
+%\glspl{ }The same as \gls but the term is put in its plural form. For instance, \glspl{formula} will write formulas in your final document.
+%\Glspl{ }The same as \Gls but the term is put in its plural form. For example, \Glspl{formula} renders as Formulas.
+%\acrlong{ }Displays the phrase which the acronyms stands for. Put the label of the acronym inside the braces. In the example, \acrlong{gcd} prints Greatest Common Divisor.
+%\acrshort{ }Prints the acronym whose label is passed as parameter. For instance, \acrshort{gcd} renders as GCD.
+%\acrfull{ }Prints both, the acronym and its definition. In the example the output of \acrfull{lcm} is Least Common Multiple (LCM).
+%\setglossarystyle{list} % Permet de définir le style de glossaire:
+%list. Writes the defined term in boldface font
+%altlist. Inserts newline after the term and indents the description.
+%listgroup. Group the terms based on the first letter.
+%listhypergroup. Adds hyperlinks at the top of the index.
+% -----
+
+% ----- Nomenclature
+\usepackage[intoc]{nomencl}
+\makenomenclature
+% This code creates the groups
+% \usepackage{etoolbox} % Nécessaire
+\renewcommand\nomgroup[1]{%
+	\item[\bfseries
+	\ifstrequal{#1}{A}{Constantes}{%
+		\ifstrequal{#1}{B}{Béton}{%
+			\ifstrequal{#1}{C}{Processus de carbonatation}{%
+				\ifstrequal{#1}{D}{Modélisations simplifiées}{%
+					\ifstrequal{#1}{E}{Modélisations avancées}{%
+						\ifstrequal{#1}{F}{Validation et analyse du modèle de transport du \ce{CO2}}{%
+							\ifstrequal{#1}{G}{Modélisation du transport réactif}{%
+								\ifstrequal{#1}{H}{Application des résultats expérimentaux expérimentaux}{}}}}}}}}%
+	]}
+% This will add the units
+\newcommand{\nomunit}[1]{%
+	\renewcommand{\nomentryend}{\hspace*{\fill}#1}}
+% -----
+
+
+% ----- Lispum
+\usepackage{lipsum}
+% -----
+
+
+% ----- Soulignements stylisés
+\usepackage[normalem]{ulem}
+% -----
+
+
+% ----- Symboles
+\usepackage{bbding} % package provides access to a set of symbolic dingbats — mostly icons, bullets, checkmarks, arrows, stars, and other decorative symbols — inspired by the Zapf Dingbats font.
+% -----
+
+
+% ----- PDF Protection
+%It is recommended to use a tool like qpdf after compiling your PDF. This tool enables 256-bit encryption and gives full control over user permissions. It's important to note that many browser-based PDF viewers do not enforce these restrictions, so the protections are most effective when the PDF is opened in full-featured desktop applications like Adobe Acrobat Reader. (https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/,http://maddingue.free.fr/softwares/pdftrans.html,https://multivalent.sourceforge.net/)
+% -----
+
+
+% ----- Watermarks
+\newcommand{\WaterMarkPerso}{
+% Type de Watermark
+\ifodd\value{page} 
+	%Draft - Draft
+\else
+	%\today
+\fi}
+
+% Default background only
+%\usepackage{draftwatermark} % package allows you to easily add a transparent, diagonal watermark (like %"DRAFT", "CONFIDENTIAL", or a date) to every page of your document.\\
+%\DraftwatermarkOptions{%
+%	stamp=true,%false
+%	angle=57.7,
+%	scale=0.85,
+%	text={\ifodd\value{page} Confidential \else \today \fi},
+%	%text={Confidential Version -- \today},
+%	color={[gray!80]{0.5}}
+%}
+
+% Background or forground
+\AddToHook{shipout/foreground}{%background 
+	\begin{tikzpicture}[overlay, remember picture]
+		\node[text=gray!80, rotate=57.7, scale=9, text opacity=0.5] at (current page) {\WaterMarkPerso};
+	\end{tikzpicture}    
+}
+
+% Define the stamp command
+\usepackage{eso-pic}
+\newcommand\RubberStampApproved{
+	\AddToShipoutPictureFG*{
+		\AtPageCenter{
+			\begin{tikzpicture}[remember picture, overlay]
+				\node[draw=red!80!black, text=red!70!black,
+				line width=1pt, rotate=15,
+				font=\sffamily\bfseries, scale=2,
+				minimum width=6cm, minimum height=1.5cm,
+				rounded corners=3pt] 
+				{APPROVED};
+			\end{tikzpicture}
+		}
+	}
+}
+% -----
+
+
+% ----- Writing code inside a document
+%\usepackage{listings}
+%% Colors
+%\definecolor{codegreen}{rgb}{0,0.6,0}
+%\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+%\definecolor{codepurple}{rgb}{0.58,0,0.82}
+%\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+%% Style Setting
+%\lstdefinestyle{mystyle}{
+%	language=Python,
+%	backgroundcolor=\color{backcolour},   
+%	basicstyle=\ttfamily\small,
+%	breaklines=true,
+%	breakatwhitespace=false,                                     
+%	keepspaces=false,                                            
+%	showspaces=false,                
+%	showstringspaces=false,
+%	showtabs=false,                  
+%	tabsize=4,
+%	numbers=none, 
+%	captionpos=b,
+%	frame=shadowbox,
+%	xleftmargin=0pt,framexleftmargin=0pt
+%}
+%% Defines a new code listing style called "mystyle". Inside the second pair of braces the options that define this style are passed; see the reference guide for a full description of these and some other parameters.
+%% Style activation
+%\lstset{style=mystyle} % Enables the style "mystyle". This command can be used within your document to switch to a different style if needed.
+
+% --- Code / Syntax highlighting (Pygments)
+% IMPORTANT: pick ONE:
+%   - minted   = current package (v3+)
+%   - minted2  = compatibility package that stays on minted v2.9 behavior
+% Do NOT load both at the same time.
+
+% Option A (recommended): minted (v3+)
+%\usepackage{minted} % Syntax highlighting via Pygments, using the dedicated Python helper "latexminted"
+% (minted v3 is a rewrite of v2.9). :contentReference[oaicite:1]{index=1}
+% Compile notes:
+% - TeX Live 2024+ (up-to-date): -shell-escape is typically NOT required because latexminted is trusted. :contentReference[oaicite:2]{index=2}
+% - Older TeX Live / MiKTeX: you may need -shell-escape (TeX Live) or -enable-write18 (MiKTeX). :contentReference[oaicite:3]{index=3}
+
+% Option B (compatibility): minted2 (locks in minted v2.9 behavior)
+\usepackage{minted2} % Backward-compatible features of minted v2.9 (final v2 release). :contentReference[oaicite:4]{index=4}
+% Requires Pygments/pygmentize and typically needs -shell-escape to run it. :contentReference[oaicite:5]{index=5}
+
+% Global defaults (works for both minted and minted2 in most documents)
+\setminted{
+	fontsize=\footnotesize,
+	breaklines,
+	autogobble,
+	linenos
+}
+% ---
+% -----
+
+
+% ----- Mise en page et styles du document
+% Styles des titres
+%\usepackage{titlesec} % Présentation des titres, etc
+
+% Styles des chapitres
+\newif\ifNoChapNumber
+\newcommand\Vlines{%
+	\def\VL{\rule[-2cm]{1pt}{5cm}\hspace{1mm}\relax}
+	\VL\VL\VL\VL\VL\VL\VL}
+\makeatletter
+\setlength\midchapskip{0pt}
+\makechapterstyle{VZ43}{
+	\renewcommand\chapternamenum{}
+	\renewcommand\printchaptername{}
+	\renewcommand\printchapternum{}
+	\renewcommand\chapnumfont{\Huge\bfseries\centering}
+	\renewcommand\chaptitlefont{\Huge\bfseries\raggedright}
+	\renewcommand\printchaptertitle[1]{%
+		\Vlines\hspace*{-2em}%
+		\begin{tabular}{@{}p{1cm} p{\textwidth-3cm}@{}}%
+			\ifNoChapNumber\relax\else%
+			\colorbox{black}{\color{white}%
+				\makebox[.8cm]{\chapnumfont\strut \thechapter}}
+			\fi
+			& \chaptitlefont ##1
+		\end{tabular}
+		\NoChapNumberfalse
+	}
+	\renewcommand\printchapternonum{\NoChapNumbertrue}
+}
+\makeatother
+\chapterstyle{VZ43}
+
+% Styles des headers et sesctions, ...
+%\usepackage{sectsty} % package allows you to customize the style of section headings in your LaTeX document. It provides a simple interface to change the font, size, color, and other formatting options for section, subsection, and other heading levels.
+
+% Styles des tables des matières et sous-tables des matières
+% Différents niveau pour les zones de textes
+%-1 	\part{part}
+%0 	\chapter{chapter}
+%1 	\section{section}
+%2 	\subsection{subsection}
+%3 	\subsubsection{subsubsection}
+%4 	\paragraph{paragraph}
+%5 	\subparagraph{subparagraph}
+\setcounter{secnumdepth}{3} % Numérotation jusqu'au niveau x, voir au-dessus.
+% Set the depth of TOC entries and numbering
+\settocdepth{subsubsection}
+\setsecnumdepth{subsubsection}
+
+\usepackage{titletoc} % Package in LaTeX is used to customize the Table of Contents (ToC) formatting. It allows you to define the appearance, style, and structure of the ToC entries for different sectioning levels (e.g., chapters, sections, subsections, etc.) and provides detailed control over the indentation, numbering, fonts, and other visual elements of the Table of Contents.
+% Set the depth of TOC entries and numbering
+\settocdepth{subsubsection}
+\setsecnumdepth{subsubsection}
+
+% Global settings for main TOC (using default values)
+% Customize TOC appearance for main TOC (optional settings can be placed here)
+\cftsetindents{part}{0em}{3em}  % Section indentation (number width)
+\cftsetindents{chapter}{0em}{2em}  % Section indentation (number width)
+\cftsetindents{section}{2em}{3em}  % Section indentation (number width)
+\cftsetindents{subsection}{5em}{3.5em}  % Subsection indentation (number width)
+\cftsetindents{subsubsection}{8.5em}{4em}  % Subsubsection indentation (number width)
+% Define the mini TOC command with local settings
+% Command to customize the style of the local table of contents
+\newcommand{\minitoc}{%
+	\bgroup
+	\renewcommand*{\cftsectionfont}{\bfseries}  % Bold section titles
+	\renewcommand*{\cftsectionpagefont}{\bfseries}  % Bold section page numbers
+	\renewcommand*{\cftsectionleader}{\bfseries\cftdotfill{\cftdotsep}}  % Bold dots only for sections
+	\renewcommand*{\cftsubsectionfont}{}  % Regular font for subsection titles
+	\renewcommand*{\cftsubsectionpagefont}{}  % Regular font for subsection page numbers
+	\renewcommand*{\cftsubsectionleader}{\normalfont\cftdotfill{\cftdotsep}}  % Regular dots for subsections
+	\setlength{\cftbeforechapterskip}{0pt}  % Remove space before chapters
+	\setlength{\cftbeforesectionskip}{5pt}  % Space before sections
+	\setlength{\cftbeforesubsectionskip}{2pt}  % Space before subsections
+	\setlength{\cftbeforesubsubsectionskip}{1pt}  % Space before subsubsections
+	\cftsetindents{section}{0em}{3em}  % Section indentation (number width)
+	\cftsetindents{subsection}{2.5em}{3.5em}  % Subsection indentation (number width)
+	\cftsetindents{subsubsection}{5.5em}{4em}  % Subsubsection indentation (number width)
+	
+	\begin{flushleft}
+		\textbf{\large Contents}
+		\vspace{3pt}
+		\hrule
+		\vspace{10pt}
+		\startcontents[chapters] % Attention lié au \stopcontents[chapters] pour ne pas avoir les annexes dedans
+		\printcontents[chapters]{}{1}{%
+			\setlength{\parskip}{0pt}
+			\setlength{\leftmargin}{0em}
+			\setlength{\itemindent}{-1em}
+			\renewcommand{\numberline}[1]{##1\hspace{0.8em}}
+		}
+		\vspace{10pt}
+		\hrule
+		\vspace{3pt}
+	\end{flushleft}
+	\egroup
+}
+
+\newcommand{\minitocEnd}{%
+	\stopcontents[chapters]%
+}
+% -----
+
+
+% ----- Custom macros
+% -----
+
+
+% ----- Errors temporary sol : avertissement: : omitting definition of \qty. (siunitx VS physics)
+% Retirer un des 2 packages permet d'éviter cette méthode
+% https://tex.stackexchange.com/questions/681700/silencing-siunitx-and-physics-package-qty-warning
+\AtBeginDocument{\RenewCommandCopy\qty\SI}
+\ExplSyntaxOn
+\msg_redirect_name:nnn { siunitx } { physics-pkg } { none }
+\ExplSyntaxOff
+% -----
+
+
+% ----- Personalised Commands
+% -----

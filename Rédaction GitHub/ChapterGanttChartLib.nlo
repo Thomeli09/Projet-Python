@@ -1,0 +1,19 @@
+\nomenclatureentry{A\(g\)@[{\(g\)}]\begingroup Accélération de la pesanteur \nomunit{9,81 [m/s\textsuperscript{2}]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(P_{atm}\)@[{\(P_{atm}\)}]\begingroup Pression atmosphérique \nomunit{1013253 [Pa]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(R\)@[{\(R\)}]\begingroup Constante universelle des gaz parfaits \nomunit{8,3143 [J.mol/K]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(M_{\ce{CaCO3}}\)@[{\(M_{\ce{CaCO3}}\)}]\begingroup Masse molaire du carbonate de calcium \nomunit{100,087 [g/mol]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(M_{\ce{Ca(OH)2}}\)@[{\(M_{\ce{Ca(OH)2}}\)}]\begingroup Masse molaire de l'hydroxyde de calcium \nomunit{74,093 [g/mol]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(M_{\ce{CO2}}\)@[{\(M_{\ce{CO2}}\)}]\begingroup Masse molaire du \ce{CO2} \nomunit{44,009 [g/mol]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{A\(M_{\ce{H2O}}\)@[{\(M_{\ce{H2O}}\)}]\begingroup Masse molaire de l'eau \nomunit{18,016 [g/mol]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(E/C\)@[{\(E/C\)}]\begingroup Ratio eau/ciment \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(\alpha_{h}\)@[{\(\alpha_{h}\)}]\begingroup Degré d'hydratation \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(D\)@[{\(D\)}]\begingroup Dimension du plus grand granulat \nomunit{[mm]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(d\)@[{\(d\)}]\begingroup Dimension du plus petit granulat \nomunit{[mm]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(\alpha_{h,u}\)@[{\(\alpha_{h,u}\)}]\begingroup Degré d'hydratation maximum \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(n\)@[{\(n\)}]\begingroup Porosité \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(V_v\)@[{\(V_v\)}]\begingroup Volume des vides \nomunit{[m\textsuperscript{3}]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(V\)@[{\(V\)}]\begingroup Volume total \nomunit{[m\textsuperscript{3}]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(e\)@[{\(e\)}]\begingroup Indice des vides \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(V_s\)@[{\(V_s\)}]\begingroup Volume de solide \nomunit{[m\textsuperscript{3}]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(\nu\)@[{\(\nu\)}]\begingroup Volume spécifique \nomunit{[-]}\nomeqref {0}|nompageref}{1}
+\nomenclatureentry{B\(S_r\)@[{\(S_r\)}]\begingroup Degré de saturation \nomunit{[-]}\nomeqref {0}|nompageref}{1}

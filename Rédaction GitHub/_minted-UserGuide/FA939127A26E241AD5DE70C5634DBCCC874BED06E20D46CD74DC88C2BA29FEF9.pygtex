@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{DatePlusNumDays}\PYG{p}{(}\PYG{n}{Date}\PYG{p}{,} \PYG{n}{NumDays}\PYG{p}{):}
+\end{Verbatim}

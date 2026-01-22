@@ -1,0 +1,181 @@
+% !TeX root = ChapterGanttChartLib.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Chapter document
+
+
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\documentclass[12pt,twoside,a4paper,final]{memoir}
+	\input{Preamble.tex}
+	\begin{document}
+	\input{DocuStart.tex}
+\fi
+% -----
+
+
+\chapter{GanttChartLib}
+\minitoc
+
+\section{Overview}
+GanttChartLib is a lightweight Python library for creating customizable Gantt charts to visualize project timelines, task progress, and scheduling. It allows users to define a list of tasks with associated start/end dates, completion status, and group coloring, and generates high-quality matplotlib plots to represent the data.
+
+Its goal is to simplify Gantt chart creation for planning, reporting, and presentation purposes while maintaining flexibility in visualization options (such as color grouping, date range control, and weekend shading).
+
+\section{Dependencies and External Libraries}
+GanttChartLib depends on the following external libraries:
+\begin{itemize}
+	\item \texttt{matplotlib} – for plotting the Gantt charts.
+	\item \texttt{pandas} – for handling task data and date operations.
+	\item \texttt{queue} - 
+	\item \texttt{datetime} – for manipulating and comparing date/time values.
+\end{itemize}
+
+Additional dependencies (assumed to be in the same project) include:
+\begin{itemize}
+	\item \texttt{PlotLib.ParamPLT}
+	\item \texttt{PlotLib.PLTGrid}
+	\item \texttt{PlotLib.PLTLimit}
+\end{itemize}
+
+\section{Architecture and Organization}
+The GanttChartLib module is organized into:
+\begin{itemize}
+	\item \textbf{Core class:} \texttt{Tasks} – defines and manages task data and generates Gantt chart visualizations.
+	\item \textbf{Helper function:} \texttt{DatePlusNumDays} – performs date arithmetic.
+	\item \textbf{Plot utilities:} External modules in \texttt{PlotLib} manage styling and figure control.
+\end{itemize}
+
+\section{Core Classes}
+
+\subsection{Class \texttt{Tasks}}
+
+\begin{itemize}
+	\item \textbf{Description:} Manages a collection of tasks and handles Gantt chart plotting. Supports task coloring, completion tracking, and grouped legends.
+	
+	\item \textbf{Inherits from:} None
+	
+	\item \textbf{Constructor:}
+	\begin{minted}{python}
+		def __init__(self):
+	\end{minted}
+	
+	\item \textbf{Properties:}
+	\begin{itemize}
+		\item \texttt{getLTask} – Returns the internal list of task dictionaries.
+		\item \texttt{getPandasStruct} – Returns the internal DataFrame storing task information.
+		\item \texttt{SetPandasStruct}:
+		Converts the internal task list into a pandas DataFrame for plotting.
+		\item \texttt{getBColorGroups} – Gets or sets the boolean flag for enabling group-based color mapping.
+	\end{itemize}
+	
+	\item \textbf{Methods:}
+	\begin{itemize}
+		\item \texttt{AddTask}: Adds a task to the list with optional color and completion status.
+		\begin{itemize}
+			\item \textbf{Signature:}
+			\begin{minted}{python}
+				def AddTask(title, start, end, completion\_ratio=0, color=None, BColorGroup=False):
+			\end{minted}
+			
+			\item \textbf{Parameters:}
+			\begin{itemize}
+				\item \texttt{title} (str): Starting date in "YYYY-MM-DD" format.
+				\item \texttt{NumDays} (int): Number of days to add.
+			\end{itemize}
+			
+			\item \textbf{Returns:} \texttt{str} – New date as a string after adding the specified number of days.
+		\end{itemize}
+		
+		\item \texttt{RangePLT}: Determines the plotting range from task dates and current date if requested.
+		\begin{itemize}
+			\item \textbf{Signature:}
+			\begin{minted}{python}
+				def AddTask(title, start, end, completion\_ratio=0, color=None, BColorGroup=False):
+			\end{minted}
+			
+			\item \textbf{Parameters:}
+			\begin{itemize}
+				\item \texttt{x} (typex): x.
+				\item \texttt{x} (typex): x.
+			\end{itemize}
+			
+			\item \textbf{Returns:} \texttt{x} (typex) : x.
+		\end{itemize}
+		
+		\item \texttt{PLTTasks}: Plots the Gantt chart using matplotlib. Supports color grouping, legends, weekend shading, and date configuration.
+		\begin{itemize}
+			\item \textbf{Signature:}
+			\begin{minted}{python}
+				def PLTTasks(paramPLT, StartDate=None, EndDate=None, BCurrentDate=False, BWeekEnds=False, GroupsColors=None, BYTicks=True):
+			\end{minted}
+			
+			\item \textbf{Parameters:}
+			\begin{itemize}
+				\item \texttt{x} (typex): x.
+				\item \texttt{x} (typex): x.
+			\end{itemize}
+			
+			\item \textbf{Returns:} \texttt{x} (typex) : x.
+		\end{itemize}
+	\end{itemize}
+	
+	\item \textbf{Example Usage:}
+	\begin{minted}{python}
+		my_tasks = Tasks()
+		my_tasks.AddTask("Phase 1", "2024-01-01", "2024-03-01", 0.75, color='IT')
+		paramPLT = ParamPLT(...)
+		my_tasks.PLTTasks(paramPLT, BCurrentDate=True)
+	\end{minted}
+\end{itemize}
+
+\section{Functions}
+
+\subsection{Function \texttt{DatePlusNumDays}}
+
+\begin{itemize}
+	\item \textbf{Description:} Adds a given number of days to a specified date and returns the result as a string in "YYYY-MM-DD" format.
+	
+	\item \textbf{Signature:}
+	\begin{minted}{python}
+		def DatePlusNumDays(Date, NumDays):
+	\end{minted}
+	
+	\item \textbf{Parameters:}
+	\begin{itemize}
+		\item \texttt{Date} (str): Starting date in "YYYY-MM-DD" format.
+		\item \texttt{NumDays} (int): Number of days to add.
+	\end{itemize}
+	
+	\item \textbf{Returns:} \texttt{str} – New date as a string after adding the specified number of days.
+	
+	\item \textbf{Example:}
+	\begin{minted}{python}
+		new_date = DatePlusNumDays("2024-01-01", 30)
+		print(new_date)  # Output: "2024-01-31"
+	\end{minted}
+\end{itemize}
+
+\section{Usage Examples}
+% Show example code on how to use the library in practice.
+% Maybe a few simple scripts with comments.
+
+\section{Development and Planned Improvements}
+% Discuss current limitations, planned features, and potential enhancements.
+
+
+\textcolor{red}{Se baser sur sympy documenation pour décrire le code}
+
+\minitocEnd	
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\input{Bibliographie.tex}
+	\input{DocuEnd.tex}
+	\end{document}
+\fi
+% -----

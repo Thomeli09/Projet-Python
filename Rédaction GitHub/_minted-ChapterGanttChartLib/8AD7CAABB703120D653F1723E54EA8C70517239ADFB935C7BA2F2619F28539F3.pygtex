@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{def}\PYG{+w}{ }\PYG{n+nf}{PLTTasks}\PYG{p}{(}\PYG{n}{paramPLT}\PYG{p}{,} \PYG{n}{StartDate}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{EndDate}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{BCurrentDate}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{BWeekEnds}\PYG{o}{=}\PYG{k+kc}{False}\PYG{p}{,} \PYG{n}{GroupsColors}\PYG{o}{=}\PYG{k+kc}{None}\PYG{p}{,} \PYG{n}{BYTicks}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{):}
+\end{Verbatim}

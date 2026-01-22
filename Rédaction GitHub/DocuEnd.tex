@@ -1,0 +1,29 @@
+
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Define the end pages of the thesis
+
+% -----
+\cleardoublepage
+\bookmarksetup{startatroot}
+\printglossary
+% -----
+
+
+% -----Page de garde officielle
+\cleartoverso % Check if the current page is odd
+\bookmarksetup{startatroot}
+\phantomsection
+\pdfbookmark[0]{End Cover Page}{end-cover-page}
+%\checkoddpage
+%\ifoddpage
+%	\null
+%	\thispagestyle{empty}
+%	\newpage
+%\fi
+\includepdf[pages=-]{PageDeGarde/Page_de_fin_1_5.pdf} % pages=- pour insérer toutes les pages du PDF Attention, la version du pdf est max V1.5
+%\includepdf[pages=-, reflect=true]{PageDeGarde/Page_de_fin_1_5.pdf}
+% -----

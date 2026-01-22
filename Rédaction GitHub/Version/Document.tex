@@ -1,0 +1,302 @@
+% !TeX spellcheck = fr_FR
+% Author: Thommes Eliott
+% Dates of creation 16-10-2024
+
+%-----
+% Type de document
+\documentclass[12pt,twoside,a4paper,final]{report} % taille du texte, twoside pour qu'en lisant les espaces soit correct, final or draft pour que la version puisse montrer ou non les erreurs
+\usepackage[a4paper,width=165mm,top=25mm,bottom=25mm]{geometry} % Adapter la géométrie
+% Langue française
+\usepackage[utf8]{inputenc} % package is responsible for specifying the input encoding of your document, i.e., how characters are interpreted when you type them in the source code.
+\usepackage[T1]{fontenc} % package defines how characters should be rendered in the output (PDF, DVI, etc.). T1 encoding provides a wide range of glyphs, especially for European languages with accented characters
+% Définition de la langue
+\usepackage[english]{babel} % Définition de la langue
+\usepackage{pgffor} % For looping through pages 
+%-----
+
+
+%-----
+% Mise en page -------
+\usepackage{lmodern} % font package provides high-quality, scalable fonts derived from Computer Modern, the default font family used by LaTeX.
+\usepackage{setspace} %  package allows you to change the line spacing in your document. You can set the document to single spacing, one-and-a-half spacing, or double spacing. Localized control: You can adjust line spacing within specific environments or sections.
+\usepackage{afterpage} % package allows you to execute LaTeX commands after the current page is finished. This is useful when you want to insert content (e.g., a new page or figure) after the current page, but not immediately.
+\usepackage{etoolbox} % The etoolbox package provides advanced tools for manipulating LaTeX commands and environments. It allows you to change existing macros or create new ones, making LaTeX more flexible. In your case, it is likely used to adjust the spacing between chapter headings and the surrounding text.
+\usepackage{enumitem} % package gives fine control over the formatting of list environments like enumerate, itemize, and description. It allows you to adjust indentation, item labels, spacing, and more.
+
+% Styles des chapitres
+\usepackage{calc} % Package in LaTeX enhances the ability to perform calculations within the document, particularly for dimensions and lengths. It allows you to use mathematical expressions directly in the arguments where lengths or dimensions are required.
+\usepackage{color} % Package allows you to use color in your LaTeX documents. It provides a way to set text, background, or drawing colors.
+
+
+%\usepackage{titlesec} % Présentation des titres, etc
+
+%Table des matières et sous-tables des matières
+% Différents niveau pour les zones de textes
+%-1 	\part{part}
+%0 	\chapter{chapter}
+%1 	\section{section}
+%2 	\subsection{subsection}
+%3 	\subsubsection{subsubsection}
+%4 	\paragraph{paragraph}
+%5 	\subparagraph{subparagraph}
+\setcounter{secnumdepth}{3} % Numérotation jusqu'au niveau x, voir au-dessus.
+
+
+
+\usepackage{titletoc} % Package in LaTeX is used to customize the Table of Contents (ToC) formatting. It allows you to define the appearance, style, and structure of the ToC entries for different sectioning levels (e.g., chapters, sections, subsections, etc.) and provides detailed control over the indentation, numbering, fonts, and other visual elements of the Table of Contents.
+% Set the depth of TOC entries and numbering
+
+
+%\usepackage{sectsty} % package allows you to customize the style of section headings in your LaTeX document. It provides a simple interface to change the font, size, color, and other formatting options for section, subsection, and other heading levels.
+%-----
+
+
+
+%-----
+% Package divers
+
+% Math -----
+\usepackage{amsfonts} % package is part of the AMS (American Mathematical Society) collection, and it provides a variety of special fonts for mathematical symbols, particularly those used in more advanced mathematical typesetting.
+\usepackage{amsmath} % package is fundamental for typesetting complex mathematical expressions. It enhances the default math environment and provides additional functionalities for formatting equations, aligning formulas, creating matrices, etc.
+\usepackage{amssymb} % package (also part of the AMS collection) provides a vast collection of additional mathematical symbols that are not available in the default LaTeX symbol set.
+\usepackage{esint} % package provides additional integral symbols, particularly for areas like vector calculus and complex analysis.
+\usepackage[squaren,Gray]{SIunits} % package provides a consistent and proper way to typeset units of measurement according to the International System of Units (SI). It ensures that units are formatted according to scientific standards.
+% Example : \unit{5}{\meter\per\second\squared}
+\usepackage{mathtools} % package is an extension of the amsmath package, offering additional features and tools for typesetting mathematical content.
+\usepackage{diffcoeff} % package simplifies the notation for derivatives, partial derivatives, and other related operations.
+\usepackage{units} % package allows for proper typesetting of units and fractions in a visually appealing way, with special focus on correct spacing and presentation.
+\usepackage{physics} % package provides commands for various mathematical and physical notations, making it easier to write expressions common in physics and engineering.
+\usepackage[version=4]{mhchem} % package is designed for writing chemical formulas and equations in LaTeX in a clean and easy way. It is widely used in chemistry typesetting.
+
+% Figures et PDF -----
+\usepackage{graphicx} % package is essential for including graphics (images) in your LaTeX document. It provides the \includegraphics command, which allows you to insert and manipulate images
+\usepackage{float} % package enhances the control over the placement of figures and tables in your document. It allows you to "fix" the position of figures and tables with more precision using the [H] option (which stands for "Here"). Exemple: la commande \begin{figure}[H] 
+\usepackage{caption} % package is used to customize the appearance and layout of captions for figures and tables.
+\usepackage{subcaption} % package allows for the creation of sub-figures and sub-tables, where multiple smaller figures or tables can be grouped together within a main figure or table.
+% Example: 
+%\begin{figure}
+%	\begin{subfigure}{0.45\textwidth}
+%		\includegraphics{image1.png}			
+%		\caption{First subfigure}
+%	\end{subfigure}
+%	\begin{subfigure}{0.45\textwidth}
+%		\includegraphics{image2.png}
+%		\caption{Second subfigure}
+%	\end{subfigure}
+%	\caption{Main caption for both subfigures}
+%\end{figure}
+\usepackage[final]{pdfpages} % package allows for the inclusion of entire PDF pages into your LaTeX document.
+%final: Inserts pages. This is the default.
+%draft: Does not insert pages, but prints a box and the filename instead.
+%demo: Inserts empty pages instead of the actual PDFs.
+%nodemo: Disables ‘demo’.
+%enable-survey: Activates survey functionalities. (experimental, subject to change)
+\usepackage{rotating} % package allows you to rotate objects, such as figures and tables, in your document. It provides the sidewaysfigure and sidewaystable environments, which rotate the content by 90 degrees.
+% If not defined
+%\usepackage{color} % Package allows you to use color in your LaTeX documents. It provides a way to set text, background, or drawing colors.
+		
+% Bibliographie -----
+\usepackage{cite} % package in LaTeX is used to manage and format citations in a more efficient and concise manner, especially when dealing with multiple references. It enhances the default citation command \cite by providing options for sorting and compressing citation lists, making them more readable and appropriately formatted for academic and scientific documents.
+
+
+		
+% Dessins et schémas
+\usepackage{tikz} % package is an extremely powerful tool for creating high-quality vector graphics directly within LaTeX documents. It is part of the PGF (Portable Graphics Format) system and is often used to draw diagrams, plots, and custom illustrations in a document without relying on external graphics files.
+\usetikzlibrary{matrix,arrows.meta}
+		
+		
+% Tableaux -----
+\usepackage{supertabular} % Tableaux sur plusieurs pages
+\usepackage{array} % package enhances the default LaTeX tabular environment by allowing more control over the formatting of table columns.
+\newcolumntype{M}[1]{>{\centering}m{#1}} 
+% Nouveau type de colonne ("M") qui centre verticalement le 				paragraphe par rapport à la ligne (comme le type de colonne m) et 			aligne le paragraphe à gauche de la colonne
+\usepackage{multicol} %package in LaTeX is used to create multi-column layouts within your document, particularly for text. It provides an easy way to format sections of your document in multiple columns, which is useful for newsletters, articles, or reports where space efficiency or a different layout is required.
+\usepackage{multirow} % package allows you to merge multiple rows of a table into one, similar to how \multicolumn merges columns.
+\usepackage{ctable} % package simplifies the creation of tables with better typographical formatting. It offers high-quality table layouts with consistent line thicknesses and spacing.
+\usepackage{booktabs} % package is designed for producing high-quality tables. It allows you to use well-defined horizontal rules (\toprule, \midrule, \bottomrule) for clear and professional-looking tables.
+%-----
+		
+		
+		
+%-----
+\usepackage{hyperref} % Permet de faire des hyperliens
+\hypersetup{colorlinks=true,	linkcolor=blue,filecolor=blue,urlcolor=blue,pdftitle={Overleaf Example},pdfauthor={Eliott Thommes},pdfpagemode=FullScreen}
+%hyperindex 	true 	Makes the page numbers of index entries into hyperlinks
+%linktocpage 	false 	Makes the page numbers instead of the text to be link in the Table of contents.
+%breaklinks 	false 	Allows links to be broken into multiple lines.
+%colorlinks 	false 	Colours the text for links and anchors, these colours will appear in the printed version
+%linkcolor 	red 	Colour for normal internal links
+%anchorcolor 	black 	Colour for anchor (target) text
+%citecolor 	green 	Colour for bibliographical citations
+%filecolor 	cyan 	Colour for links that open local files
+%urlcolor 	magenta 	Colour for linked URLs
+%frenchlinks 	false 	Use small caps instead of colours for links
+	
+%bookmarks 	true 	Acrobat bookmarks are written, similar to the table of contents.
+%bookmarksopen 	false 	Bookmarks are shown with all sub-trees expanded.
+%citebordercolor 	0 1 0 	Colour of the box around citations in RGB format.
+%filebordercolor 	0 .5 .5 	Colour of the box around links to files in RGB format.
+%linkbordercolor 	1 0 0 	Colour of the box around normal links in RGB format.
+%menubordercolor 	1 0 0 	Colour of the box around menu links in RGB format.
+%urlbordercolor 	0 1 1 	Colour of the box around links to URLs in RGB format.
+%pdfpagemode 	empty 	Determines how the file is opened. Possibilities are UseThumbs (Thumbnails), UseOutlines (Bookmarks) and FullScreen.
+%pdftitle 		Sets the document title.
+%pdfauthor 		Sets the document Author.
+%pdfstartpage 	1 	Determines on which page the PDF file is opened. 
+	
+%\urlstyle{same}
+%urlstyle{same} Default settings print links in mono-style spaced fonts, this command changes that and displays the links in the same style as the rest of the text.
+%----
+		
+		
+		
+%----
+% Page de garde
+\title{Codes Python : Fichiers, Utilisation, Analyse fonctionnelle et Développement}
+\author{Thommes Eliott}
+\date{\today}
+		
+% Documents ---------------------------------------------
+\begin{document}
+	\maketitle
+		
+	\tableofcontents
+
+% Description des fichiers et des interdépendances			
+	\chapter{Fichiers}
+			
+	\section{Organisation}
+	Schéma des interdépendances entre fichiers
+			
+	\section{ChargementLib}
+			
+	\section{ElementLib}
+
+	\section{ExperimentLib}
+			
+	\section{FormworkLib}
+			
+	\section{GanttChartLib}
+			
+	\section{GeometryLib}
+
+	\section{LagamineLib}
+			
+	\section{PlotLib}
+	
+	\section{RheologyLib}
+		
+	\section{SoilLib}
+	
+	\section{StructuralLib}
+
+			
+% Manuel d'utilisation des différentes librairies
+	\chapter{Utilisation}
+			
+	\section{ChargementLib}
+	
+	\section{ElementLib}
+
+	\section{ExperimentLib}
+
+	\section{FormworkLib}
+	
+	\section{GanttChartLib}
+	
+	\section{GeometryLib}
+	
+	\section{LagamineLib}
+	
+	\section{PlotLib}
+	
+	\section{RheologyLib}
+			
+	\section{SoilLib}
+	
+	\section{StructuralLib}
+
+
+% Dévellopements futurs		
+	\chapter{Dévellopements}
+			
+	\section{ChargementLib}
+	\begin{itemize}
+		\item Affichage du nom des chargements
+		\item Reconnaissance automatique des chargements
+		\item Définition du chargement en angle relatif ou absolue
+		\item Définition 
+	\end{itemize}
+	
+	\section{ElementLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{ExperimentLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{FormworkLib}
+	\begin{itemize}
+		\item Refaire les fonctions d'affichage
+		\item Ajouter les autres fonctions de calculs de pression
+	\end{itemize}
+
+	\section{GanttChartLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{GeometryLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{LagamineLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{PlotLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+	
+	\section{RheologyLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+		
+	\section{SoilLib}
+	\begin{itemize}
+		\item 
+		\item 
+	\end{itemize}
+
+	\section{StructuralLib}
+	\begin{itemize}
+		\item Créer une classe Structure
+		\begin{itemize}
+			\item Enregistrer la structure et les cas de charges
+			\item Afficher la structure
+			\item Afficher les cas de charges
+			\item Afficher les résultats
+			\item Afficher la structure par type de section, cond limites, chargement,...
+		\end{itemize}
+		\item Créer une classe de solveur
+		\begin{itemize}
+			\item Enregistrer les paramètres du solveur
+			\item Créer les implémentations des différents solveurs
+			\item Indications pour afficher que les résultats ont été obtenus (sonore, visuel,...)
+		\end{itemize}
+	\end{itemize}
+\end{document}     

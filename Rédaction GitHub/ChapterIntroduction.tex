@@ -1,0 +1,73 @@
+% !TeX root = ChapterIntroduction.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Chapter document
+
+
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\documentclass[12pt,twoside,a4paper,final]{memoir}
+	\input{Preamble.tex}
+	\begin{document}
+	\input{DocuStart.tex}
+\fi
+% -----
+
+
+\chapter{Introduction}
+\minitoc
+
+\section{Introduction}
+
+\section{copyright}
+
+\section{Outline of the files}
+
+\section{Temp Improovement}
+ChargementLib
+\begin{itemize}
+	\item Affichage du nom des chargements
+	\item Reconnaissance automatique des chargements
+	\item Définition du chargement en angle relatif ou absolue
+	\item Définition 
+\end{itemize}
+
+FormworkLib
+\begin{itemize}
+	\item Refaire les fonctions d'affichage
+	\item Ajouter les autres fonctions de calculs de pression
+\end{itemize}
+
+StructuralLib
+\begin{itemize}
+	\item Créer une classe Structure
+	\begin{itemize}
+		\item Enregistrer la structure et les cas de charges
+		\item Afficher la structure
+		\item Afficher les cas de charges
+		\item Afficher les résultats
+		\item Afficher la structure par type de section, cond limites, chargement,...
+	\end{itemize}
+	\item Créer une classe de solveur
+	\begin{itemize}
+		\item Enregistrer les paramètres du solveur
+		\item Créer les implémentations des différents solveurs
+		\item Indications pour afficher que les résultats ont été obtenus (sonore, visuel,...)
+	\end{itemize}
+\end{itemize}
+
+
+
+\minitocEnd	
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\input{Bibliographie.tex}
+	\input{DocuEnd.tex}
+	\end{document}
+\fi
+% -----

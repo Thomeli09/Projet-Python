@@ -1,0 +1,129 @@
+% !TeX root = ChapterPlotLib.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+% Author: Thommes Eliott
+% Dates of creation 03-06-2025
+
+% Chapter document
+
+
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\documentclass[12pt,twoside,a4paper,final]{memoir}
+	\input{Preamble.tex}
+	\begin{document}
+	\input{DocuStart.tex}
+\fi
+% -----
+
+
+\chapter{PlotLib}
+\minitoc
+
+\section{Overview}
+% Give a brief description of what PlotLib is, what it's for, and its goals.
+
+\section{Dependencies and External Libraries}
+% Mention any external libraries that PlotLib uses (e.g., matplotlib, numpy).
+
+\section{Architecture and Organization}
+% Explain the file/folder structure of the library and key components (modules/packages).
+
+\section{Core Classes}
+% Describe the main classes (e.g., Plot, Axis, Figure), their purpose, and attributes.
+
+	\subsection{Class \texttt{Plot}}
+	
+	\begin{itemize}
+		\item \textbf{Description:} Represents a 2D plotting object capable of rendering and managing basic plot elements.
+		
+		\item \textbf{Inherits from:} \texttt{BasePlot} Hyperref où label
+		
+%		\item \textbf{Attributes:}
+%		\begin{itemize}
+%			\item \texttt{\_title} (str): Internal title of the plot (private).
+%			\item \texttt{data} (list): Data series to be plotted.
+%		\end{itemize}
+		
+		\item \textbf{Constructor:}
+		\begin{minted}{python}
+			def __init__(self, title: str = "", data: list = None)
+		\end{minted}
+		
+		\item \textbf{Property:}
+		\begin{itemize}
+			\item \texttt{title} (str): A property for accessing and setting the plot title.
+		\end{itemize}
+
+		\item \textbf{Methods:}
+		\begin{itemize}
+			\item \texttt{plot()}:
+			\begin{itemize}
+				\item \textbf{Description:} Plots a line graph using the provided x and y data.
+				\item \textbf{Signature:}
+				\begin{minted}{python}
+					def plot_line(x: list, y: list, label: str = "", color: str = "blue") -> None
+				\end{minted}
+				\item \textbf{Parameters:}
+				\begin{itemize}
+					\item \texttt{x} (list): X-axis data points.
+					\item \texttt{y} (list): Y-axis data points.
+					\item \texttt{label} (str, optional): Label for the line.
+					\item \texttt{color} (str, optional): Color of the line.
+				\end{itemize}
+				\item \textbf{Returns:} \texttt{None}
+			\end{itemize}
+		\end{itemize}
+		
+		\item \textbf{Example Usage:}
+		\begin{minted}{python}
+			p = Plot(title="My Graph", data=[(0, 1), (1, 2)])
+			print(p.title)
+			p.title = "Updated Title"
+			p.set_data([(0, 0), (1, 1)])
+			p.plot()
+		\end{minted}
+	\end{itemize}
+
+\section{Functions}
+% Describe key functions (e.g., plot(), save(), configure()), inputs/outputs, and use cases.
+
+	\subsection{Function \texttt{plot\_line}}
+	\begin{itemize}
+		\item \textbf{Description:} Plots a line graph using the provided x and y data.
+		\item \textbf{Signature:}
+		\begin{minted}{python}
+			def plot_line(x: list, y: list, label: str = "", color: str = "blue") -> None
+		\end{minted}
+		\item \textbf{Parameters:}
+		\begin{itemize}
+			\item \texttt{x} (list): X-axis data points.
+			\item \texttt{y} (list): Y-axis data points.
+			\item \texttt{label} (str, optional): Label for the line.
+			\item \texttt{color} (str, optional): Color of the line.
+		\end{itemize}
+		\item \textbf{Returns:} \texttt{None}
+		\item \textbf{Example:}
+		\begin{minted}{python}
+			plot_line([1, 2, 3], [4, 5, 6], label="Data", color="red")
+		\end{minted}
+	\end{itemize}
+
+\section{Usage Examples}
+% Show example code on how to use the library in practice.
+% Maybe a few simple scripts with comments.
+
+\section{Development and Planned Improvements}
+% Discuss current limitations, planned features, and potential enhancements.
+
+
+\minitocEnd	
+% ----- Standalone compilation	
+\ifdefined\wholethesis
+\else
+	\input{Bibliographie.tex}
+	\input{DocuEnd.tex}
+	\end{document}
+\fi
+% -----

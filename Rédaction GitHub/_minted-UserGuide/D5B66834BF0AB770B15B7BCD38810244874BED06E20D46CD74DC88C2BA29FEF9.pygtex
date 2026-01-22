@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{my\PYGZus{}tasks} \PYG{o}{=} \PYG{n}{Tasks}\PYG{p}{()}
+\PYG{n}{my\PYGZus{}tasks}\PYG{o}{.}\PYG{n}{AddTask}\PYG{p}{(}\PYG{l+s+s2}{\PYGZdq{}Phase 1\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}2024\PYGZhy{}01\PYGZhy{}01\PYGZdq{}}\PYG{p}{,} \PYG{l+s+s2}{\PYGZdq{}2024\PYGZhy{}03\PYGZhy{}01\PYGZdq{}}\PYG{p}{,} \PYG{l+m+mf}{0.75}\PYG{p}{,} \PYG{n}{color}\PYG{o}{=}\PYG{l+s+s1}{\PYGZsq{}IT\PYGZsq{}}\PYG{p}{)}
+\PYG{n}{paramPLT} \PYG{o}{=} \PYG{n}{ParamPLT}\PYG{p}{(}\PYG{o}{...}\PYG{p}{)}
+\PYG{n}{my\PYGZus{}tasks}\PYG{o}{.}\PYG{n}{PLTTasks}\PYG{p}{(}\PYG{n}{paramPLT}\PYG{p}{,} \PYG{n}{BCurrentDate}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+\end{Verbatim}
