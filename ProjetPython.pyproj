@@ -23,6 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ConcreteCarbonationLib.py" />
+    <Compile Include="ConcreteCarbonationLibLegacy.py" />
     <Compile Include="ConcreteRVELib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
@@ -40,6 +41,12 @@
     </Compile>
     <Compile Include="ConcreteLib.py" />
     <Compile Include="MaterialLib.py" />
+    <Compile Include="ConcreteChemistry.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConcreteCompo.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ObjectManagementLib.py" />
     <Compile Include="PlotLib.py" />
     <Compile Include="ProjetPython.py" />

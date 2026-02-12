@@ -193,6 +193,34 @@ def VectorSelectClosestVal(Vector, Val, BFirst=False):
 
     return SelectedVal, IndexVect
 
+def VectorSelectValInRange(Vector, ValMin, ValMax, IntPick=1, NPick=None):
+    """
+    Select values in a numpy array that are within a given range and return the indices.
+    Args:
+    - Vector: numpy array of values to select from
+    - ValMin: minimum value of the range
+    - ValMax: maximum value of the range
+    - IntPick: Choose to pick one in every IntPick values in the selected range (default is 1, meaning all values are selected)
+    - NPick: Number of values to pick in the selected range (overrides IntPick if specified)
+    """
+    IndexVect = np.where((Vector >= ValMin) & (Vector <= ValMax))[0]
+    if IndexVect.size == 0:
+        return np.array([]), np.array([], dtype=int)  # nicer than None for downstream
+
+    if NPick is not None:
+        if NPick <= 0:
+            raise ValueError("NPick must be a positive integer.")
+        if NPick < IndexVect.size:
+            IndexVect = IndexVect[np.linspace(0, IndexVect.size - 1, NPick, dtype=int)]
+        # else: keep all IndexVect (don’t fall back to IntPick)
+    else:
+        if IntPick <= 0:
+            raise ValueError("IntPick must be >= 1.")
+        IndexVect = IndexVect[::IntPick]
+        
+    SelectedVal = Vector[IndexVect]
+    return SelectedVal, IndexVect
+
 
 # Matrix management functions
 def MatrixSelectRowOrColumn(Matrix, Index, Axis=0):

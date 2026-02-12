@@ -6,42 +6,21 @@ Created on Fri Feb 21 11:24:54 2025
 """
 
 # Carbonation of concrete Library
-
-
-# Other Lib
 import numpy as np
 import math
 import scipy.special
-
 
 # Custom Lib
 from DataStorageLib import DataLog
 from MathOperationLib import CMPTInterpolationLinear, CMPTInterpolationSpline
 from DataManagementLib import DataSort
-from ExperimentLib import Experiment
 
-
-"""
-CarboExp : Carbonation experiment object
-"""
-class CarboExp(Experiment):
-    def __init__(self, Name, StartDate, Other):
-        super().__init__(Name, StartDate)
-        self.Other = Other
-
-"""
-CarboModels : Subobject of CarboExp containing the carbonation models
-"""
-class CarboModels(CarboExp):
-    def __init__(self, Name, StartDate, Other):
-        super().__init__(Name, StartDate, Other)
-        self.Other = []
 
 
 # Methods
 
 # Transport model
-def TransportDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef):
+def TransportDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, VectTime=None):
     """
     Diffusion model
 
@@ -53,6 +32,7 @@ def TransportDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef):
         Dt (float): Time step.
         Cco20 (float): Initial CO2 concentration.
         DiffCoef (float): Diffusion coefficient.
+        VectTime (numpy.ndarray, optional): Array of time steps. If None, it will be generated based on tMax and Dt.
 
     Returns:
         TimeArray (numpy.ndarray): Array of time steps.
@@ -61,8 +41,11 @@ def TransportDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef):
     """
     
     # Generate spatial and temporal grid
-    NStepst = int(tMax/Dt) + 1
-    TimeArray = np.linspace(0, tMax, NStepst)
+    if VectTime is None:
+        NStepst = int(tMax/Dt) + 1
+        TimeArray = np.linspace(0, tMax, NStepst)
+    else:
+        TimeArray = VectTime
     NStepsX = int((Xmax-Xini)/Dx) + 1
     XArray = np.linspace(Xini, Xmax, NStepsX) - Xini
 
@@ -147,7 +130,7 @@ def TransportAdvec(Xini, Xmax, tMax, Dt, Cco20, u):
 
     return TimeArray, XArray, CMatrix
 
-def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0):
+def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0, VectTime=None):
     """
     Advection-Diffusion model
  
@@ -160,6 +143,7 @@ def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0):
         Cco20 (float): Initial CO2 concentration.
         DiffCoef (float): Diffusion coefficient.
         u (float): Advection velocity.
+        VectTime (numpy.ndarray, optional): Array of time steps. If None, it will be generated based on tMax and Dt.
 
     Returns:
         TimeArray (numpy.ndarray): Array of time steps.
@@ -167,9 +151,17 @@ def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0):
         CMatrix (numpy.ndarray): Computed CO2 concentration over time and space.
     """
     # Generate spatial and temporal grid
-    NStepst = int(tMax/Dt) + 1
-    TimeArray = np.linspace(0, tMax, NStepst)
-    TimeArray[0] = Dt # For numerical purposes, to avoid division by zero
+    if VectTime is None:
+        NStepst = int(tMax/Dt) + 1
+        TimeArray = np.linspace(0, tMax, NStepst)
+    else:
+        TimeArray = VectTime
+    
+    BChangeFirstVal = False
+    if TimeArray[0] == 0:
+        BChangeFirstVal = True
+        TimeArray[0] = Dt # For numerical purposes, to avoid division by zero
+
     NStepsX = int((Xmax-Xini)/Dx) + 1
     XArray = np.linspace(Xini, Xmax, NStepsX) - Xini
 
@@ -195,7 +187,9 @@ def TransportAdvecDiff(Xini, Xmax, Dx, tMax, Dt, Cco20, DiffCoef, u=0):
 
     # Get back to the original XArray and TimeArray
     XArray = XArray + Xini
-    TimeArray[0] = 0
+
+    if BChangeFirstVal:
+        TimeArray[0] = Dt # For numerical purposes, to avoid division by zero
 
     return TimeArray, XArray, CMatrix
 

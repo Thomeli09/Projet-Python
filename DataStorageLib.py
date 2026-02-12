@@ -213,7 +213,8 @@ class DataLog:
         ValArray = self.getDataMatrix[:, IntCol]
         # Extract the unique values
         UniqueValArray = np.unique(ValArray)
-        return UniqueValArray, len(UniqueValArray)
+        SortUniqueValArray = np.sort(UniqueValArray)
+        return SortUniqueValArray, len(SortUniqueValArray)
 
     @property
     def getUniqueTimeSteps(self):

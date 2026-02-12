@@ -6,16 +6,18 @@ Created on Wed Oct 30 14:15:29 2024
 """
 
 # General Plotting library
-from matplotlib import axes
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib import cm
-from matplotlib.cm import ScalarMappable
+from matplotlib import axes, colors, cm
+from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from matplotlib.cm import ScalarMappable
 import numpy as np
 from highlight_text import fig_text
 import os
+
+from pytest import param
 
 
 # Custom Lib
@@ -93,6 +95,7 @@ class ParamPLT:
         self.Figure = None  # Figure
         self.BAxes = False  
         self.LAxes = []  # List of axes if BAxes = True
+        self.PlottedObject = []  # List of plotted objects to be able to modify them later if needed
         self.BMappable = False
         self.LMappable = []  # List of mappable if BMappable = True
 
@@ -505,7 +508,7 @@ class ParamPLT:
         ScaleTypeDict = {0: 'linear', 1: 'log', 2: 'logit',
                          3: 'symlog', 4: 'function',
                          5: 'functionlog', 6: 'asinh',
-                         7: 'mercator'}
+                         7: 'mercator', 8: None}
         ScaleType = ScaleTypeDict.get(Val, 'linear')
         return ScaleType
 
@@ -589,20 +592,36 @@ class ParamPLT:
         self.PltAspect = Aspect
 
     # Grid
-    def getGrid(self, Axis, Colour=None):
-        if Axis == 1:
-            self.GridAxis = 'x'
-        elif Axis == 2:
-            self.GridAxis = 'y'
-        elif Axis >= 0:
-            self.GridAxis = 'both'
-        else:
-            self.GridAxis = None
+    @property
+    def getGridAxis(self):
+        return self.GridAxis
 
+    @getGridAxis.setter
+    def getGridAxis(self, GridAxis):
+        self.GridAxis = GridAxis
+
+    @property
+    def getGridColour(self):
+        return self.GridColour
+
+    @getGridColour.setter
+    def getGridColour(self, Colour):
         self.GridColour = Colour
 
-        self.GridLineType = None
-        self.GridLineSize = 0.4
+    def getGrid(self, Axis, Colour=None):
+        if Axis == 1:
+            self.getGridAxis = 'x'
+        elif Axis == 2:
+            self.getGridAxis = 'y'
+        elif Axis >= 0:
+            self.getGridAxis = 'both'
+        else:
+            self.getGridAxis = None
+
+        self.getGridColour = Colour
+
+        self.getGridLineType = None
+        self.getGridLineSize = 0.4
 
     @property
     def getGridLineType(self):
@@ -622,14 +641,6 @@ class ParamPLT:
     @getGridLineSize.setter
     def getGridLineSize(self, LineSize):
         self.GridLineSize = LineSize
-
-    @property
-    def getGridAxis(self):
-        return self.GridAxis
-
-    @getGridAxis.setter
-    def getGridAxis(self, GridAxis):
-        self.GridAxis = GridAxis
 
     @property
     def getGridAlpha(self):
@@ -715,7 +726,7 @@ class ParamPLT:
         if not self.getBAxes:
             return None
         else:
-            return self.Axes
+            return self.LAxes
 
     @getAxes.setter
     def getAxes(self, Ax):
@@ -743,9 +754,9 @@ class ParamPLT:
 
         # Store
         if self.getBAxes:
-            self.Axes.extend(Axes2Add)
+            self.LAxes.extend(Axes2Add)
         else:
-            self.Axes = Axes2Add
+            self.LAxes = Axes2Add
             self.getBAxes = True
 
     @property
@@ -754,7 +765,28 @@ class ParamPLT:
             print("Warning: No axes found.")
             return None
         else:
-            return self.Axes[-1]
+            return self.getAxes[-1]
+
+    @property
+    def getPlottedObject(self):
+        if not self.PlottedObject:
+            return None
+        else:
+            return self.PlottedObject
+
+    @getPlottedObject.setter
+    def getPlottedObject(self, PlottedObject):
+        if isinstance(PlottedObject, list):
+            self.PlottedObject.extend(PlottedObject)
+        else:
+            self.PlottedObject.append(PlottedObject)
+
+    @property
+    def getPlottedObjectNum(self):
+        return len(self.getPlottedObject)
+
+    def getPlottedObjectFromIndex(self, Index):
+        return self.getPlottedObject[Index]
 
     @property
     def getBMappable(self):
@@ -874,9 +906,11 @@ def PLTLegend(paramPLT):
     """
     if paramPLT.getBLegends:
         if paramPLT.getBLegendsInsideBox:
-            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getLegendsSize, loc=paramPLT.getLegendsLoc)
+            plt.legend(title=paramPLT.getLegendTitle, title_fontproperties={'size':paramPLT.getLegendsSize*1.2,'weight': 'bold'},
+                       fontsize=paramPLT.getLegendsSize, loc=paramPLT.getLegendsLoc)
         else:
-            plt.legend(title=paramPLT.getLegendTitle,fontsize=paramPLT.getLegendsSize, bbox_to_anchor=(1, 1), loc='upper left')
+            plt.legend(title=paramPLT.getLegendTitle, title_fontproperties={'size':paramPLT.getLegendsSize*1.2,'weight': 'bold'},
+                       fontsize=paramPLT.getLegendsSize, bbox_to_anchor=(1, 1), loc='upper left')
 
 def UpdatePlotColorsAndLegend(LColors):
     """
@@ -939,7 +973,7 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
             handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
 
     # Adding the main title to the legend
-    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getLegendsSize)
+    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getTitlesize)
     # Setting the title properties
     FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getLegendsSize * TitleSizeRatio, Weight=None,
                Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
@@ -1312,14 +1346,43 @@ def PLTPlot(XValues, YValues, paramPLT):
     Returns:
         None: This function does not return anything. It simply displays the plot.
     """
-    plt.plot(XValues, YValues,
-            color=paramPLT.getColour,
-            alpha=paramPLT.getAlpha,
-            linestyle=paramPLT.getLineType,
-            linewidth=paramPLT.getLineSize,
-            marker=paramPLT.getMarker,
-            markersize=paramPLT.getMarkerSize,
-            label=paramPLT.getLegends)
+    ln = plt.plot(XValues, YValues,
+                  color=paramPLT.getColour,
+                  alpha=paramPLT.getAlpha,
+                  linestyle=paramPLT.getLineType,
+                  linewidth=paramPLT.getLineSize,
+                  marker=paramPLT.getMarker,
+                  markersize=paramPLT.getMarkerSize,
+                  label=paramPLT.getLegends)
+
+    paramPLT.getPlottedObject = ln[0]  # Store the line object for later use
+
+def PLTEmptyPlot(paramPLT):
+    """
+    Creates an empty plot with customizable parameters.
+    Args:
+        paramPLT (object): Object containing plot parameters.
+    Returns:
+        None: This function does not return anything. It simply displays the empty plot.
+    """
+    PLTPlot(XValues=[], YValues=[], paramPLT=paramPLT)
+
+def PLTUpdatePlot(XValues, YValues, paramPLT, index):
+    """
+    Updates an existing plot with new X and Y values.
+    Args:
+    - XValues (list or array-like): New X-axis values for the plot.
+    - YValues (list or array-like): New Y-axis values for the plot.
+    - paramPLT (object): Object containing plot parameters.
+    - index (int): Index of the line to update in the current axis.
+    Returns:
+    None: This function does not return anything. It simply updates the existing plot with new data.
+    """
+    Line = paramPLT.getPlottedObjectFromIndex(index)
+    if isinstance(Line, Line2D):
+        Line.set_data(XValues, YValues)
+    else:
+        print(f"Warning: The object at index {index} is not a Line2D object and cannot be updated.")
 
 def PLTPlotSeries(LXValues, LYValues, paramPLT):
     """
@@ -1577,7 +1640,7 @@ def PLTHist2D(XValues, YValues, paramPLT, NBins=10, BNormalizeArea=False, BCumul
     paramPLT.getMappable = im  # Store the mappable object for colorbar
 
 
-def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAbs=0, 
+def PLTPie(Val, Labels, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAbs=0, 
            Radius=1, StartAngle=0, LabelDist=1.25, PctDist=0.6, BShadow=False, explode=None, 
            EnableAnnotations=False):
     """
@@ -1585,7 +1648,8 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
 
     Args:
     - Val (list): Values for the pie chart.
-    - paramPLT (object): Object containing plot parameters (e.g., colors, labels, hatches).
+    - Labels (list): Labels for each slice of the pie chart.
+    - paramPLT (object): Object containing plot parameters (e.g., getColour, getHatch).
     - TypeAutopct (int): Type of percentage display:
         0: Display only percentages (%).
         1: Display absolute values.
@@ -1609,9 +1673,8 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
     - Extraire un nombre limité de paramètres pour éviter des clash si plus de valeurs.
     """
 
-    AnnotateTextSize=paramPLT.getFontSize
-    paramPLT.GridAxis = None
-    paramPLT.getBLegends = False
+    paramPLT.getLegends = Labels
+    paramPLT.getColour = [colors.to_rgba(c) for c in paramPLT.getColourFullList(BEmptying=True)]
 
     def GeneAutopct(pct, allvals):
         absolute = np.round(pct / 100. * np.sum(allvals), PrecisionAbs)
@@ -1631,7 +1694,7 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
                                        colors=paramPLT.getColourFullList(), hatch=paramPLT.getHatchFullList(),
                                        radius=Radius, startangle=StartAngle,
                                        explode=explode, shadow=BShadow,
-                                       textprops=dict(size=AnnotateTextSize, color="k"))  # Customize text properties
+                                       textprops=dict(size=paramPLT.getFontSize, color="k"))  # Customize text properties
 
     # Optional Annotation logic
     if EnableAnnotations:
@@ -1647,9 +1710,17 @@ def PLTPie(Val, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAb
             plt.annotate(LLegends[i],  # Use legend text
                          xy=(x, y), 
                          xytext=(1.35 * Radius * np.sign(x), 1.4 * Radius * y),
-                         fontsize=AnnotateTextSize,
+                         fontsize=paramPLT.getFontSize,
                          horizontalalignment=horizontalalignment, 
                          **kw)
+
+    # Remove axes and box for pie chart
+    paramPLT.getXScaleType = 8
+    paramPLT.getYScaleType = 8
+    paramPLT.getBBox = False
+    # Remove grid and legends
+    paramPLT.getGridAxis = None
+    paramPLT.getBLegends = False
 
 def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True, BShowVal=True, Fmt=".2f"):
     """
