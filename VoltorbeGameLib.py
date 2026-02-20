@@ -6,8 +6,6 @@ Created on Tue Jan 21 12:35:04 2025
 """
 
 # Voltorb Game Solver Library
-
-from pickle import TRUE
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools

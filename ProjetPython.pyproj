@@ -24,14 +24,26 @@
   <ItemGroup>
     <Compile Include="ConcreteCarbonationLib.py" />
     <Compile Include="ConcreteCarbonationLibLegacy.py" />
+    <Compile Include="ConcreteRVEGeneration3D.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConcreteRVEGeneration.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ConcreteRVELib.py" />
     <Compile Include="ElementLib.py" />
     <Compile Include="ExperimentLib.py" />
     <Compile Include="FormworkLib.py" />
     <Compile Include="GanttChartLib.py" />
     <Compile Include="GeometryLib.py" />
+    <Compile Include="GranulometryLib.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GUITKLib.py" />
     <Compile Include="LoadingLib.py" />
+    <Compile Include="MeshLib.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MessageLib.py" />
     <Compile Include="DataStorageLib.py">
       <SubType>Code</SubType>
@@ -41,10 +53,16 @@
     </Compile>
     <Compile Include="ConcreteLib.py" />
     <Compile Include="MaterialLib.py" />
-    <Compile Include="ConcreteChemistry.py">
+    <Compile Include="ConcreteChemistryLib.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ConcreteCompo.py">
+    <Compile Include="ConcreteCompoLib.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConcreteRVEAgg.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConcreteRVEAgg3D.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ObjectManagementLib.py" />

@@ -17,6 +17,7 @@ add the adjuvant and take into account it's water in the water content but not i
 from tkinter import SE
 from matplotlib import hatch
 import numpy as np
+from pytest import param
 
 
 # Custom Lib
@@ -24,6 +25,7 @@ from PlotLib import ParamPLT, StartPlots, CloseAllPlots, PLTShow, DefaultParamPL
 from DataManagementLib import DataSort, ListFindFirstMaxPair
 from MaterialLib import Material
 from GeometryLib import Volume
+from GranulometryLib import Granulometry
 
 
 """
@@ -56,7 +58,7 @@ class CemMat(Material):
         # Ingredients
         # Absolute volume of => p:Gravel, s:Sand, c:Cement, e:Water, v:Void
         self.LCement = []  # [L of Cement] Cement object (Unlimited)
-        self.Water = []  # [Water] Water object (Limited to one object)
+        self.Water = []  # [L of Water] Water object (Limited to one object)
         self.LAggregates = []  # [L of Aggregate] Aggregates objects (Unlimited)
         self.LAdjuvants = []  # [L of Adjuvant] Adjuvants objects (Unlimited)
 
@@ -86,8 +88,8 @@ class CemMat(Material):
 
         self.Dmax = 0  # [float] Maximum diameter of the composition [mm]
         self.Dmin = 0  # [float] Minimum diameter of the composition [mm]
-        self.GranuloDiamMix = None  # Vector of diameter for the granulometry of the composition [mm]
-        self.GranuloRatioMix = None  # Vector of ratio for the granulometry of the composition [-] or [%]
+        self.GranuloMix = Granulometry()  # [Granulometry] Granulometry object to define the granulometry of the mix of aggregates  
+        
 
         # Water properties
         self.AggWaterContent = Water(Name="Water", ID="Water")  # [Water] Water object to define the water content of the aggregates
@@ -166,6 +168,10 @@ class CemMat(Material):
     @property
     def getVCement(self):
         return self.VCement
+
+    @getVCement.setter
+    def getVCement(self, VCement):
+        self.VCement = VCement
 
     @property
     def CMPTCement(self):
@@ -448,10 +454,6 @@ class CemMat(Material):
 
     @property
     def getDmax(self):
-        return self.Dmax
-
-    @getDmax.setter
-    def getDmax(self, Dmax):
         """
         Compute the maximum diameter of the composition
         """
@@ -460,57 +462,32 @@ class CemMat(Material):
             if Aggregate.getDmax > Dmax:
                 Dmax = Aggregate.getDmax
         self.Dmax = Dmax
-        return self.getDmax
+        return Dmax
+
+    @getDmax.setter
+    def getDmax(self, Dmax):
+        self.Dmax = Dmax
+
 
     @property
     def getDmin(self):
-        return self.Dmin
-
-    @getDmin.setter
-    def getDmin(self, Dmin):
         """
         Compute the minimum diameter of the composition
         """
-        Dmin = 0
+        Dmin = self.getDmax
         for Aggregate in self.getAggregates:
             if Aggregate.getDmin < Dmin:
                 Dmin = Aggregate.getDmin
         self.Dmin = Dmin
-        return self.getDmin
+        return Dmin
+
+    @getDmin.setter
+    def getDmin(self, Dmin):
+        self.Dmin = Dmin
 
     @property
-    def getGranuloDiamMix(self):
-        return self.GranuloDiamMix
-
-    @getGranuloDiamMix.setter
-    def getGranuloDiamMix(self, GranuloDiamMix):
-        if isinstance(GranuloDiamMix, float):
-            # Append the ratio to the numpy array
-            return
-        elif isinstance(GranuloDiamMix, list):
-            self.GranuloDiamMix = np.asarray(GranuloDiamMix, dtype=float)
-        elif isinstance(GranuloDiamMix, np.ndarray):
-            self.GranuloDiamMix = GranuloDiamMix
-        else:
-            print("Error : Invalid input for Granulometry Diameter")
-        self.GranuloDiamMix = DataSort(self.GranuloDiamMix)
-
-    @property
-    def getGranuloRatioMix(self):
-        return self.GranuloRatioMix
-
-    @getGranuloRatioMix.setter
-    def getGranuloRatioMix(self, GranuloRatioMix):
-        if isinstance(GranuloRatioMix, float):
-            # Append the ratio to the numpy array
-            return
-        elif isinstance(GranuloRatioMix, list):
-            self.GranuloRatioMix = np.asarray(GranuloRatioMix, dtype=float)
-        elif isinstance(GranuloRatioMix, np.ndarray):
-            self.GranuloRatioMix = GranuloRatioMix
-        else:
-            print("Error : Invalid input for Granulometry Ratio")
-        self.GranuloRatioMix = DataSort(self.GranuloRatioMix)
+    def getGranuloMix(self):
+        return self.GranuloMix
 
     @property
     def CMPGranuloRatioMix(self):
@@ -522,7 +499,7 @@ class CemMat(Material):
 
         # Merging all the diameters of the aggregates in the mix
         LAggregates = self.getAggregates
-        GranuloDiamMix = np.concatenate([Aggregate.getGranuloDiam for Aggregate in LAggregates])
+        GranuloDiamMix = np.concatenate([Aggregate.getGranulo.getGranuloDiam for Aggregate in LAggregates])
         GranuloDiamMix = np.unique(GranuloDiamMix)
         LogGranuloDiamMix = np.log10(GranuloDiamMix)
         GranuloRatioMix = np.zeros_like(GranuloDiamMix, dtype=float)
@@ -530,8 +507,8 @@ class CemMat(Material):
         # For each aggregate, add its granulometry ratio weighted by its mass proportion in the mix to the mix granulometry while interpolating the missing values
         for Aggregate in LAggregates:
             ProportMass = Aggregate.getMass/MAggregates
-            GranuloDiamAgg = Aggregate.getGranuloDiam
-            GranuloRatioAgg = Aggregate.getGranuloRatio
+            GranuloDiamAgg = Aggregate.getGranulo.getGranuloDiam
+            GranuloRatioAgg = Aggregate.getGranulo.getGranuloRatio
 
             # Sorting the granulometry of the aggregate
             Order = np.argsort(GranuloDiamAgg)
@@ -542,9 +519,9 @@ class CemMat(Material):
             LogGranuloDiamAgg = np.log10(GranuloDiamAgg) # Warning : Need to do the interpolation in log scale because of the logarithmic scale of the granulometric plot
             GranuloRatioMix += np.interp(LogGranuloDiamMix, LogGranuloDiamAgg, GranuloRatioAgg, left=0) * ProportMass
 
-        self.getGranuloDiamMix = GranuloDiamMix
-        self.getGranuloRatioMix = GranuloRatioMix
-        return self.getGranuloDiamMix, self.getGranuloRatioMix
+        self.getGranuloMix.getGranuloDiam = GranuloDiamMix
+        self.getGranuloMix.getGranuloRatio = GranuloRatioMix
+        return GranuloDiamMix, GranuloRatioMix
 
     # Water properties
     @property
@@ -632,7 +609,6 @@ class CemMat(Material):
     @getCompTarget.setter
     def getCompTarget(self, CompTarget):
         self.CompTarget = CompTarget
-        CompTarget.CemMat = self
 
     # Parameters
     @property
@@ -652,7 +628,7 @@ class CemMat(Material):
         self.BDmaxSand = BDmaxSand
 
     # Plot of the granulometries of the ingredients
-    def PLTGranuloAggregates(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
+    def PLTGranuloAggregates(self, paramPLT=None, BStart=True, BEnd=True, BPourcent=True):
         """
         Plot the granulometry of each aggregate in the composition
 
@@ -667,7 +643,7 @@ class CemMat(Material):
 
         Improvement : Add the the differents markers for each granulometry
         """
-        if not paramPLT:
+        if paramPLT is None:
             paramPLT = DefaultParamPLT()
 
         if BStart:
@@ -675,7 +651,6 @@ class CemMat(Material):
 
         # Plot of granulometries
         for Aggregate in self.getAggregates:
-            paramPLT.getLegends = [Aggregate.getName]
             Aggregate.PLTGranulometry(paramPLT, BStart=False, BEnd=False, BPourcent=BPourcent)
 
         paramPLT.getTitle = "Particle size distribution of the aggregates in " + self.getName
@@ -684,7 +659,7 @@ class CemMat(Material):
             PLTShow(paramPLT)
 
     # Plot of the granulometry curves of the composition
-    def PLTGranuloAggregatesMix(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
+    def PLTGranuloAggregatesMix(self, paramPLT=None, BStart=True, BEnd=True, BPourcent=True):
         """
         Plot the granulometry of the mix of aggregates
         
@@ -697,7 +672,7 @@ class CemMat(Material):
         Returns:
             Plot of the granulometry of the mix
         """
-        if not paramPLT:
+        if paramPLT is None:
             paramPLT = DefaultParamPLT()
 
         if BStart:
@@ -705,24 +680,21 @@ class CemMat(Material):
 
         GranuloDiamMix, GranuloRatioMix = self.CMPGranuloRatioMix
 
-        # Convert to percentage if needed
-        if not BPourcent:
-            paramPLT.getYLabel = "Percentage of passers-by (%)"
-            GranuloRatioMix = GranuloRatioMix * 100.0
-
         # Plot the granulometry of the mix
-        paramPLT.getXScaleType = 1
-        PLTPlot(GranuloDiamMix, GranuloRatioMix, paramPLT)
+        TempColor = paramPLT.getColour
 
-        paramPLT.getTitle = "Particle size distribution of the " + self.getName
-        paramPLT.getXLabel = "Particle size (mm)"
-        paramPLT.getYLabel = "Ratio of passers-by (%)"
+        paramPLT.getColour = self.getColour
+        paramPLT.getLegends = [self.getName + " " + self.getMatType]
+        self.getGranuloMix.PLTGranulometry(paramPLT=paramPLT, StrTitleName=self.getName + " mix of aggregates", 
+                                           BStart=False, BEnd=False, BPourcent=BPourcent)
+        
+        paramPLT.getColour = TempColor
 
         if BEnd:
             PLTShow(paramPLT)
 
     # Plots of the composition
-    def PLTPieCompo(self, paramPLT=False, BRealQuantity=False, TypeAutopct=1, PrecisionPct=1, AbsUnit="kg", PrecisionAbs=0, 
+    def PLTPieCompo(self, paramPLT=None, BRealQuantity=False, TypeAutopct=1, PrecisionPct=1, AbsUnit="kg", PrecisionAbs=0, 
            Radius=1, StartAngle=0, LabelDist=1.25, PctDist=0.6, BShadow=False, explode=None, EnableAnnotations=False):
         """
         Plot the composition of the cementious material as a pie chart
@@ -748,7 +720,7 @@ class CemMat(Material):
         Returns:
             Pie chart of the composition
         """
-        if not paramPLT:
+        if paramPLT is None:
             paramPLT = DefaultParamPLT()
 
         StartPlots()
@@ -800,7 +772,7 @@ class CemMat(Material):
             for Aggregate in self.getAggregates:
                 Labels.append(Aggregate.getName)
                 Colors.append(Aggregate.getColour)
-                Weights.append(Aggregate.getUnSatMass)
+                Weights.append(Aggregate.getWaterAdjustedMass)
                 Hatches.append(None)
             # Adjuvants
             for Adjuvant in self.getAdjuvants:
@@ -811,9 +783,10 @@ class CemMat(Material):
 
         paramPLT.getHatch = Hatches
         paramPLT.getColour = Colors
-        PLTPie(Val=Weights, Labels=Labels, paramPLT=paramPLT, TypeAutopct=1, PrecisionPct=1, AbsUnit="kg", PrecisionAbs=0, 
-           Radius=1, StartAngle=0, LabelDist=1.25, PctDist=0.6, BShadow=False, explode=None, 
-           EnableAnnotations=False)
+        PLTPie(Val=Weights, Labels=Labels, paramPLT=paramPLT, TypeAutopct=TypeAutopct, 
+               PrecisionPct=PrecisionPct, AbsUnit=AbsUnit, PrecisionAbs=PrecisionAbs, 
+               Radius=Radius, StartAngle=StartAngle, LabelDist=LabelDist, PctDist=PctDist,
+               BShadow=BShadow, explode=explode, EnableAnnotations=EnableAnnotations)
 
         # Parameters of the plot
         paramPLT.getTitle = "Composition of the " + self.getName
@@ -1239,8 +1212,7 @@ class Aggregate(Ingredient):
         self.DiamExtend = StrDiamExtend  # [str] Maximum and minimum diameter of the aggregates [mm]
 
         # Granulometry
-        self.GranuloDiam = None # [Vect of float] Diameter of granulometry [mm]
-        self.GranuloRatio = None # [Vect of float] Ratio of granulometry [-] or [%]
+        self.Granulo = Granulometry()  # [object] Granulometry of the aggregate
 
         # Water-related properties
         self.WaterAbsorption = 0  # [float] Water absorption of the aggregate mass [-]
@@ -1273,49 +1245,20 @@ class Aggregate(Ingredient):
 
     # Granulometry
     @property
-    def getGranuloDiam(self):
-       return self.GranuloDiam
-
-    @getGranuloDiam.setter
-    def getGranuloDiam(self, GranuloDiam):
-        if isinstance(GranuloDiam, float):
-            # Append the diameter to the numpy array
-            # self.GranuloDiam = np.append(self.GranuloDiam, GranuloDiam) si pas initialisé problème
-            return
-        elif isinstance(GranuloDiam, list):
-            self.GranuloDiam = np.asarray(GranuloDiam, dtype=float)
-        elif isinstance(GranuloDiam, np.ndarray):
-            self.GranuloDiam = GranuloDiam
-        else:
-            print("Error : Invalid input for Granulometry Diameter")
-        self.GranuloDiam = DataSort(self.GranuloDiam)
-
-    @property
-    def getGranuloRatio(self):
-        return self.GranuloRatio
-
-    @getGranuloRatio.setter
-    def getGranuloRatio(self, GranuloRatio):
-        if isinstance(GranuloRatio, float):
-            # Append the ratio to the numpy array
-            return
-        elif isinstance(GranuloRatio, list):
-            self.GranuloRatio = np.asarray(GranuloRatio, dtype=float)
-        elif isinstance(GranuloRatio, np.ndarray):
-            self.GranuloRatio = GranuloRatio
-        else:
-            print("Error : Invalid input for Granulometry Ratio")
-        self.GranuloRatio = DataSort(self.GranuloRatio)
+    def getGranulo(self):
+        return self.Granulo
 
     @property
     def getDmax(self):
-        # [float] Maximum diameter of the granulometry [mm]
-        if self.getGranuloDiam is not None and self.getGranuloRatio is not None:
+        """
+        [float] Maximum diameter of the granulometry [mm]
+        """
+        if self.getGranulo.getGranuloDiam is not None and self.getGranulo.getGranuloRatio is not None:
             # Find the maximum diameter corresponding to 100% ratio
-            MaxRatio = max(self.getGranuloRatio)
+            MaxRatio = max(self.getGranulo.getGranuloRatio)
             # Found the index of the first maximum ratio in granulo ratio
-            IndexMax = np.where(self.getGranuloRatio == MaxRatio)[0][0]
-            MaxDiam = self.getGranuloDiam[IndexMax]
+            IndexMax = np.where(self.getGranulo.getGranuloRatio == MaxRatio)[0][0]
+            MaxDiam = self.getGranulo.getGranuloDiam[IndexMax]
             return MaxDiam
         else:
             print("Error: Granulometry not defined")
@@ -1323,13 +1266,15 @@ class Aggregate(Ingredient):
 
     @property
     def getDmin(self):
-        # [float] Minimum diameter of the granulometry [mm]
-        if self.getGranuloDiam is not None and self.getGranuloRatio is not None:
+        """
+        [float] Minimum diameter of the granulometry [mm]
+        """
+        if self.getGranulo.getGranuloDiam is not None and self.getGranulo.getGranuloRatio is not None:
             # Find the minimum diameter corresponding to 0% ratio
-            MinRatio = min(self.getGranuloRatio)
+            MinRatio = min(self.getGranulo.getGranuloRatio)
             # Found the index of the last maximum ratio in granulo ratio
-            IndexMin = np.where(self.getGranuloRatio == MinRatio)[0][-1]
-            MinDiam = self.getGranuloDiam[IndexMin]
+            IndexMin = np.where(self.getGranulo.getGranuloRatio == MinRatio)[0][-1]
+            MinDiam = self.getGranulo.getGranuloDiam[IndexMin]
             return MinDiam
         else:
             print("Error: Granulometry not defined")
@@ -1385,35 +1330,15 @@ class Aggregate(Ingredient):
 
 
     # Granulometry plot
-    def PLTGranulometry(self, paramPLT=False, BStart=True, BEnd=True, BPourcent=True):
-        if not paramPLT:
-            paramPLT = DefaultParamPLT()
-
-        if BStart:
-            StartPlots()
-
-        # Recovering parameters of the plot
-        GranuloRatio = self.getGranuloRatio
-        if not BPourcent:
-            paramPLT.getYLabel = "Percentage of passers-by (%)"
-            GranuloRatio = GranuloRatio*100.0
-
+    def PLTGranulometry(self, paramPLT=None, BStart=True, BEnd=True, BPourcent=True):
         TempColor = paramPLT.getColour
-        paramPLT.getColour = self.getColour
 
-        PLTPlot(self.getGranuloDiam, GranuloRatio, paramPLT)
+        paramPLT.getColour = self.getColour
+        paramPLT.getLegends = [self.getName]
+        self.getGranulo.PLTGranulometry(paramPLT=paramPLT, StrTitleName=self.getName, BStart=BStart, BEnd=BEnd, BPourcent=BPourcent)
 
         paramPLT.getColour = TempColor
 
-        # Parameters of the plot
-        paramPLT.getTitle = "Particle size distribution of the " + self.getName
-        paramPLT.getXLabel = "Particle size (mm)"
-        paramPLT.getYLabel = "Ratio of passers-by (%)"
-
-        paramPLT.getXScaleType = 1
-
-        if BEnd:
-            PLTShow(paramPLT)
 
 """
 Adjuvant

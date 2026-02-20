@@ -6,19 +6,20 @@ Created on Mon Feb 02 15:43:03 2026
 """
 
 # Concrete composition library
-
 """
 Improovements :
 - Ajouter des méthodes de calcul de la composition (ex: Feret, Bolomey, ...)
 """
 
 # Other Lib
-from math import e, factorial
 import numpy as np
+from scipy.optimize import minimize
 
 
 # Custom Lib
 from ConcreteLib import CemMat
+from GranulometryLib import Granulometry, PLTGranulometry
+from PlotLib import ParamPLT, StartPlots, CloseAllPlots, PLTShow, DefaultParamPLT, PLTPie, PLTPlot
 
 
 """
@@ -30,16 +31,14 @@ class CompositionTarget:
         self.CemMat = CemMat # Cementious materials object
 
         # Models parameters
+        self.ErrorMeasureMethod = "SquareError" # Method to measure the error between the target composition and the computed composition
 
-
-        # Models results
-        self.GranuloDiamMix = None # [mm] Vector of diameters of the granulometry of the mix 
-        self.GranuloRatioMix = None # [-] Vector of passers-by of the granulometry of the mix
-
+        # Models computation results
+        self.GranuloMix = Granulometry() # Granulometry object for the granulometry of the mix
+        self.VectAggMass = None # Vector of the mass of each aggregate in the mix [kg]
 
         # Composition targets
-        self.GranuloDiamMixIdeal = None # [mm] Vector of diameters of the ideal granulometry of the mix based on the chosen model
-        self.GranuloRatioMixIdeal = None # [-] Vector of passers-by of the ideal granulometry of the mix based on the chosen model
+        self.TargGranuloMix = Granulometry() # Granulometry object for the target granulometry of the mix
 
         self.TargECEffRatio = 0.0 # [float] Target water to cement ratio effective
 
@@ -60,24 +59,30 @@ class CompositionTarget:
         CemMat.CompTarget = self
 
     # Models parameters
+    @property
+    def getErrorMeasureMethod(self):
+        return self.ErrorMeasureMethod
 
+    @getErrorMeasureMethod.setter
+    def getErrorMeasureMethod(self, ErrorMeasureMethod):
+        if isinstance(ErrorMeasureMethod, str):
+            if ErrorMeasureMethod in ["SquareError", "AbsoluteError", "RelativeError"]:
+                self.ErrorMeasureMethod = ErrorMeasureMethod
+        elif isinstance(ErrorMeasureMethod, int):
+            self.ErrorMeasureMethod = {0: "SquareError", 1: "AbsoluteError", 2: "RelativeError"}.get(ErrorMeasureMethod, "SquareError")
 
     # Models results
     @property
-    def getGranuloDiamMix(self):
-        return self.GranuloDiamMix
-
-    @getGranuloDiamMix.setter
-    def getGranuloDiamMix(self, GranuloDiamMix):
-        self.GranuloDiamMix = GranuloDiamMix
+    def getGranuloMix(self):
+        return self.GranuloMix
 
     @property
-    def getGranuloRatioMix(self):
-        return self.GranuloRatioMix
+    def getVectAggMass(self):
+        return self.VectAggMass
 
-    @getGranuloRatioMix.setter
-    def getGranuloRatioMix(self, GranuloRatioMix):
-        self.GranuloRatioMix = GranuloRatioMix
+    @getVectAggMass.setter
+    def getVectAggMass(self, VectAggMass):
+        self.VectAggMass = VectAggMass
 
     @property
     def getGranuloDiamVect(self):
@@ -91,26 +96,14 @@ class CompositionTarget:
         """
         # Merging all the diameters of the aggregates in the mix
         LAggregates = self.getCemMat.getAggregates
-        GranuloDiamMix = np.concatenate([Aggregate.getGranuloDiam for Aggregate in LAggregates])
+        GranuloDiamMix = np.concatenate([Aggregate.getGranulo.getGranuloDiam for Aggregate in LAggregates])
         GranuloDiamMix = np.unique(GranuloDiamMix)
         return GranuloDiamMix
 
     # Composition targets
     @property
-    def getGranuloDiamMixIdeal(self):
-        return self.GranuloDiamMixIdeal
-
-    @getGranuloDiamMixIdeal.setter
-    def getGranuloDiamMixIdeal(self, GranuloDiamMixIdeal):
-        self.GranuloDiamMixIdeal = GranuloDiamMixIdeal
-
-    @property
-    def getGranuloRatioMixIdeal(self):
-        return self.GranuloRatioMixIdeal
-
-    @getGranuloRatioMixIdeal.setter
-    def getGranuloRatioMixIdeal(self, GranuloRatioMixIdeal):
-        self.GranuloRatioMixIdeal = GranuloRatioMixIdeal
+    def getTargGranuloMix(self):
+        return self.TargGranuloMix
 
     @property
     def getTargECEffRatio(self):
@@ -248,6 +241,9 @@ class CompositionTarget:
         VectPassBy = np.minimum(VectPassBy, 1.0) # Limit the percentage of passers-by to 1 if the value is higher than 1
         VectPassBy = np.maximum(VectPassBy, 0.0) # Limit the percentage of passers-by to 0 if the value is lower than 0
 
+        self.getTargGranuloMix.getGranuloDiam = VectDiam
+        self.getTargGranuloMix.getGranuloRatio = VectPassBy
+
         if BPourcent:
             VectPassBy = 100 * VectPassBy # [%] Vector of the percentage of passers-by
         
@@ -295,6 +291,9 @@ class CompositionTarget:
 
         VectPassBy = np.minimum(VectPassBy, 1.0) # Limit the percentage of passers-by to 1 if the value is higher than 1
         VectPassBy = np.maximum(VectPassBy, 0.0) # Limit the percentage of passers-by to 0 if the value is lower than 0
+
+        self.getTargGranuloMix.getGranuloDiam = VectDiam
+        self.getTargGranuloMix.getGranuloRatio = VectPassBy
 
         if BPourcent:
             VectPassBy = 100 * VectPassBy # [%] Vector of the percentage of passers-by
@@ -354,6 +353,9 @@ class CompositionTarget:
 
         VectPassBy = np.minimum(VectPassBy, 1.0) # Limit the percentage of passers-by to 1 if the value is higher than 1
         VectPassBy = np.maximum(VectPassBy, 0.0) # Limit the percentage of passers-by to 0 if the value is lower than 0
+
+        self.getTargGranuloMix.getGranuloDiam = VectDiam
+        self.getTargGranuloMix.getGranuloRatio = VectPassBy
 
         if BPourcent:
             VectPassBy = 100 * VectPassBy # [%] Vector of the percentage of passers-by
@@ -439,6 +441,9 @@ class CompositionTarget:
 
         VectPassBy = np.minimum(VectPassBy, 1.0) # Limit the percentage of passers-by to 1 if the value is higher than 1
         VectPassBy = np.maximum(VectPassBy, 0.0) # Limit the percentage of passers-by to 0 if the value is lower than 0
+
+        self.getTargGranuloMix.getGranuloDiam = VectDiam
+        self.getTargGranuloMix.getGranuloRatio = VectPassBy
 
         if BPourcent:
             VectPassBy = 100 * VectPassBy # [%] Vector of the percentage of passers-by
@@ -539,6 +544,8 @@ class CompositionTarget:
         VectDiamFauryAxis = np.log10(VectDiam) # [mm] Vector of diameters for the desired points of the curve on a logarithmic scale
         VectPassBy = np.interp(VectDiamFauryAxis, VectDiamRefFauryAxis, VectPassByRef) # [-] Vector of the percentage of passers-by based on the reference curve
         
+        self.getTargGranuloMix.getGranuloDiam = VectDiam
+        self.getTargGranuloMix.getGranuloRatio = VectPassBy
 
         VectPassBy = np.minimum(VectPassBy, 1.0) # Limit the percentage of passers-by to 1 if the value is higher than 1
         VectPassBy = np.maximum(VectPassBy, 0.0) # Limit the percentage of passers-by to 0 if the value is lower than 0
@@ -548,15 +555,42 @@ class CompositionTarget:
         
         return VectDiam, VectPassBy
 
+    # PLT Ideal Curves
+    def PLTIdealCurve(self, paramPLT=None, BStart=True, BEnd=True, BPourcent=True):
+        """
+        Plot the granulometry of the mix of aggregates
+        
+        Args:
+            paramPLT: Parameters of the plot
+            BStart: Boolean to indicate if the plot starts in a new figure
+            BEnd: Boolean to indicate if the plot ends and shows the figure
+            BPourcent: Boolean to indicate if the y-axis is in percentage (True) or ratio (False)
+
+        Returns:
+            Plot of the granulometry of the mix
+        """
+        if paramPLT is None:
+            paramPLT = DefaultParamPLT()
+
+        if BStart:
+            StartPlots()
+
+        # Plot the granulometry of the mix
+        paramPLT.getLegends = ["Ideal Curve"]
+        self.getTargGranuloMix.PLTGranulometry(paramPLT=paramPLT, StrTitleName="Ideal Curve", 
+                                           BStart=False, BEnd=False, BPourcent=BPourcent)
+
+        if BEnd:
+            PLTShow(paramPLT)
+
     # Granular squeletton computation - Fitting to a target curve (ideal or experimental)
-    def CMPGranuloRatioMix(self, VectAggregatesMass, VectGranuloDiamMix=None, BPourcent=False):
+    def CMPGranuloRatioMix(self, VectAggregatesMass, VectGranuloDiamMix=None):
         """
         Compute the granulometry of the mix of aggregates based on the aggregate inside the CemMat object and their provided mass.
         Args:
         - VectAggregatesMass: Vector of the mass of each aggregate in the mix [kg]
         - VectGranuloDiamMix: Vector of diameters to which the curve is computed
-        - BPourcent: Boolean to indicate if the percentage of passers-by is in percentage (True) or ratio (False)
-
+       
         Return:
         - GranuloDiamMix: Vector of diameters of the granulometry of the mix [mm]
         - GranuloRatioMix: Vector of the percentage of passers-by of the granulometry of the mix [-] or [%]
@@ -567,8 +601,7 @@ class CompositionTarget:
 
         # Merging all the diameters of the aggregates in the mix
         LAggregates = self.getCemMat.getAggregates
-        GranuloDiamMix = np.concatenate([Aggregate.getGranuloDiam for Aggregate in LAggregates])
-        GranuloDiamMix = np.unique(GranuloDiamMix)
+        GranuloDiamMix = self.getGranuloDiamVect
         LogGranuloDiamMix = np.log10(GranuloDiamMix)
         GranuloRatioMix = np.zeros_like(GranuloDiamMix, dtype=float)
 
@@ -580,8 +613,8 @@ class CompositionTarget:
         # For each aggregate, add its granulometry ratio weighted by its mass proportion in the mix to the mix granulometry while interpolating the missing values
         for Aggregate in LAggregates:
             ProportMass = VectAggregatesMass[int(LAggregates.index(Aggregate))] / MAggregates # [-] Proportion of the aggregate mass in the mix
-            GranuloDiamAgg = Aggregate.getGranuloDiam
-            GranuloRatioAgg = Aggregate.getGranuloRatio
+            GranuloDiamAgg = Aggregate.getGranulo.getGranuloDiam
+            GranuloRatioAgg = Aggregate.getGranulo.getGranuloRatio
 
             # Sorting the granulometry of the aggregate
             Order = np.argsort(GranuloDiamAgg)
@@ -592,41 +625,183 @@ class CompositionTarget:
             LogGranuloDiamAgg = np.log10(GranuloDiamAgg) # Warning : Need to do the interpolation in log scale because of the logarithmic scale of the granulometric plot
             GranuloRatioMix += np.interp(LogGranuloDiamMix, LogGranuloDiamAgg, GranuloRatioAgg, left=0) * ProportMass
 
-        if BPourcent:
-            GranuloRatioMix = 100 * GranuloRatioMix # [%] Vector of the percentage of passers-by of the granulometry of the mix
-
         if VectGranuloDiamMix is not None:
             VectLogGranuloDiamMix = np.log10(VectGranuloDiamMix)
-            VectGranuloRatioMix = np.interp(VectLogGranuloDiamMix, LogGranuloDiamMix, GranuloRatioMix, left=0) * MAggregates
-            self.getCMPTGranuloDiamMix = VectGranuloDiamMix
-            self.getCMPTGranuloRatioMix = VectGranuloRatioMix
-            return VectGranuloRatioMix
+            VectGranuloRatioMix = np.interp(VectLogGranuloDiamMix, LogGranuloDiamMix, GranuloRatioMix, left=0)
+            self.getGranuloMix.getGranuloDiam = VectGranuloDiamMix
+            self.getGranuloMix.getGranuloRatio = VectGranuloRatioMix
+            return VectLogGranuloDiamMix, VectGranuloRatioMix
         else:
-            self.getCMPTGranuloDiamMix = GranuloDiamMix
-            self.getCMPTGranuloRatioMix = GranuloRatioMix
-            return self.getGranuloDiamMix, self.getGranuloRatioMix
+            self.getGranuloMix.getGranuloDiam = GranuloDiamMix
+            self.getGranuloMix.getGranuloRatio = GranuloRatioMix
+            return GranuloDiamMix, GranuloRatioMix
 
-    def CMPTGranuloLeastSquareMethod(self, GranuloDiamMixIdeal, GranuloRatioMixIdeal):
+    def CMPGranuloRatioMixConstraint(self, VectAggregatesMass):
         """
-        Compute the granulometry of the composition by fitting the percentage of passers-by to a target curve (ideal or experimental) using the least square method
+        Apply constraints to the computation of the granulometry of the mix of aggregates, based on the constraints defined
+        in the constraints parts of the composition object, such as maximum and minimum proportion of aggregates in the mix,
+        substitution of aggregates, etc.
         Args:
-        - GranuloDiamMixIdeal: Vector of diameters for the target curve of the granulometry of the mix [mm]
-        - GranuloRatioMixIdeal: Vector of the percentage of passers-by for the target curve of the granulometry of the mix [-] or [%]
+        Return:
+        """
+
+        # Verify and enforce non-negativity of the mass of aggregates in the mix
+        VectAggregatesMass = np.maximum(VectAggregatesMass, 0.0)
+
+        return VectAggregatesMass
+
+    def CMPTGranuloRatioMixInitialGuess(self):
+        """
+        Compute an initial guess of the granulometry of the mix of aggregates based on the constraints
+        defined in the constraints parts of the composition object, such as maximum and minimum 
+        proportion of aggregates in the mix, substitution of aggregates, etc.
+        """
+        return np.zeros(len(self.getCemMat.getAggregates)) # [kg] Initial guess of the mass of each aggregate in the mix
+
+    def CMPTGranuloDiffIdeal2Real(self):
+        """
+        Compute the difference between the granulometry of the composition and a target curve (ideal or experimental) 
+        based on the ratio of passers-by at the diameters of the composition granulometry, at each diameter.
+       
+        Args:
+
+        Return:
+
+        """
+        if self.getTargGranuloDiam is None or self.getTargGranuloRatio is None:
+            print("Error: No target curve defined for the granulometry, please define a target curve to compute the difference between the granulometry of the composition and the target curve")
+            return None
+        if self.getGranuloMix.getGranuloDiam is None or self.getGranuloMix.getGranuloRatio is None:
+            print("Error: Granulometry of the mix not computed, please compute the granulometry of the mix to compute the difference between the granulometry of the composition and the target curve")
+            return None
+        if self.getTargGranuloMix.getGranuloDiam is None or self.getTargGranuloMix.getGranuloRatio is None:
+            print("Error: Target granulometry of the mix not computed, please compute the target granulometry of the mix to compute the difference between the granulometry of the composition and the target curve")
+            return None
+
+        if len(self.getGranuloMix.getGranuloRatio) != len(self.getTargGranuloMix.getGranuloRatio) or len(self.getGranuloMix.getGranuloDiam) != len(self.getTargGranuloMix.getGranuloDiam):
+            print("Error: The number of points of the granulometry of the mix and the target granulometry of the mix are not the same, please compute the granulometry of the mix and the target granulometry of the mix with the same number of points to compute the difference between the granulometry of the composition and the target curve")
+            return None
+        if len(self.getGranuloMix.getGranuloRatio) != len(self.getGranuloMix.getGranuloDiam):
+            print("Error: The number of points of the granulometry of the mix and the number of diameters of the granulometry of the mix are not the same, please compute the granulometry of the mix with the same number of points and diameters to compute the difference between the granulometry of the composition and the target curve")
+
+        if not np.array_equal(self.getGranuloMix.getGranuloDiam, self.getTargGranuloMix.getGranuloDiam):
+            print("Error: The diameters of the granulometry of the mix and the target granulometry of the mix are not the same, please compute the granulometry of the mix and the target granulometry of the mix with the same diameters to compute the difference between the granulometry of the composition and the target curve")
+            return None
+
+        return self.getGranuloMix.getGranuloRatio - self.getTargGranuloMix.getGranuloRatio
+
+    def CMPTGranuloIdealRealError(self):
+        """
+        Compute a measure of the error between the granulometry of the composition and a target curve (ideal or experimental)
+       
+        Args:
+        Return:
+        - SumDiffMeasure: Float to indicate the measure of the error between the granulometry of the composition and the target curve, 
+        which can be used as an objective function to minimize to optimize the granulometry of the composition
+        """
+        GranuloDiff = self.CMPTGranuloDiffIdeal2Real()
+        if GranuloDiff is None:
+            return None
+        else:
+            if self.getErrorMeasureMethod == "SquareError":
+                DiffMeasure = GranuloDiff**2 # [-]
+            elif self.getErrorMeasureMethod == "AbsoluteError":
+                DiffMeasure = np.abs(GranuloDiff) # [-]
+            elif self.getErrorMeasureMethod == "RelativeError":
+                DiffMeasure = np.abs(GranuloDiff) / np.maximum(np.abs(self.getTargGranuloMix.getGranuloRatio), 1e-4) # [-] Relative error, with a small value in the denominator to avoid division by zero
+            else:
+                print("Error: ErrorMeasureMethod value not recognized, please choose between 'Abs' and 'Square' for the method to compute the error between the granulometry of the composition and the target curve")
+                return None
+            SumDiffMeasure = np.sum(DiffMeasure)
+            return SumDiffMeasure
+
+    def CMPTGranuloIdealRealFun2Min(self, VectAggregatesMass):
+        """
+        Function to be minimized to optimize the granulometry of the composition by fitting the percentage of
+        passers-by to a target curve (ideal or experimental).
+        Args:
+        Return:
+        """
+        # Apply constraints to the computation of the granulometry of the mix of aggregates
+        VectAggregatesMass = self.CMPGranuloRatioMixConstraint(VectAggregatesMass)
+
+        # Compute the granulometry of the mix of aggregates based on the aggregate inside the CemMat object and their provided mass
+        self.CMPGranuloRatioMix(self, VectAggregatesMass, VectGranuloDiamMix=None)
+
+        # Compute the measure of the error between the granulometry of the composition and a target curve (ideal or experimental)
+        Error = self.CMPTGranuloIdealRealError()
+        return Error
+        
+
+    def CMPTGranuloLeastSquareMethod(self):
+        """
+        Compute the granulometry of the composition by fitting the percentage of passers-by to a target curve 
+        (ideal or experimental) using the least square method
+        Args:
+        -
 
         Return:
         - 
         """
+        # Verify the existence of the target curve
+        if self.getTargGranuloMix is None or self.getTargGranuloMix.getGranuloDiam is None or self.getTargGranuloMix.getGranuloRatio is None:
+            print("Error: No target curve defined for the granulometry, please define a target curve to use the least square method")
+            return None
+
+        # Initial guess
+        VectAggregatesMass = self.CMPTGranuloRatioMixInitialGuess()
+
+        # Optimization of the granulometry of the composition by fitting the percentage of passers-by to a target curve (ideal or experimental) using the least square method
+        Result = minimize(self.CMPTGranuloIdealRealFun2Min, VectAggregatesMass,
+                          method='Nelder-Mead', tol=1e-6)
+        
+        # Verify the success of the optimization
+        if not Result.success:
+            print("Error: Optimization of the granulometry of the composition did not converge, the results may not be reliable")
+            print("Info: {}".format(Result.message))
+
+        # Extract the optimized mass of aggregates in the mix
+        VectAggregatesMass = Result.x
+
+        # Apply constraints to the computation of the granulometry of the mix of aggregates
+        VectAggregatesMass = self.CMPGranuloRatioMixConstraint(VectAggregatesMass)
+
+        # Print the error of the optimization with regard to the target curve
+        print("Info: Optimization of the granulometry of the composition completed with an error of {:.6f}".format(Result.fun))
+
+        # Verify the volume of concrete produced with the optimized mass of aggregates in the mix 
+        # to produce at the end 1 m3 of concrete
+        pass
+
+        # Provide the optimized mass of aggregates in the mix to CemMat object
+        pass
+        
+        # Compute the granulometry of the mix of aggregates based on the aggregate inside the CemMat object and their provided mass
+        
+        # Compute the amount of water needed for the composition
         pass
     
-    def CMPTGranuloDreuxGorrisse(self):
+    def CMPTGranuloDreuxGorrisseMethod(self):
         """
+        Compute the granulometry of the composition by fitting the percentage of passers-by to a target curve 
+        (ideal or experimental) using the Dreux-Gorrisse method. The method consists in founding the intersection 
+        between the target curve and the line linking the 95% passing-by point of the smaller fraction and the 5%
+        passing-by point of the next larger fraction of the composition. This method is repeated from smaller to larger diameters
+        until the Dmax of the composition is reached. The proportion of each fraction is then computed based on proportion 
+        at the intersection when using the larger fraction diminished by the proportion at the intersection 
+        when using the smaller fraction.
         Args:
         -   
 
         Return:
         -
         """
-        pass
+        # Sort the aggregates in the mix by their maximum diameter
+
+        # For each aggregate, compute the line linking the 95% passing-by point of the aggregate mix with the 5% passing-by point of the next 
+        # larger aggregate mix, and compute the intersection of this line with the target curve to determine the proportion of the aggregate 
+        # in the mix
+
 
     # Added amount of water computation
     def CMPTWater(self):
@@ -670,3 +845,69 @@ class CompositionTarget:
         if abs(MWater - MAddedWater)/MAddedWater > 1e-1:
             print("Warning: Output water amount does not match the added water amount")
 
+    # Enforce the computed mass of aggregates in the mix in the CemMat object
+    def TRNSFAggMassMix2CemMat(self, VectAggMass=None):
+        """
+        Enforce the computed mass of aggregates in the mix in the CemMat object 
+        to be used for the computation of the granulometry of the mix and the water balance.
+        
+        Args:
+        - VectAggMass: Vector of the mass of each aggregate in the mix [kg]
+        
+        Return:
+         - Change the mass of each aggregate in the mix in the CemMat object
+        """
+        LAggregates = self.getCemMat.getAggregates
+
+        # 
+        if VectAggMass is None:
+            VectAggMass = self.getVectAggMass
+            if VectAggMass is None:
+                print("Error: No mass of aggregates in the mix provided, please provide the mass of aggregates in the mix to enforce it in the CemMat object")
+                return
+
+        # Verify the provided mass of aggregates in the mix is consistent with the number of aggregates in the CemMat object
+        if len(VectAggMass) != len(LAggregates):
+            print("Error: The provided mass of aggregates in the mix is not consistent with the number of aggregates in the CemMat object")
+            return
+
+        # Set the mass of each aggregate in the mix in the CemMat object
+        for Aggregate in LAggregates:
+            MassAgg = VectAggMass[int(LAggregates.index(Aggregate))] # [kg] Mass of the aggregate in the mix
+            Aggregate.getMass = MassAgg # Set the mass of the aggregate in the mix in the CemMat object
+
+    # Plotting functions
+    # Plot of the granulometry curves of the composition
+    def PlotGranuloCompo(self, paramPLT=False, StrTitleName=None, BStart=True, BEnd=True, BPourcent=True):
+        """
+        Plot of a granulometric curve of the composition.
+        
+        Args:
+        - paramPLT: Parameters of the plot
+        - StrTitleName: String to indicate the name added to the title of the plot
+        - BStart: Boolean to indicate if the plot starts in a new figure
+        - BEnd: Boolean to indicate if the plot ends and shows the figure
+        - BPourcent: Boolean to indicate if the y-axis is in percentage (True) or ratio (False)
+
+        Returns:
+            Plot of the granulometry of the mix
+        """
+        self.getGranuloMix.PLTGranulometry(paramPLT=paramPLT, StrTitleName=StrTitleName, BStart=BStart, BEnd=BEnd, BPourcent=BPourcent)
+
+    # Plot of the ideal granulometry curves (Fuller, Bolomey, Faury, Dreux)
+    def PlotGranuloCompo(self, paramPLT=False, StrTitleName=None, BStart=True, BEnd=True, BPourcent=True):
+        """
+        Plot of the ideal granulometric curve of the composition.
+        
+        Args:
+        - paramPLT: Parameters of the plot
+        - StrTitleName: String to indicate the name added to the title of the plot
+        - BStart: Boolean to indicate if the plot starts in a new figure
+        - BEnd: Boolean to indicate if the plot ends and shows the figure
+        - BPourcent: Boolean to indicate if the y-axis is in percentage (True) or ratio (False)
+
+        Returns:
+            Plot of the ideal granulometric curve
+        """
+        self.getTargGranuloMix.PLTGranulometry(paramPLT=paramPLT, StrTitleName=StrTitleName, BStart=BStart, BEnd=BEnd, BPourcent=BPourcent)
+    
