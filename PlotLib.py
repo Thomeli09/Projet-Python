@@ -1808,7 +1808,7 @@ def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
         Alpha: float (0.0 to 1.0, where 0 is fully transparent and 1 is opaque)
     """
     if Fontsize is not None:
-        Text.set_Fontsize(Fontsize)
+        Text.set_fontsize(Fontsize)
 
     if Weight is not None:
         Text.set_weight(Weight)
