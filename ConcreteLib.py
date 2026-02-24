@@ -681,14 +681,14 @@ class CemMat(Material):
         GranuloDiamMix, GranuloRatioMix = self.CMPGranuloRatioMix
 
         # Plot the granulometry of the mix
-        TempColor = paramPLT.getColour
+        TempColour = paramPLT.getColour
 
         paramPLT.getColour = self.getColour
         paramPLT.getLegends = [self.getName + " " + self.getMatType]
         self.getGranuloMix.PLTGranulometry(paramPLT=paramPLT, StrTitleName=self.getName + " mix of aggregates", 
                                            BStart=False, BEnd=False, BPourcent=BPourcent)
         
-        paramPLT.getColour = TempColor
+        paramPLT.getColour = TempColour
 
         if BEnd:
             PLTShow(paramPLT)
@@ -728,19 +728,19 @@ class CemMat(Material):
         # Pie chart
         Labels = []
         Weights = []
-        Colors = []
+        Colours = []
         Hatches = []
 
         # Cement
         for Cement in self.getCement:
             Labels.append(Cement.getName)
-            Colors.append(Cement.getColour)
+            Colours.append(Cement.getColour)
             Weights.append(Cement.getMass)
             Hatches.append(None)
         # Water
         for Water in self.getWater:
             Labels.append(Water.getName)
-            Colors.append(Water.getColour)
+            Colours.append(Water.getColour)
             Weights.append(Water.getMass)
             Hatches.append(None)
 
@@ -748,19 +748,19 @@ class CemMat(Material):
             # Absorbed water by the aggregates
             AbsorbedWater = self.CMPTAggWaterAbsorbed
             Labels.append(AbsorbedWater.getName)
-            Colors.append(AbsorbedWater.getColour)
+            Colours.append(AbsorbedWater.getColour)
             Weights.append(AbsorbedWater.getMass)
             Hatches.append(None)
             # Aggregates
             for Aggregate in self.getAggregates:
                 Labels.append(Aggregate.getName)
-                Colors.append(Aggregate.getColour)
+                Colours.append(Aggregate.getColour)
                 Weights.append(Aggregate.getMass)
                 Hatches.append(None)
             # Adjuvants
             for Adjuvant in self.getAdjuvants:
                 Labels.append(Adjuvant.getName)
-                Colors.append(Adjuvant.getColour)
+                Colours.append(Adjuvant.getColour)
                 Weights.append(Adjuvant.getMass)
                 Hatches.append(None)
         else: 
@@ -771,18 +771,18 @@ class CemMat(Material):
             # Aggregates
             for Aggregate in self.getAggregates:
                 Labels.append(Aggregate.getName)
-                Colors.append(Aggregate.getColour)
+                Colours.append(Aggregate.getColour)
                 Weights.append(Aggregate.getWaterAdjustedMass)
                 Hatches.append(None)
             # Adjuvants
             for Adjuvant in self.getAdjuvants:
                 Labels.append(Adjuvant.getName)
-                Colors.append(Adjuvant.getColour)
+                Colours.append(Adjuvant.getColour)
                 Weights.append(Adjuvant.getMass)
                 Hatches.append(None)
 
         paramPLT.getHatch = Hatches
-        paramPLT.getColour = Colors
+        paramPLT.getColour = Colours
         PLTPie(Val=Weights, Labels=Labels, paramPLT=paramPLT, TypeAutopct=TypeAutopct, 
                PrecisionPct=PrecisionPct, AbsUnit=AbsUnit, PrecisionAbs=PrecisionAbs, 
                Radius=Radius, StartAngle=StartAngle, LabelDist=LabelDist, PctDist=PctDist,
@@ -927,11 +927,11 @@ class CemMat(Material):
 Ingredients : General class for all the ingredients in cementious materials
 """
 class Ingredient(Material):
-    def __init__(self, Name, ID, MatType, Color=None):
+    def __init__(self, Name, ID, MatType, Colour=None):
         super().__init__(Name=Name, ID=ID, MatType=MatType)
 
         # Graphics
-        self.getColour = Color
+        self.getColour = Colour
 
         # Properties
 
@@ -1001,7 +1001,7 @@ Default colors : Gray
 """
 class Cement(Ingredient):
     def __init__(self, Name, ID, CementClass, CementType, CementStrengthClass):
-        super().__init__(Name=Name, ID=ID, MatType="Cement", Color="slategray")
+        super().__init__(Name=Name, ID=ID, MatType="Cement", Colour="slategray")
 
         # Caracteristics identification of the cement
         self.CementClass = None  # [int] Class of cement (CEM X)
@@ -1170,7 +1170,7 @@ Default colors : Blue
 """
 class Water(Ingredient):
     def __init__(self, Name, ID):
-        super().__init__(Name=Name, ID=ID, MatType="Water", Color="b")
+        super().__init__(Name=Name, ID=ID, MatType="Water", Colour="b")
 
         self.getDensity = 1000  # [float] Density of water [kg/m^3]
         self.getBulkDensity = 1000  # [float] Bulk density of water [kg/m^3]
@@ -1190,21 +1190,21 @@ class Aggregate(Ingredient):
         if isinstance(MatType, int):
             if MatType==1:
                 MatType="Aggregate"
-                Color = "sienna"
+                Colour = "sienna"
             elif MatType==2:
                 MatType="Sand"
-                Color = "orange"
+                Colour = "orange"
             else:
                 print("Error : Type of aggregate not defined")
         elif isinstance(MatType, str):
             if MatType=="Aggregate":
-                Color = "sienna"
+                Colour = "sienna"
             elif MatType=="Sand":
-                Color = "orange"
+                Colour = "orange"
             else:
                 print("Error : Type of aggregate not defined")
 
-        super().__init__(Name=Name, ID=ID, MatType=MatType, Color=Color)
+        super().__init__(Name=Name, ID=ID, MatType=MatType, Colour=Colour)
 
         # Caracteristics of the aggregate
         self.RockType = StrRockType  # [str] Type of rock (Granite, Basalt, Limestone, ...)
@@ -1331,13 +1331,13 @@ class Aggregate(Ingredient):
 
     # Granulometry plot
     def PLTGranulometry(self, paramPLT=None, BStart=True, BEnd=True, BPourcent=True):
-        TempColor = paramPLT.getColour
+        TempColour = paramPLT.getColour
 
         paramPLT.getColour = self.getColour
         paramPLT.getLegends = [self.getName]
         self.getGranulo.PLTGranulometry(paramPLT=paramPLT, StrTitleName=self.getName, BStart=BStart, BEnd=BEnd, BPourcent=BPourcent)
 
-        paramPLT.getColour = TempColor
+        paramPLT.getColour = TempColour
 
 
 """
@@ -1350,7 +1350,7 @@ Improovements :
 """
 class Adjuvant(Ingredient):
     def __init__(self, Name, ID):
-        super().__init__(Name=Name, ID=ID, MatType="Adjuvant", Color="lime")
+        super().__init__(Name=Name, ID=ID, MatType="Adjuvant", Colour="lime")
 
 
 # Type of differents typical samples in concrete sector

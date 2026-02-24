@@ -34,25 +34,25 @@ Improvements:
 
 # Display parameters
 class ParamPLT:
-    def __init__(self, colour, linetype, marker, linesize, fontsize):
+    def __init__(self, Colour, Linetype, Marker, Linesize, Fontsize):
         """
         Ajouter le système de liste si différents éléments, pas que pour les légendes,...
         """
         # Plot
-        self.Colour = colour
+        self.Colour = Colour
         self.ColourMap = 'viridis'
-        self.LineType = linetype
-        self.LineSize = linesize
-        self.MarkerType = marker
-        self.MarkerSize = linesize
+        self.Linetype = Linetype
+        self.LineSize = Linesize
+        self.MarkerType = Marker
+        self.MarkerSize = Linesize
         self.Alpha = 1  # Blending value, from 0 (transparent) to 1 (opaque)
         self.HatchType = ''
 
         # Text
-        self.TitleSize = fontsize
-        self.FontSize = fontsize
-        self.TicksSize = fontsize
-        self.LegendsSize = fontsize
+        self.TitleSize = Fontsize
+        self.FontSize = Fontsize
+        self.TicksSize = Fontsize
+        self.LegendsSize = Fontsize
         self.XLabel = None
         self.YLabel = None
         self.ZLabel = None
@@ -81,7 +81,7 @@ class ParamPLT:
         # Grid
         self.GridAxis = 'both'
         self.GridColour = None
-        self.GridLineType = None
+        self.GridLinetype = None
         self.GridLineSize = 0.4
         self.GridAlpha = 1
         self.BBox = True # To add a box around the plot or not
@@ -118,31 +118,31 @@ class ParamPLT:
                 return self.Colour
 
     @getColour.setter
-    def getColour(self, colour):
-        if isinstance(colour, list):
+    def getColour(self, Colour):
+        if isinstance(Colour, list):
             if isinstance(self.Colour, list):
-                self.Colour = self.Colour + colour
+                self.Colour = self.Colour + Colour
             else:
                 self.Colour = None
-                self.Colour = colour
+                self.Colour = Colour
         else:
-            self.Colour = colour
+            self.Colour = Colour
 
-    def getColourFillList(self, ShadesNumber, FloatMin=0.0, FloatMax=1.0, B2ParamPLTColor=True):
+    def getColourFillList(self, ShadesNumber, FloatMin=0.0, FloatMax=1.0, B2ParamPLTColour=True):
         """
-        Create a list of colours based on a colour map and a range of values.
+        Create a list of Colours based on a Colour map and a range of values.
 
         Args:
             ShadesNumber (int): Number of shades to generate.
             FloatMin (float): Minimum value of the range.
             FloatMax (float): Maximum value of the range.
-            B2ParamPLTColor (bool): If True, transfer the colour to the ParamPLT object. Else, return the list of colours.
+            B2ParamPLTColour (bool): If True, transfer the Colour to the ParamPLT object. Else, return the list of Colours.
         """
         CMap = cm.get_cmap(self.getColourMap)
-        ColorRange = np.linspace(FloatMin, FloatMax, ShadesNumber)
-        ListColours = [CMap(Value) for Value in ColorRange]
+        ColourRange = np.linspace(FloatMin, FloatMax, ShadesNumber)
+        ListColours = [CMap(Value) for Value in ColourRange]
 
-        if B2ParamPLTColor:
+        if B2ParamPLTColour:
             self.getColour = ListColours
         else:
             return ListColours
@@ -154,7 +154,7 @@ class ParamPLT:
                 self.Colour = None
             return Temp
         else:
-            print("Warning: No list of colours found.")
+            print("Warning: No list of Colours found.")
             return self.Colour
 
     @property
@@ -220,23 +220,23 @@ class ParamPLT:
         self.ColourMap = ColourMapDict.get(ValColourMap, 'viridis')
 
     @property
-    def getLineType(self):
-        # Determine line type based on linetype input
-        LineTypeDict = {0: '-', 1: '--', 2: '-.', 3: ':', 4: 'None'}
-        LineType = LineTypeDict.get(self.LineType, '-')
-        return LineType
+    def getLinetype(self):
+        # Determine line type based on Linetype input
+        LinetypeDict = {0: '-', 1: '--', 2: '-.', 3: ':', 4: 'None'}
+        Linetype = LinetypeDict.get(self.Linetype, '-')
+        return Linetype
 
-    @getLineType.setter
-    def getLineType(self, linetype):
-        self.LineType = linetype
+    @getLinetype.setter
+    def getLinetype(self, Linetype):
+        self.Linetype = Linetype
 
     @property
     def getLineSize(self):
         return self.LineSize
 
     @getLineSize.setter
-    def getLineSize(self, linesize):
-        self.LineSize = linesize
+    def getLineSize(self, Linesize):
+        self.LineSize = Linesize
 
     @property
     def getMarker(self):
@@ -249,8 +249,8 @@ class ParamPLT:
         return MarkerType
 
     @getMarker.setter
-    def getMarker(self, marker):
-        self.MarkerType = marker
+    def getMarker(self, Marker):
+        self.MarkerType = Marker
 
     @property
     def getMarkerSize(self):
@@ -368,8 +368,8 @@ class ParamPLT:
         return self.FontSize
 
     @getFontSize.setter
-    def getFontSize(self, fontsize):
-        self.FontSize = fontsize
+    def getFontSize(self, Fontsize):
+        self.FontSize = Fontsize
 
     @property
     def getTicksSize(self):
@@ -620,19 +620,19 @@ class ParamPLT:
 
         self.getGridColour = Colour
 
-        self.getGridLineType = None
+        self.getGridLinetype = None
         self.getGridLineSize = 0.4
 
     @property
-    def getGridLineType(self):
-        # Determine line type based on linetype input
-        LineTypeDict = {0: '-', 1: '-', 2: '--', 3: '-.', 4: ':'}
-        LineType = LineTypeDict.get(self.GridLineType, '-')
-        return LineType
+    def getGridLinetype(self):
+        # Determine line type based on Linetype input
+        LinetypeDict = {0: '-', 1: '-', 2: '--', 3: '-.', 4: ':'}
+        Linetype = LinetypeDict.get(self.GridLinetype, '-')
+        return Linetype
 
-    @getGridLineType.setter
-    def getGridLineType(self, LineType):
-        self.GridLineType = LineType
+    @getGridLinetype.setter
+    def getGridLinetype(self, Linetype):
+        self.GridLinetype = Linetype
 
     @property
     def getGridLineSize(self):
@@ -878,7 +878,7 @@ def PLTTitleModified(paramPLT, X=0.5, Y=0.95):
 
     Args:
     - TitleText: Text of the title with the desired style. 
-        Example: 'Text with <highlighted color::{"color": "red", "fontstyle": "italic", "fontweight": "bold"}>'
+        Example: 'Text with <highlighted Colour::{"Colour": "red", "fontstyle": "italic", "fontweight": "bold"}>'
     - paramPLT: Object containing plot parameters.
     - X: X position of the title.
     - Y: Y position of the title.
@@ -912,24 +912,24 @@ def PLTLegend(paramPLT):
             plt.legend(title=paramPLT.getLegendTitle, title_fontproperties={'size':paramPLT.getLegendsSize*1.2,'weight': 'bold'},
                        fontsize=paramPLT.getLegendsSize, bbox_to_anchor=(1, 1), loc='upper left')
 
-def UpdatePlotColorsAndLegend(LColors):
+def UpdatePlotColoursAndLegend(LColours):
     """
-    Update the colors of the lines in the plot based on a list of colors.
+    Update the Colours of the lines in the plot based on a list of Colours.
 
     Args:
-    - LColors: List of colors to apply to the lines in the plot.
+    - LColours: List of Colours to apply to the lines in the plot.
     """
     # Get the current axis
     ax = plt.gca()
     
-    # Verify that the number of colors matches the number of lines
-    if len(LColors) != len(ax.lines):
-        print("Error: The number of colors does not match the number of lines.")
+    # Verify that the number of Colours matches the number of lines
+    if len(LColours) != len(ax.lines):
+        print("Error: The number of Colours does not match the number of lines.")
         return
     
-    # Update the colors of the lines
-    for Line, Color in zip(ax.lines, LColors):
-        Line.set_color(Color)
+    # Update the Colours of the lines
+    for Line, Colour in zip(ax.lines, LColours):
+        Line.set_color(Colour)
 
     # Update the legend
     plt.legend()
@@ -957,7 +957,7 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
 
     Improvements:
     - Refine the position of the subtitles based on the number of labels in the legend.
-    - Add an argument to specify the color of the subtitles.
+    - Add an argument to specify the Colour of the subtitles.
     """
     # Get the current axis if not provided
     if ax is None:
@@ -973,59 +973,59 @@ def PLTLegendWithTitlesSubtitles(LegendTitle, LLegendSubtitles, LSubtitlesPositi
             handles.insert(Position, plt.Line2D([], [], color='none', label=Subtitle))
 
     # Adding the main title to the legend
-    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getTitlesize)
+    Legend = ax.legend(handles=handles, title=LegendTitle, fontsize=paramPLT.getTitleSize)
     # Setting the title properties
     FormatText(Text=Legend.get_title(), Fontsize=paramPLT.getLegendsSize * TitleSizeRatio, Weight=None,
-               Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
+               Style=None, Family=None, Colour=None, BackgroundColour=None, Alpha=None)
 
     # Setting the subtitles properties
     for text in Legend.get_texts():
         if text.get_text() in LLegendSubtitles: # In case of the subtitles
             FormatText(Text=text, Fontsize=paramPLT.getLegendsSize * SubtitlesSizeRatio, Weight='bold',
-                       Style=None, Family=None, Color=None, Backgroundcolor=None, Alpha=None)
+                       Style=None, Family=None, Colour=None, BackgroundColour=None, Alpha=None)
         else:  # In case of the different labels
             pass
 
-def PLTColorBar(paramPLT, Location=0, Fraction=0.10, Padding=-1, Spacing=0, BDrawEdges=False):
+def PLTColourBar(paramPLT, Location=0, Fraction=0.10, Padding=-1, Spacing=0, BDrawEdges=False):
     """
-    Add a color bar to the plot based on the specified parameters.
+    Add a Colour bar to the plot based on the specified parameters.
 
     Args:
     - paramPLT: Object containing plot parameters.
-    - Location: Location of the color bar (0: right, 1: left, 2: top, 3: bottom).
-    - Fraction: Fraction of the original axes to use for the color bar.
-    - Padding: Padding between the color bar and the plot. If negative, a default value is used based on the location.
-    - Spacing: Uniformity of the color bar (0: uniform, 1: proportional).
-    - BDrawEdges: Boolean indicating whether to draw edges around the color bar.
+    - Location: Location of the Colour bar (0: right, 1: left, 2: top, 3: bottom).
+    - Fraction: Fraction of the original axes to use for the Colour bar.
+    - Padding: Padding between the Colour bar and the plot. If negative, a default value is used based on the location.
+    - Spacing: Uniformity of the Colour bar (0: uniform, 1: proportional).
+    - BDrawEdges: Boolean indicating whether to draw edges around the Colour bar.
     """
     Fig = paramPLT.getFigure
     if Fig is None:
-        print("Warning: No figure found for the color bar.")
+        print("Warning: No figure found for the Colour bar.")
         return
     Mappable = paramPLT.getLastMappable
     if Mappable is None:
-        print("Warning: No mappable found for the color bar.")
+        print("Warning: No mappable found for the Colour bar.")
         return
     Ax = paramPLT.getLastAx
     if Ax is None:
-        print("Warning: No axis found for the color bar.")
+        print("Warning: No axis found for the Colour bar.")
         return
-    # Location of the color bar
+    # Location of the Colour bar
     LocationDict = {0: 'right', 1: 'left', 2: 'top', 3: 'bottom'}
     Location = LocationDict.get(Location, 'right')
 
-    # Padding between the color bar and the plot
+    # Padding between the Colour bar and the plot
     if Padding<0:
         PaddingDict = {'right': 0.05, 'left': 0.05, 'top': 0.15, 'bottom': 0.15}
         Padding = PaddingDict.get(Location, 0.05)
     else:
         Padding = Padding
 
-    # Uniformity of the color bar
+    # Uniformity of the Colour bar
     SpacingDict = {0: 'uniform', 1: 'proportional'}
     Spacing = SpacingDict.get(Spacing, 'uniform')
 
-    Cb = Fig.colorbar(mappable=Mappable, ax=Ax, location=Location, fraction=Fraction, pad=Padding, 
+    Cb = Fig.Colourbar(mappable=Mappable, ax=Ax, location=Location, fraction=Fraction, pad=Padding, 
                       format=None, spacing=Spacing, drawedges=BDrawEdges)
     Cb.set_label(label=paramPLT.getColourBarTitle, size=paramPLT.getFontSize)
     Cb.ax.tick_params(labelsize=paramPLT.getTicksSize)
@@ -1034,7 +1034,7 @@ def PLTGrid(paramPLT):
     if paramPLT.getGridAxis:
         plt.grid(axis=paramPLT.getGridAxis,
                  color=paramPLT.getColour,
-                 linestyle=paramPLT.getGridLineType,
+                 linestyle=paramPLT.getGridLinetype,
                  linewidth=paramPLT.getGridLineSize,
                  alpha=paramPLT.getGridAlpha)
 
@@ -1261,7 +1261,7 @@ def PLTShowRefSavePlace():
     print("Info : ", os.getcwd())
 
 def DefaultParamPLT():
-    return ParamPLT(colour='black', linetype=0, marker=0, linesize=2, fontsize=16)
+    return ParamPLT(Colour='black', Linetype=0, Marker=0, Linesize=2, Fontsize=16)
 
 # Version in 3D case with PLT3DShow
 
@@ -1349,7 +1349,7 @@ def PLTPlot(XValues, YValues, paramPLT):
     ln = plt.plot(XValues, YValues,
                   color=paramPLT.getColour,
                   alpha=paramPLT.getAlpha,
-                  linestyle=paramPLT.getLineType,
+                  linestyle=paramPLT.getLinetype,
                   linewidth=paramPLT.getLineSize,
                   marker=paramPLT.getMarker,
                   markersize=paramPLT.getMarkerSize,
@@ -1419,23 +1419,23 @@ def PLTVHLine(Val, paramPLT, BRelative=True, SecValMin=0, SecValMax=1, BOrientat
     if BOrientation:  # Vertical line
         if BRelative:
             plt.axvline(x=Val, ymin=SecValMin, ymax=SecValMax,
-                        color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                        color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                         marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
                         alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
         else:
             plt.vlines(x=Val, ymin=SecValMin, ymax=SecValMax,
-                       color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                       color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                        marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
                        alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
     elif BOrientation == False:  # Horizontal line
         if BRelative:
             plt.axhline(y=Val, xmin=SecValMin, xmax=SecValMax,
-                        color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                        color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                         marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
                         alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
         else:
             plt.hlines(y=Val, xmin=SecValMin, xmax=SecValMax,
-                       color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                       color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                        marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize, 
                        alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
 
@@ -1455,12 +1455,12 @@ def PLTAXLine(XY1, paramPLT,XY2=(0,0), Slope=None):
     """
     if Slope is not None:
         plt.axline(xy=XY1, slope=Slope,
-                   color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                   color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                    marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize,
                    alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
     else:
         plt.axline(xy1=XY1, xy2=XY2,
-                   color=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize,
+                   color=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize,
                    marker=paramPLT.getMarker, markersize=paramPLT.getMarkerSize,
                    alpha=paramPLT.getAlpha, label=paramPLT.getLegends)
 
@@ -1480,13 +1480,13 @@ def PLTCoordsSpan(ValMin, ValMax, paramPLT, SecValMin=0, SecValMax=1, BOrientati
     if BOrientation:  # Vertical line
         plt.axvspan(xmin=ValMin, xmax=ValMax, ymin=SecValMin, ymax=SecValMax,
                     facecolor=paramPLT.getColour, hatch=paramPLT.getHatch,
-                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
+                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
                     label=paramPLT.getLegends)
 
     elif BOrientation == False:
         plt.axhspan(ymin=ValMin, ymax=ValMax, xmin=SecValMin, xmax=SecValMax,
                     facecolor=paramPLT.getColour, hatch=paramPLT.getHatch,
-                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLineType, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
+                    edgecolor=paramPLT.getColour, linestyle=paramPLT.getLinetype, linewidth=paramPLT.getLineSize, alpha=paramPLT.getAlpha,
                     label=paramPLT.getLegends)
 
 
@@ -1515,7 +1515,7 @@ def PLTFill(XValues, YValues, paramPLT, ValZOrder=0, YValuesSec=False):
 
 def PLTBar(XBars, Heights, paramPLT, Width=0.8, StdErrors=None, BOrientation=True, Bottom=0):
     """
-    Creates a bar plot with optional error bars, customizable colors, labels, and orientation.
+    Creates a bar plot with optional error bars, customizable Colours, labels, and orientation.
 
     Args:
     - XBars: List or array of x-coordinates for the bars or labels of each bar
@@ -1546,7 +1546,7 @@ def PLTBar(XBars, Heights, paramPLT, Width=0.8, StdErrors=None, BOrientation=Tru
         elif paramPLT.getGenericScaleType:
             BLogScale = True if paramPLT.getGenericScaleType == 'log' else False
         plt.bar(x=XBars, height=Heights, width=Width, yerr=StdErrors, ecolor='k',
-                facecolor=paramPLT.getColourFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(), 
+                facecolor=paramPLT.getcolorFullList(BEmptying=False), edgecolor=paramPLT.getColourFullList(), 
                 align='center', bottom=Bottom, label=paramPLT.getLegends)
     else:
         # Scale type for X axis
@@ -1628,8 +1628,8 @@ def PLTHist2D(XValues, YValues, paramPLT, NBins=10, BNormalizeArea=False, BCumul
     - Weights (list or array-like): Weights for each value in XValues and YValues.
     - CountMin (float): Minimum count threshold to display a bin.
     - CountMax (float): Maximum count threshold to display a bin.
-    - ValMin (float): Minimum value for the color scale.
-    - ValMax (float): Maximum value for the color scale.
+    - ValMin (float): Minimum value for the Colour scale.
+    - ValMax (float): Maximum value for the Colour scale.
 
     Returns:
     - None: This function does not return anything. It simply displays the 2D histogram.
@@ -1637,7 +1637,7 @@ def PLTHist2D(XValues, YValues, paramPLT, NBins=10, BNormalizeArea=False, BCumul
 
     counts, xedges, yedges, im = plt.hist2d(XValues, YValues, bins=NBins, density=BNormalizeArea, weights=Weights, cmin=CountMin, cmax=CountMax,
                cmap=paramPLT.getColourMap, norm=None, vmin=ValMin, vmax=ValMax, alpha=paramPLT.getAlpha)
-    paramPLT.getMappable = im  # Store the mappable object for colorbar
+    paramPLT.getMappable = im  # Store the mappable object for Colourbar
 
 
 def PLTPie(Val, Labels, paramPLT, TypeAutopct=0, PrecisionPct=1, AbsUnit="", PrecisionAbs=0, 
@@ -1747,7 +1747,7 @@ def PLTImShow(ValMatrix, paramPLT, FInterpolType=0, BOrigin=True, BShowVal=True,
                          color="black",fontsize=paramPLT.getFontSize, fontweight="bold",
                          ha='center', va='center')
 
-    PLTColorBar(paramPLT)
+    PLTColourBar(paramPLT)
 
     
 
@@ -1769,7 +1769,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
             plt.plot([xStart, xEnd],
                      [yStart, yEnd],
                      color=paramPLT.getColour,
-                     linestyle=paramPLT.getLineType,
+                     linestyle=paramPLT.getLinetype,
                      marker=paramPLT.getMarker,
                      linewidth=paramPLT.getLineSize,
                      markersize=paramPLT.getLineSize,
@@ -1792,7 +1792,7 @@ def PLT2DCircle(x, y, NPoints, Radius, paramPLT, BFill=False):
 
 # Text management functions for matplotlib
 def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
-                Color=None, Backgroundcolor=None, Alpha=None):
+                Colour=None, BackgroundColour=None, Alpha=None):
     """
     Applies text formatting options dynamically.
     If an option is None, it resets to the default Matplotlib setting.
@@ -1803,12 +1803,12 @@ def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
         Weight: {'light', 'normal', 'medium', 'semibold', 'bold', 'heavy', 'black'}
         Style: {'normal', 'italic', 'oblique'} or None
         Family: {'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'} or None
-        Color: Named color, hex ('#FF5733'), or RGB tuple ((1,0,0))
-        Backgroundcolor: Same as color
+        Colour: Named Colour, hex ('#FF5733'), or RGB tuple ((1,0,0))
+        BackgroundColour: Same as Colour
         Alpha: float (0.0 to 1.0, where 0 is fully transparent and 1 is opaque)
     """
     if Fontsize is not None:
-        Text.set_fontsize(Fontsize)
+        Text.set_Fontsize(Fontsize)
 
     if Weight is not None:
         Text.set_weight(Weight)
@@ -1819,11 +1819,11 @@ def FormatText(Text, Fontsize=None, Weight=None, Style=None, Family=None,
     if Family is not None:
         Text.set_family(Family)
 
-    if Color is not None:
-        Text.set_color(Color)
+    if Colour is not None:
+        Text.set_color(Colour)
 
-    if Backgroundcolor is not None:
-        Text.set_backgroundcolor(Backgroundcolor)
+    if BackgroundColour is not None:
+        Text.set_backgroundcolor(BackgroundColour)
 
     if Alpha is not None:
         Text.set_alpha(Alpha)

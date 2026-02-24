@@ -23,10 +23,48 @@ Granulometry : Generic granulometry class
 """
 class Granulometry:
     def __init__(self):
+        # Metadata
+        self.Name = None # Name of the granulometry
+        self.ID = None # ID of the granulometry
+        self.Description = None # Description of the granulometry
+        self.Colour = None # Colour of the granulometry for plotting
+
         # Granulometry data
         self.GranuloDiam = None # Vector of diameters of the granulometry to plot [mm]
         self.GranuloRatio = None # Vector of the ratio of passers-by of the granulometry [-]
         self.GranuloPourcent = None # Vector of the percentage of passers-by of the granulometry [%]
+    # Metadata
+    @property
+    def getName(self):
+        return self.Name
+
+    @getName.setter
+    def getName(self, Name):
+        self.Name = Name
+
+    @property
+    def getID(self):
+        return self.ID
+
+    @getID.setter
+    def getID(self, ID):
+        self.ID = ID
+
+    @property
+    def getDescription(self):
+        return self.Description
+
+    @getDescription.setter
+    def getDescription(self, Description):
+        self.Description = Description
+
+    @property
+    def getColour(self):
+        return self.Colour
+
+    @getColour.setter
+    def getColour(self, Colour):
+        self.Colour = Colour
 
     # Granulometry data
     @property
@@ -107,7 +145,23 @@ class Granulometry:
                         BStart=BStart, BEnd=BEnd, BPourcent=BPourcent)
 
 # Generic computation function of granulometric curve
+def CMPTGranuloInterp(GranuloDiam, GranuloRatio, GranuloDiamInterp):
+    """
+    Computation of the interpolated granulometric curve based on the provided diameters and percentage of passers-by,
+    Args:
+    - GranuloDiam: Vector of diameters of the granulometry to plot [mm]
+    - GranuloRatio: Vector of the percentage of passers-by of the granulometry to plot [-] or [%]
+    - GranuloDiamInterp: Vector of diameters for which the percentage of passers-by is to be interpolated [mm]
+    Returns:
+    - GranuloRatioInterp: Vector of the interpolated percentage of passers-by of the granulometry for the provided diameters [-] or [%]
+    """
+    # Convertion to log scale for interpolation
+    LogGranuloDiam = np.log10(GranuloDiam)
+    LogGranuloDiamInterp = np.log10(GranuloDiamInterp)
 
+    GranuloRatioInterp = np.interp(LogGranuloDiamInterp, LogGranuloDiam, GranuloRatio)
+
+    return GranuloRatioInterp
 
 # Generic plotting function of granulometric curve
 def PLTGranulometry(GranuloDiam, GranuloRatio, paramPLT=None, StrTitleName=None, BStart=True, BEnd=True, BPourcent=True):
@@ -134,7 +188,7 @@ def PLTGranulometry(GranuloDiam, GranuloRatio, paramPLT=None, StrTitleName=None,
         StartPlots()
 
     # Convert to percentage if needed
-    if not BPourcent:
+    if BPourcent:
         GranuloRatio = GranuloRatio * 100.0
 
     # Plot the granulometry of the mix
@@ -156,3 +210,4 @@ def PLTGranulometry(GranuloDiam, GranuloRatio, paramPLT=None, StrTitleName=None,
 
     if BEnd:
         PLTShow(paramPLT)
+
